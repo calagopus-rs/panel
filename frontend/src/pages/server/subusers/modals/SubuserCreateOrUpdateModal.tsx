@@ -9,6 +9,7 @@ import TextInput from '@/elements/input/TextInput.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import PermissionSelector from '@/elements/PermissionSelector.tsx';
 import { serverSubuserCreateSchema } from '@/lib/schemas/server/subusers.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 
 type Props = ModalProps & {
@@ -18,6 +19,7 @@ type Props = ModalProps & {
 };
 
 export default function SubuserCreateOrUpdateModal({ subuser, onCreate, onUpdate, opened, onClose }: Props) {
+  const { t } = useTranslations();
   const { availablePermissions } = useGlobalStore();
 
   const captchaRef = useRef<CaptchaRef>(null);
@@ -54,37 +56,55 @@ export default function SubuserCreateOrUpdateModal({ subuser, onCreate, onUpdate
   };
 
   return (
-    <Modal title={subuser ? 'Update Subuser' : 'Create Subuser'} onClose={onClose} opened={opened} size='xl'>
+    <Modal
+      title={
+        subuser
+          ? t('pages.server.subusers.modal.updateSubuser.title', {})
+          : t('pages.server.subusers.modal.createSubuser.title', {})
+      }
+      onClose={onClose}
+      opened={opened}
+      size='xl'
+    >
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate())}>
         <Stack>
           {subuser ? (
-            <TextInput label='Username' placeholder='Username' value={subuser.user.username} disabled />
+            <TextInput
+              label={t('common.form.username', {})}
+              placeholder={t('common.form.username', {})}
+              value={subuser.user.username}
+              disabled
+            />
           ) : (
             <TextInput
-              label='Email'
-              placeholder='Enter the email that this subuser should be saved as.'
+              label={t('pages.server.subusers.modal.createSubuser.form.email', {})}
+              placeholder={t('pages.server.subusers.modal.createSubuser.form.emailPlaceholder', {})}
               {...form.getInputProps('email')}
             />
           )}
 
           <PermissionSelector
-            label='Permissions'
+            label={t('pages.server.subusers.modal.createSubuser.form.permissions', {})}
             permissionsMapType='serverPermissions'
             permissions={availablePermissions.serverPermissions}
             selectedPermissions={form.values.permissions}
             setSelectedPermissions={(permissions) => form.setFieldValue('permissions', permissions)}
           />
 
-          <TagsInput label='Ignored Files' placeholder='Ignored Files' {...form.getInputProps('ignoredFiles')} />
+          <TagsInput
+            label={t('pages.server.subusers.modal.createSubuser.form.ignoredFiles', {})}
+            placeholder={t('pages.server.subusers.modal.createSubuser.form.ignoredFiles', {})}
+            {...form.getInputProps('ignoredFiles')}
+          />
 
           {!subuser && <Captcha ref={captchaRef} />}
 
           <Group>
             <Button type='submit' disabled={!form.isValid()}>
-              {subuser ? 'Update' : 'Create'}
+              {subuser ? t('common.button.update', {}) : t('common.button.create', {})}
             </Button>
             <Button variant='default' onClick={onClose}>
-              Close
+              {t('common.button.close', {})}
             </Button>
           </Group>
         </Stack>

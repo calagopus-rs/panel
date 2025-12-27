@@ -13,6 +13,7 @@ import Card from '@/elements/Card.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { hexToRgba } from '@/lib/color.ts';
 import { bytesToString } from '@/lib/size.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import { useChart, useChartTickLabel } from './chart.ts';
 
@@ -41,6 +42,7 @@ function ChartBlock({
 }
 
 export default function ServerStats() {
+  const { t } = useTranslations();
   const server = useServerStore((state) => state.server);
   const stats = useServerStore((state) => state.stats);
 
@@ -88,21 +90,21 @@ export default function ServerStats() {
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-      <ChartBlock icon={faMicrochip} title='CPU Load'>
+      <ChartBlock icon={faMicrochip} title={t('pages.server.console.stats.cpuLoad', {})}>
         <Line {...cpu.props} />
       </ChartBlock>
-      <ChartBlock icon={faMemory} title='Memory Load'>
+      <ChartBlock icon={faMemory} title={t('pages.server.console.stats.memoryLoad', {})}>
         <Line {...memory.props} />
       </ChartBlock>
       <ChartBlock
         icon={faCloudDownload}
-        title='Network'
+        title={t('pages.server.console.stats.network', {})}
         legend={
           <>
-            <Tooltip label='Inbound'>
+            <Tooltip label={t('pages.server.console.stats.inbound', {})}>
               <FontAwesomeIcon icon={faCloudArrowDown} className='mr-2 h-4 w-4 text-yellow-400' />
             </Tooltip>
-            <Tooltip label='Outbound'>
+            <Tooltip label={t('pages.server.console.stats.outbound', {})}>
               <FontAwesomeIcon icon={faCloudArrowUp} className='h-4 w-4 text-cyan-400' />
             </Tooltip>
           </>

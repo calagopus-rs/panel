@@ -11,9 +11,11 @@ import NumberInput from '@/elements/input/NumberInput.tsx';
 import Switch from '@/elements/input/Switch.tsx';
 import { serverSettingsAutokillSchema } from '@/lib/schemas/server/settings.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 export default function AutokillContainer() {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
 
@@ -32,7 +34,7 @@ export default function AutokillContainer() {
     setLoading(true);
     updateAutokill(server.uuid, form.values)
       .then(() => {
-        addToast('Server auto-kill updated.', 'success');
+        addToast(t('pages.server.settings.autokill.toast.updated', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -46,19 +48,24 @@ export default function AutokillContainer() {
         <form onSubmit={form.onSubmit(() => doUpdate())}>
           <Stack h='100%'>
             <Title order={2} c='white'>
-              Auto-Kill
+              {t('pages.server.settings.autokill.title', {})}
             </Title>
 
             <Switch
-              label='Enabled'
+              label={t('pages.server.settings.autokill.form.enabled', {})}
               checked={form.values.enabled}
               onChange={(e) => form.setFieldValue('enabled', e.target.checked)}
             />
-            <NumberInput label='Seconds until auto-kill' min={0} max={3600} {...form.getInputProps('seconds')} />
+            <NumberInput
+              label={t('pages.server.settings.autokill.form.secondsUntilAutoKill', {})}
+              min={0}
+              max={3600}
+              {...form.getInputProps('seconds')}
+            />
 
             <Group mt='auto'>
               <Button type='submit' loading={loading} disabled={!form.isValid()}>
-                Save
+                {t('common.button.save', {})}
               </Button>
             </Group>
           </Stack>

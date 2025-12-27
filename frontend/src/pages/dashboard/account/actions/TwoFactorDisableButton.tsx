@@ -61,7 +61,7 @@ export default function TwoFactorDisableButton() {
         opened={openModal === 'disable'}
       >
         <Stack>
-          <Text>{t('pages.account.account.containers.twoFactor.modal.disableTwoFactor.description', {})}</Text>
+          <Text>{t('pages.account.account.containers.twoFactor.modal.disableTwoFactor.description', {}).md()}</Text>
 
           <TextInput
             withAsterisk

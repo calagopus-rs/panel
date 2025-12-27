@@ -9,9 +9,11 @@ import Table, { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 export default function ServerActivity() {
+  const { t } = useTranslations();
   const [activities, setActivities] = useState<ResponseMeta<ServerActivity>>(getEmptyPaginationSet());
   const server = useServerStore((state) => state.server);
 
@@ -21,9 +23,16 @@ export default function ServerActivity() {
   });
 
   return (
-    <ServerContentContainer title='Activity' search={search} setSearch={setSearch}>
+    <ServerContentContainer title={t('pages.server.activity.title', {})} search={search} setSearch={setSearch}>
       <Table
-        columns={['', 'Actor', 'Event', 'IP', 'When', '']}
+        columns={[
+          '',
+          t('common.table.columns.actor', {}),
+          t('common.table.columns.event', {}),
+          t('common.table.columns.ip', {}),
+          t('common.table.columns.when', {}),
+          '',
+        ]}
         loading={loading}
         pagination={activities}
         onPageSelect={setPage}
@@ -41,7 +50,7 @@ export default function ServerActivity() {
             </TableData>
 
             <TableData>
-              {activity.user ? `${activity.user.username} (${activity.isApi ? 'API' : 'Web'})` : 'System'}
+              {activity.user ? `${activity.user.username} (${activity.isApi ? 'API' : 'Web'})` : t('common.system', {})}
             </TableData>
 
             <TableData>

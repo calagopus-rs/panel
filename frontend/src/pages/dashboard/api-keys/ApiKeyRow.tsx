@@ -11,9 +11,11 @@ import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import ApiKeyCreateOrUpdateModal from '@/pages/dashboard/api-keys/modals/ApiKeyCreateOrUpdateModal.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 
 export default function ApiKeyRow({ apiKey }: { apiKey: UserApiKey }) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { removeApiKey } = useUserStore();
 
@@ -23,7 +25,7 @@ export default function ApiKeyRow({ apiKey }: { apiKey: UserApiKey }) {
     await deleteApiKey(apiKey.uuid)
       .then(() => {
         removeApiKey(apiKey);
-        addToast('API key removed.', 'success');
+        addToast(t('pages.account.apiKeys.modal.deleteApiKey.toast.removed', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -40,19 +42,17 @@ export default function ApiKeyRow({ apiKey }: { apiKey: UserApiKey }) {
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title='Confirm API Key Deletion'
-        confirm='Delete'
+        title={t('pages.account.apiKeys.modal.deleteApiKey.title', {})}
+        confirm={t('common.button.delete', {})}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete
-        <Code>{apiKey.name}</Code>
-        from your account?
+        {t('pages.account.apiKeys.modal.deleteApiKey.content', { name: apiKey.name }).md()}
       </ConfirmationModal>
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
-          { icon: faTrash, label: 'Remove', onClick: () => setOpenModal('delete'), color: 'red' },
+          { icon: faPencil, label: t('common.button.edit', {}), onClick: () => setOpenModal('edit'), color: 'gray' },
+          { icon: faTrash, label: t('common.button.remove', {}), onClick: () => setOpenModal('delete'), color: 'red' },
         ]}
       >
         {({ openMenu }) => (
@@ -76,7 +76,7 @@ export default function ApiKeyRow({ apiKey }: { apiKey: UserApiKey }) {
 
             <TableData>
               {!apiKey.lastUsed ? (
-                'N/A'
+                t('common.na', {})
               ) : (
                 <Tooltip label={formatDateTime(apiKey.lastUsed)}>{formatTimestamp(apiKey.lastUsed)}</Tooltip>
               )}
@@ -84,7 +84,7 @@ export default function ApiKeyRow({ apiKey }: { apiKey: UserApiKey }) {
 
             <TableData>
               {!apiKey.expires ? (
-                'N/A'
+                t('common.na', {})
               ) : (
                 <Tooltip label={formatDateTime(apiKey.expires)}>{formatTimestamp(apiKey.expires)}</Tooltip>
               )}

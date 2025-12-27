@@ -1,5 +1,6 @@
 import { Group, Title, TitleOrder } from '@mantine/core';
 import { Dispatch, ReactNode, SetStateAction } from 'react';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 import TextInput from '../input/TextInput.tsx';
 import ContentContainer from './ContentContainer.tsx';
@@ -23,6 +24,7 @@ export default function AdminContentContainer({
   contentRight,
   children,
 }: Props) {
+  const { t } = useTranslations();
   const { settings } = useGlobalStore();
 
   return (
@@ -33,7 +35,12 @@ export default function AdminContentContainer({
             {title}
           </Title>
           <Group>
-            <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+            <TextInput
+              placeholder={t('common.input.search', {})}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              w={250}
+            />
             {contentRight}
           </Group>
         </Group>

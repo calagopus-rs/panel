@@ -19,6 +19,7 @@ import Checkbox from '@/elements/input/Checkbox.tsx';
 import { formatAllocation } from '@/lib/server.ts';
 import { bytesToString, mbToBytes } from '@/lib/size.ts';
 import { formatMiliseconds } from '@/lib/time.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 function StatCard({
@@ -76,6 +77,7 @@ function StatCard({
 }
 
 export default function ServerDetails() {
+  const { t } = useTranslations();
   const server = useServerStore((state) => state.server);
   const stats = useServerStore((state) => state.stats!);
   const state = useServerStore((state) => state.state);
@@ -118,37 +120,41 @@ export default function ServerDetails() {
     <div className='flex flex-col space-y-4'>
       <StatCard
         icon={faEthernet}
-        label='Address'
+        label={t('pages.server.console.details.address', {})}
         copyOnClick={!!server.allocation}
-        value={server.allocation ? formatAllocation(server.allocation, server.egg.separatePort) : 'N/A'}
+        value={server.allocation ? formatAllocation(server.allocation, server.egg.separatePort) : t('common.na', {})}
       />
       {server.egg.separatePort && server.allocation && (
         <StatCard
           icon={faEthernet}
-          label='Port'
+          label={t('pages.server.console.details.port', {})}
           copyOnClick={!!server.allocation}
           value={server.allocation.port.toString()}
         />
       )}
       <StatCard
         icon={faClock}
-        label='Uptime'
-        value={state === 'offline' ? 'Offline' : formatMiliseconds(stats?.uptime || 0)}
+        label={t('pages.server.console.details.uptime', {})}
+        value={
+          state === 'offline' ? t('pages.server.console.details.offline', {}) : formatMiliseconds(stats?.uptime || 0)
+        }
       />
       <StatCard
         icon={faMicrochip}
-        label='CPU Load'
+        label={t('pages.server.console.details.cpuLoad', {})}
         value={
           state === 'offline'
-            ? 'Offline'
+            ? t('pages.server.console.details.offline', {})
             : doNormalizeCpuLoad
               ? `${((stats?.cpuAbsolute / (server.limits.cpu || 100)) * 100).toFixed(2)}%`
               : `${stats?.cpuAbsolute.toFixed(2)}%`
         }
-        limit={doNormalizeCpuLoad ? null : server.limits.cpu !== 0 ? server.limits.cpu + '%' : 'Unlimited'}
+        limit={
+          doNormalizeCpuLoad ? null : server.limits.cpu !== 0 ? server.limits.cpu + '%' : t('common.unlimited', {})
+        }
         popover={
           <Checkbox
-            label='Normalize CPU Load (shifted to max 100%)'
+            label={t('pages.server.console.details.normalizeCpuLoad', {})}
             checked={doNormalizeCpuLoad}
             onChange={(e) => setDoNormalizeCpuLoad(e.target.checked)}
           />
@@ -156,28 +162,32 @@ export default function ServerDetails() {
       />
       <StatCard
         icon={faMemory}
-        label='Memory Load'
-        value={state === 'offline' ? 'Offline' : bytesToString(stats?.memoryBytes)}
-        limit={server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : 'Unlimited'}
+        label={t('pages.server.console.details.memoryLoad', {})}
+        value={state === 'offline' ? t('pages.server.console.details.offline', {}) : bytesToString(stats?.memoryBytes)}
+        limit={server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : t('common.unlimited', {})}
       />
       <StatCard
         icon={faHardDrive}
-        label='Disk Usage'
+        label={t('pages.server.console.details.diskUsage', {})}
         value={bytesToString(stats?.diskBytes)}
-        limit={server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited'}
+        limit={server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : t('common.unlimited', {})}
       />
       <StatCard
         icon={faCloudDownload}
-        label='Network (In)'
-        value={state === 'offline' ? 'Offline' : bytesToString(stats?.network.rxBytes)}
+        label={t('pages.server.console.details.networkIn', {})}
+        value={
+          state === 'offline' ? t('pages.server.console.details.offline', {}) : bytesToString(stats?.network.rxBytes)
+        }
         details={
           state === 'offline' ? null : `${bytesToString(Math.round(networkRef.current.rxSpeed), undefined, true)}/s`
         }
       />
       <StatCard
         icon={faCloudUpload}
-        label='Network (Out)'
-        value={state === 'offline' ? 'Offline' : bytesToString(stats?.network.txBytes)}
+        label={t('pages.server.console.details.networkOut', {})}
+        value={
+          state === 'offline' ? t('pages.server.console.details.offline', {}) : bytesToString(stats?.network.txBytes)
+        }
         details={
           state === 'offline' ? null : `${bytesToString(Math.round(networkRef.current.txSpeed), undefined, true)}/s`
         }

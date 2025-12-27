@@ -86,7 +86,9 @@ export default function ServerGroupItem({
         confirm={t('common.button.delete', {})}
         onConfirmed={doDelete}
       >
-        {t('pages.account.home.tabs.groupedServers.page.modal.deleteServerGroup.content', { group: serverGroup.name })}
+        {t('pages.account.home.tabs.groupedServers.page.modal.deleteServerGroup.content', {
+          group: serverGroup.name,
+        }).md()}
       </ConfirmationModal>
 
       <Card key={serverGroup.uuid} p={8}>

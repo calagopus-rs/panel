@@ -58,7 +58,12 @@ export default function ServerGroupEditModal({ serverGroup, opened, onClose }: P
       opened={opened}
     >
       <Stack>
-        <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+        <TextInput
+          withAsterisk
+          label={t('common.form.name', {})}
+          placeholder={t('common.form.name', {})}
+          {...form.getInputProps('name')}
+        />
 
         <Group>
           <Button onClick={doUpdate} loading={loading} disabled={!form.isValid()}>

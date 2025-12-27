@@ -99,7 +99,7 @@ export default function TwoFactorSetupButton() {
                 </div>
               </div>
             )}
-            <Text>{t('pages.account.account.containers.twoFactor.modal.setupTwoFactor.descriptionQR', {})}</Text>
+            <Text>{t('pages.account.account.containers.twoFactor.modal.setupTwoFactor.descriptionQR', {}).md()}</Text>
 
             <TextInput
               withAsterisk

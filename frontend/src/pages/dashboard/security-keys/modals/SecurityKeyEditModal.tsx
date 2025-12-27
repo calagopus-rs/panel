@@ -9,6 +9,7 @@ import Button from '@/elements/Button.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 
 const schema = z.object({
@@ -20,6 +21,7 @@ type Props = ModalProps & {
 };
 
 export default function SecurityKeyEditModal({ securityKey, opened, onClose }: Props) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { updateSecurityKey: updateStateSecurityKey } = useUserStore();
 
@@ -47,7 +49,7 @@ export default function SecurityKeyEditModal({ securityKey, opened, onClose }: P
         updateStateSecurityKey(securityKey.uuid, form.values);
 
         onClose();
-        addToast('Security Key updated.', 'success');
+        addToast(t('pages.account.securityKeys.modal.editSecurityKey.toast.updated', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -56,16 +58,21 @@ export default function SecurityKeyEditModal({ securityKey, opened, onClose }: P
   };
 
   return (
-    <Modal title='Edit Security Key' onClose={onClose} opened={opened}>
+    <Modal title={t('pages.account.securityKeys.modal.editSecurityKey.title', {})} onClose={onClose} opened={opened}>
       <Stack>
-        <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+        <TextInput
+          withAsterisk
+          label={t('common.form.name', {})}
+          placeholder={t('common.form.name', {})}
+          {...form.getInputProps('name')}
+        />
 
         <Group>
           <Button onClick={doUpdate} loading={loading} disabled={!form.isValid()}>
-            Edit
+            {t('common.button.update', {})}
           </Button>
           <Button variant='default' onClick={onClose}>
-            Close
+            {t('common.button.close', {})}
           </Button>
         </Group>
       </Stack>

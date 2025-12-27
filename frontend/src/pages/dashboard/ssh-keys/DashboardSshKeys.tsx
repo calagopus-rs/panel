@@ -9,12 +9,14 @@ import AccountContentContainer from '@/elements/containers/AccountContentContain
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 import SshKeyCreateModal from './modals/SshKeyCreateModal.tsx';
 import SshKeyImportModal from './modals/SshKeyImportModal.tsx';
 import SshKeyRow from './SshKeyRow.tsx';
 
 export default function DashboardSshKeys() {
+  const { t } = useTranslations();
   const { sshKeys, setSshKeys } = useUserStore();
 
   const [openModal, setOpenModal] = useState<'create' | 'import' | null>(null);
@@ -25,32 +27,42 @@ export default function DashboardSshKeys() {
   });
 
   return (
-    <AccountContentContainer title='SSH Keys'>
+    <AccountContentContainer title={t('pages.account.sshKeys.title', {})}>
       <SshKeyCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
       <SshKeyImportModal opened={openModal === 'import'} onClose={() => setOpenModal(null)} />
 
       <Group justify='space-between' align='start' mb='md'>
         <Title order={1} c='white'>
-          SSH Keys
+          {t('pages.account.sshKeys.title', {})}
         </Title>
         <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput
+            placeholder={t('common.input.search', {})}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            w={250}
+          />
           <Button
             onClick={() => setOpenModal('import')}
             color='blue'
             leftSection={<FontAwesomeIcon icon={faDownload} />}
           >
-            Import
+            {t('pages.account.sshKeys.button.import', {})}
           </Button>
           <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Create
+            {t('common.button.create', {})}
           </Button>
         </Group>
       </Group>
 
       <ContextMenuProvider>
         <Table
-          columns={['Name', 'Fingerprint', 'Created', '']}
+          columns={[
+            t('common.table.columns.name', {}),
+            t('pages.account.sshKeys.table.columns.fingerprint', {}),
+            t('common.table.columns.created', {}),
+            '',
+          ]}
           loading={loading}
           pagination={sshKeys}
           onPageSelect={setPage}

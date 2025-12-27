@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import deleteDatabase from '@/api/server/databases/deleteDatabase.ts';
 import Button from '@/elements/Button.tsx';
-import Code from '@/elements/Code.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
@@ -14,6 +14,7 @@ type Props = ModalProps & {
 };
 
 export default function DatabaseDeleteModal({ database, opened, onClose }: Props) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
   const { removeDatabase } = useServerStore();
@@ -26,7 +27,7 @@ export default function DatabaseDeleteModal({ database, opened, onClose }: Props
 
     deleteDatabase(server.uuid, database.uuid)
       .then(() => {
-        addToast('Database deleted.', 'success');
+        addToast(t('pages.server.databases.modal.deleteDatabase.toast.deleted', {}), 'success');
         onClose();
         removeDatabase(database);
       })
@@ -38,27 +39,24 @@ export default function DatabaseDeleteModal({ database, opened, onClose }: Props
   };
 
   return (
-    <Modal title='Confirm Database Deletion' onClose={onClose} opened={opened}>
+    <Modal title={t('pages.server.databases.modal.deleteDatabase.title', {})} onClose={onClose} opened={opened}>
       <Stack>
-        <Text>
-          Deleting a database is a permanent action, it cannot be undone. This will permanently delete the
-          <Code>{database.name}</Code> database and remove all associated data.
-        </Text>
+        <Text>{t('pages.server.databases.modal.deleteDatabase.content', { name: database.name }).md()}</Text>
 
         <TextInput
           withAsterisk
-          label='Database Name'
-          placeholder='Database Name'
+          label={t('pages.server.databases.modal.createDatabase.form.databaseName', {})}
+          placeholder={t('pages.server.databases.modal.createDatabase.form.databaseName', {})}
           value={enteredName}
           onChange={(e) => setEnteredName(e.target.value)}
         />
 
         <Group>
           <Button color='red' onClick={doDelete} loading={loading} disabled={database.name !== enteredName}>
-            Delete
+            {t('common.button.delete', {})}
           </Button>
           <Button variant='default' onClick={onClose}>
-            Close
+            {t('common.button.close', {})}
           </Button>
         </Group>
       </Stack>

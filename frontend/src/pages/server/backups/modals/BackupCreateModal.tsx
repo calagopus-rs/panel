@@ -11,9 +11,11 @@ import TextInput from '@/elements/input/TextInput.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import { serverBackupCreateSchema } from '@/lib/schemas/server/backups.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 export default function BackupCreateModal({ opened, onClose }: ModalProps) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { server, addBackup } = useServerStore();
 
@@ -34,7 +36,7 @@ export default function BackupCreateModal({ opened, onClose }: ModalProps) {
     createBackup(server.uuid, form.values)
       .then((backup) => {
         addBackup(backup);
-        addToast('Backup created.', 'success');
+        addToast(t('pages.server.backups.modal.createBackup.toast.created', {}), 'success');
         onClose();
       })
       .catch((msg) => {
@@ -44,19 +46,28 @@ export default function BackupCreateModal({ opened, onClose }: ModalProps) {
   };
 
   return (
-    <Modal title='Create Backup' onClose={onClose} opened={opened}>
+    <Modal title={t('pages.server.backups.modal.createBackup.title', {})} onClose={onClose} opened={opened}>
       <form onSubmit={form.onSubmit(() => doCreate())}>
         <Stack>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+          <TextInput
+            withAsterisk
+            label={t('common.form.name', {})}
+            placeholder={t('common.form.name', {})}
+            {...form.getInputProps('name')}
+          />
 
-          <TagsInput label='Ignored Files' placeholder='Ignored Files' {...form.getInputProps('ignoredFiles')} />
+          <TagsInput
+            label={t('pages.server.backups.modal.createBackup.form.ignoredFiles', {})}
+            placeholder={t('pages.server.backups.modal.createBackup.form.ignoredFiles', {})}
+            {...form.getInputProps('ignoredFiles')}
+          />
 
           <Group>
             <Button type='submit' loading={loading} disabled={!form.isValid()}>
-              Create
+              {t('common.button.create', {})}
             </Button>
             <Button variant='default' onClick={onClose}>
-              Close
+              {t('common.button.close', {})}
             </Button>
           </Group>
         </Stack>

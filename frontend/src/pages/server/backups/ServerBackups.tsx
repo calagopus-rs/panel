@@ -8,11 +8,13 @@ import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
 import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import BackupRow from './BackupRow.tsx';
 import BackupCreateModal from './modals/BackupCreateModal.tsx';
 
 export default function ServerBackups() {
+  const { t } = useTranslations();
   const { server, backups, setBackups } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'create' | null>(null);
@@ -24,14 +26,17 @@ export default function ServerBackups() {
 
   return (
     <ServerContentContainer
-      title='Backups'
-      subtitle={`${backups.total} of ${server.featureLimits.backups} maximum backups created.`}
+      title={t('pages.server.backups.title', {})}
+      subtitle={t('pages.server.backups.subtitle', {
+        current: backups.total,
+        max: server.featureLimits.backups,
+      })}
       search={search}
       setSearch={setSearch}
       contentRight={
         <ConditionalTooltip
           enabled={backups.total >= server.featureLimits.backups}
-          label={`This server is limited to ${server.featureLimits.backups} backups.`}
+          label={t('pages.server.backups.tooltip.limitReached', { max: server.featureLimits.backups })}
         >
           <Button
             disabled={backups.total >= server.featureLimits.backups}
@@ -39,7 +44,7 @@ export default function ServerBackups() {
             color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
-            Create
+            {t('common.button.create', {})}
           </Button>
         </ConditionalTooltip>
       }
@@ -48,7 +53,15 @@ export default function ServerBackups() {
 
       <ContextMenuProvider>
         <Table
-          columns={['Name', 'Checksum', 'Size', 'Files', 'Created At', 'Locked?', '']}
+          columns={[
+            t('common.table.columns.name', {}),
+            t('pages.server.backups.table.columns.checksum', {}),
+            t('common.table.columns.size', {}),
+            t('pages.server.backups.table.columns.files', {}),
+            t('common.table.columns.created', {}),
+            t('pages.server.backups.table.columns.locked', {}),
+            '',
+          ]}
           loading={loading}
           pagination={backups}
           onPageSelect={setPage}

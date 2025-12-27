@@ -10,6 +10,7 @@ import Switch from '@/elements/input/Switch.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import { serverDatabaseEditSchema } from '@/lib/schemas/server/databases.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
@@ -17,6 +18,7 @@ type Props = ModalProps & {
 };
 
 export default function DatabaseEditModal({ database, opened, onClose }: Props) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
 
@@ -37,7 +39,7 @@ export default function DatabaseEditModal({ database, opened, onClose }: Props) 
       .then(() => {
         database.isLocked = form.values.locked;
         onClose();
-        addToast('Database updated.', 'success');
+        addToast(t('pages.server.databases.modal.editDatabase.toast.updated', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -46,11 +48,11 @@ export default function DatabaseEditModal({ database, opened, onClose }: Props) 
   };
 
   return (
-    <Modal title='Edit Database' onClose={onClose} opened={opened}>
+    <Modal title={t('pages.server.databases.modal.editDatabase.title', {})} onClose={onClose} opened={opened}>
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Stack>
           <Switch
-            label='Locked'
+            label={t('pages.server.databases.modal.editDatabase.form.locked', {})}
             name='locked'
             checked={form.values.locked}
             onChange={(e) => form.setFieldValue('locked', e.target.checked)}
@@ -58,10 +60,10 @@ export default function DatabaseEditModal({ database, opened, onClose }: Props) 
 
           <Group>
             <Button type='submit' loading={loading}>
-              Save
+              {t('common.button.save', {})}
             </Button>
             <Button variant='default' onClick={onClose}>
-              Close
+              {t('common.button.close', {})}
             </Button>
           </Group>
         </Stack>

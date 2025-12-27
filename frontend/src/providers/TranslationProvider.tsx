@@ -1,4 +1,5 @@
 import { ReactNode, useContext, useEffect, useState } from 'react';
+import Markdown from 'react-markdown';
 import { GetPlaceholders, getTranslationMapping, TranslationContext, TranslationItemRecord } from 'shared';
 import { z } from 'zod';
 import { $ZodConfig } from 'zod/v4/core';
@@ -12,6 +13,16 @@ const modules = import.meta.glob('/node_modules/zod/v4/locales/*.js');
 type LanguageData = {
   items: TranslationItemRecord;
   translations: Record<string, string>;
+};
+
+declare global {
+  interface String {
+    md(): ReactNode;
+  }
+}
+
+String.prototype.md = function (): ReactNode {
+  return <Markdown>{this.toString()}</Markdown>;
 };
 
 const TranslationProvider = ({ children }: { children: ReactNode }) => {

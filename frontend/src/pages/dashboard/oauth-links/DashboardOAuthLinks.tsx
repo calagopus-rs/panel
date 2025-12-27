@@ -9,10 +9,12 @@ import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
 import AccountContentContainer from '@/elements/containers/AccountContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 import OAuthLinkRow from './OAuthLinkRow.tsx';
 
 export default function DashboardOAuthLinks() {
+  const { t } = useTranslations();
   const { oauthLinks, setOAuthLinks } = useUserStore();
   const [oAuthProviders, setOAuthProviders] = useState<OAuthProvider[]>([]);
 
@@ -28,10 +30,10 @@ export default function DashboardOAuthLinks() {
   });
 
   return (
-    <AccountContentContainer title='OAuth Links'>
+    <AccountContentContainer title={t('pages.account.oauthLinks.title', {})}>
       <Group justify='space-between' align='center' mb='md'>
         <Title order={1} c='white'>
-          OAuth Links
+          {t('pages.account.oauthLinks.title', {})}
         </Title>
         <Group>
           <ContextMenuProvider>
@@ -42,7 +44,7 @@ export default function DashboardOAuthLinks() {
                   (oauthProvider) =>
                     ({
                       icon: faFingerprint,
-                      label: `Connect to ${oauthProvider.name}`,
+                      label: t('pages.account.oauthLinks.button.connectTo', { provider: oauthProvider.name }),
                       onClick: () => window.location.replace(`/api/auth/oauth/redirect/${oauthProvider.uuid}`),
                       color: 'gray',
                     }) as const,
@@ -61,7 +63,7 @@ export default function DashboardOAuthLinks() {
                   color='blue'
                   rightSection={<FontAwesomeIcon icon={faChevronDown} />}
                 >
-                  Connect
+                  {t('pages.account.oauthLinks.button.connect', {})}
                 </Button>
               )}
             </ContextMenu>
@@ -71,7 +73,13 @@ export default function DashboardOAuthLinks() {
 
       <ContextMenuProvider>
         <Table
-          columns={['Provider Name', 'Identifier', 'Last Used', 'Created', '']}
+          columns={[
+            t('pages.account.oauthLinks.table.columns.providerName', {}),
+            t('pages.account.oauthLinks.table.columns.identifier', {}),
+            t('common.table.columns.lastUsed', {}),
+            t('common.table.columns.created', {}),
+            '',
+          ]}
           loading={loading}
           pagination={oauthLinks}
           onPageSelect={setPage}

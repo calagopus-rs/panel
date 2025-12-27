@@ -9,6 +9,7 @@ import TextInput from '@/elements/input/TextInput.tsx';
 import Progress from '@/elements/Progress.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import { SocketEvent, SocketRequest } from '@/plugins/useWebsocketEvent.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 const ansiUp = new AnsiUp();
@@ -63,6 +64,7 @@ interface TerminalLine {
 }
 
 export default function Terminal() {
+  const { t } = useTranslations();
   const TERMINAL_PRELUDE = '\u001b[1m\u001b[33mcontainer@calagopus~ \u001b[0m';
   const { server, imagePulls, socketConnected, socketInstance, state } = useServerStore();
 
@@ -184,12 +186,12 @@ export default function Terminal() {
     setIsAtBottom(true);
 
     const listeners: Record<string, (msg: string) => void> = {
-      [SocketEvent.STATUS]: (s) => addLine(`Server marked as ${s}...`, true),
+      [SocketEvent.STATUS]: (s) => addLine(t('pages.server.console.message.serverMarkedAs', { state: s }), true),
       [SocketEvent.CONSOLE_OUTPUT]: (l) => addLine(l),
       [SocketEvent.INSTALL_OUTPUT]: (l) => addLine(l),
       [SocketEvent.TRANSFER_LOGS]: (l) => addLine(l),
       [SocketEvent.TRANSFER_STATUS]: (s) => {
-        if (s === 'failure') addLine('Transfer has failed.', true);
+        if (s === 'failure') addLine(t('pages.server.console.message.transferFailed', {}), true);
       },
       [SocketEvent.DAEMON_MESSAGE]: (l) => addLine(l, true),
       [SocketEvent.DAEMON_ERROR]: (l) => addLine(`\u001b[1m\u001b[41m${l}\u001b[0m`, true),
@@ -270,10 +272,13 @@ export default function Terminal() {
 
       {imagePulls.size > 0 && (
         <span className='flex flex-col justify-end mt-4'>
-          Your Server is currently pulling it&apos;s docker image. Please wait...
+          {t('pages.server.console.message.pullingImage', {})}
           {Array.from(imagePulls).map(([id, progress]) => (
             <span key={id} className='flex flex-row w-full items-center whitespace-pre-wrap break-all'>
-              {progress.status === 'pulling' ? 'Pulling' : 'Extracting'} Layer{' '}
+              {progress.status === 'pulling'
+                ? t('pages.server.console.message.pulling', {})
+                : t('pages.server.console.message.extracting', {})}{' '}
+              {t('pages.server.console.message.layer', {})}{' '}
               <Progress hourglass={false} value={(progress.progress / progress.total) * 100} className='flex-1 ml-2' />
             </span>
           ))}
@@ -291,8 +296,8 @@ export default function Terminal() {
       <div className='w-full mt-4'>
         <TextInput
           ref={inputRef}
-          placeholder='Type a command...'
-          aria-label='Console command input.'
+          placeholder={t('pages.server.console.input.placeholder', {})}
+          aria-label={t('pages.server.console.input.ariaLabel', {})}
           disabled={!socketConnected || state === 'offline'}
           onKeyDown={handleKeyDown}
           autoCorrect='off'

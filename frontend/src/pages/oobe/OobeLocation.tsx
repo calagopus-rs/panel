@@ -18,11 +18,13 @@ import {
   adminBackupConfigurationS3Schema,
 } from '@/lib/schemas/admin/backupConfigurations.ts';
 import { oobeLocationSchema } from '@/lib/schemas/oobe.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { OobeComponentProps } from '@/routers/OobeRouter.tsx';
 import BackupRestic from '../admin/backupConfigurations/forms/BackupRestic.tsx';
 import BackupS3 from '../admin/backupConfigurations/forms/BackupS3.tsx';
 
 export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
+  const { t } = useTranslations();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -93,7 +95,7 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
   return (
     <Stack gap='lg' py='md'>
       <Title order={2} mb='xs'>
-        Location Configuration
+        {t('pages.oobe.location.title', {})}
       </Title>
 
       {error && <AlertError error={error} setError={setError} />}
@@ -101,16 +103,16 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
       <form onSubmit={form.onSubmit(() => onSubmit())}>
         <Stack gap='md'>
           <TextInput
-            label='Location Name'
-            placeholder='My home'
+            label={t('pages.oobe.location.form.locationName', {})}
+            placeholder={t('pages.oobe.location.form.locationNamePlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faAddressCard} size='sm' />}
             required
             {...form.getInputProps('locationName')}
           />
 
           <TextInput
-            label='Backup Configuration Name'
-            placeholder='Unicorn Cloud'
+            label={t('pages.oobe.location.form.backupName', {})}
+            placeholder={t('pages.oobe.location.form.backupNamePlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faRainbow} size='sm' />}
             required
             {...form.getInputProps('backupName')}
@@ -118,8 +120,8 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
 
           <Select
             withAsterisk
-            label='Backup Disk'
-            placeholder='Backup Disk'
+            label={t('pages.oobe.location.form.backupDisk', {})}
+            placeholder={t('pages.oobe.location.form.backupDiskPlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faFloppyDisk} size='sm' />}
             data={Object.entries(backupDiskLabelMapping).map(([value, label]) => ({
               value,
@@ -133,10 +135,10 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
 
           <Group justify='flex-end' mt='xl'>
             <Button variant='outline' onClick={() => skipFrom('location')}>
-              Skip
+              {t('common.button.skip', {})}
             </Button>
             <Button type='submit' disabled={!form.isValid()} loading={loading}>
-              Create & Continue
+              {t('pages.oobe.location.button.create', {})}
             </Button>
           </Group>
         </Stack>

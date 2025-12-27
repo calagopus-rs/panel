@@ -16,11 +16,9 @@ export default function TwoFactorContainer() {
           {t('pages.account.account.containers.twoFactor.title', {})}
         </Title>
         <div className='mt-4'>
-          <p>
-            {user!.totpEnabled
-              ? t('pages.account.account.containers.twoFactor.twoFactorEnabled', {})
-              : t('pages.account.account.containers.twoFactor.twoFactorDisabled', {})}
-          </p>
+          {user!.totpEnabled
+            ? t('pages.account.account.containers.twoFactor.twoFactorEnabled', {}).md()
+            : t('pages.account.account.containers.twoFactor.twoFactorDisabled', {}).md()}
         </div>
         <div className='pt-4 flex mt-auto'>
           {user!.totpEnabled ? <TwoFactorDisableButton /> : <TwoFactorSetupButton />}

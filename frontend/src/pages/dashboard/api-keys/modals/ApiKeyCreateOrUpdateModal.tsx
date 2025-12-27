@@ -15,6 +15,7 @@ import Modal from '@/elements/modals/Modal.tsx';
 import PermissionSelector from '@/elements/PermissionSelector.tsx';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 import { useUserStore } from '@/stores/user.ts';
 
@@ -32,6 +33,7 @@ type Props = ModalProps & {
 };
 
 export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClose }: Props) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { addApiKey, updateApiKey: updateStateApiKey } = useUserStore();
   const { availablePermissions, setAvailablePermissions } = useGlobalStore();
@@ -77,7 +79,7 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
     if (contextApiKey) {
       updateApiKey(contextApiKey.uuid, form.values)
         .then(() => {
-          addToast('API key updated.', 'success');
+          addToast(t('pages.account.apiKeys.modal.updateApiKey.toast.updated', {}), 'success');
           onClose();
           updateStateApiKey(contextApiKey.uuid, form.values);
         })
@@ -90,7 +92,7 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
     } else {
       createApiKey(form.values)
         .then((key) => {
-          addToast('API key created.', 'success');
+          addToast(t('pages.account.apiKeys.modal.createApiKey.toast.created', {}), 'success');
           onClose();
           addApiKey({ ...key.apiKey, keyStart: key.key });
         })
@@ -104,14 +106,28 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
   };
 
   return (
-    <Modal title={`${contextApiKey ? 'Update' : 'Create'} API Key`} onClose={onClose} opened={opened} size='xl'>
+    <Modal
+      title={
+        contextApiKey
+          ? t('pages.account.apiKeys.modal.updateApiKey.title', {})
+          : t('pages.account.apiKeys.modal.createApiKey.title', {})
+      }
+      onClose={onClose}
+      opened={opened}
+      size='xl'
+    >
       <Stack>
         <Group grow>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+          <TextInput
+            withAsterisk
+            label={t('common.form.name', {})}
+            placeholder={t('common.form.name', {})}
+            {...form.getInputProps('name')}
+          />
 
           <DateTimePicker
-            label='Expires'
-            placeholder='Expires'
+            label={t('pages.account.apiKeys.table.columns.expires', {})}
+            placeholder={t('pages.account.apiKeys.table.columns.expires', {})}
             clearable
             value={form.values.expires}
             onChange={(value) => form.setFieldValue('expires', value ? new Date(value) : null)}
@@ -119,14 +135,14 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
         </Group>
 
         <TagsInput
-          label='Allowed IPs'
-          placeholder='e.g. 192.168.1.1, 2001:db8::1'
+          label={t('pages.account.apiKeys.form.allowedIps', {})}
+          placeholder={t('pages.account.apiKeys.form.allowedIpsPlaceholder', {})}
           {...form.getInputProps('allowedIps')}
         />
 
         {availablePermissions?.userPermissions && (
           <PermissionSelector
-            label='User Permissions'
+            label={t('pages.account.apiKeys.form.userPermissions', {})}
             permissionsMapType='userPermissions'
             permissions={availablePermissions.userPermissions}
             selectedPermissions={form.values.userPermissions}
@@ -135,7 +151,7 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
         )}
         {availablePermissions?.serverPermissions && (
           <PermissionSelector
-            label='Server Permissions'
+            label={t('pages.account.apiKeys.form.serverPermissions', {})}
             permissionsMapType='serverPermissions'
             permissions={availablePermissions.serverPermissions}
             selectedPermissions={form.values.serverPermissions}
@@ -144,7 +160,7 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
         )}
         {user!.admin && availablePermissions?.adminPermissions && (
           <PermissionSelector
-            label='Admin Permissions'
+            label={t('pages.account.apiKeys.form.adminPermissions', {})}
             permissionsMapType='adminPermissions'
             permissions={availablePermissions.adminPermissions}
             selectedPermissions={form.values.adminPermissions}
@@ -154,10 +170,10 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
 
         <Group mt='md'>
           <Button onClick={doCreateOrUpdate} loading={loading} disabled={!form.isValid()}>
-            Save
+            {t('common.button.save', {})}
           </Button>
           <Button variant='default' onClick={onClose}>
-            Close
+            {t('common.button.close', {})}
           </Button>
         </Group>
       </Stack>

@@ -9,11 +9,13 @@ import AccountContentContainer from '@/elements/containers/AccountContentContain
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 import SecurityKeyCreateModal from './modals/SecurityKeyCreateModal.tsx';
 import SshKeyRow from './SecurityKeyRow.tsx';
 
 export default function DashboardSecurityKeys() {
+  const { t } = useTranslations();
   const { securityKeys, setSecurityKeys } = useUserStore();
 
   const [openModal, setOpenModal] = useState<'create' | null>(null);
@@ -24,24 +26,34 @@ export default function DashboardSecurityKeys() {
   });
 
   return (
-    <AccountContentContainer title='Security Keys'>
+    <AccountContentContainer title={t('pages.account.securityKeys.title', {})}>
       <SecurityKeyCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <Group justify='space-between' align='start' mb='md'>
         <Title order={1} c='white'>
-          Security Keys
+          {t('pages.account.securityKeys.title', {})}
         </Title>
         <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput
+            placeholder={t('common.input.search', {})}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            w={250}
+          />
           <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Create
+            {t('common.button.create', {})}
           </Button>
         </Group>
       </Group>
 
       <ContextMenuProvider>
         <Table
-          columns={['Name', 'Last Used', 'Created', '']}
+          columns={[
+            t('common.table.columns.name', {}),
+            t('common.table.columns.lastUsed', {}),
+            t('common.table.columns.created', {}),
+            '',
+          ]}
           loading={loading}
           pagination={securityKeys}
           onPageSelect={setPage}

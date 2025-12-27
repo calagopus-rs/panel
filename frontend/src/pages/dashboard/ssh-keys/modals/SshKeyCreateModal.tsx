@@ -10,6 +10,7 @@ import TextArea from '@/elements/input/TextArea.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 
 const schema = z.object({
@@ -18,6 +19,7 @@ const schema = z.object({
 });
 
 export default function SshKeyCreateModal({ opened, onClose }: ModalProps) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { addSshKey } = useUserStore();
 
@@ -37,7 +39,7 @@ export default function SshKeyCreateModal({ opened, onClose }: ModalProps) {
 
     createSshKey(form.values)
       .then((key) => {
-        addToast('SSH key created.', 'success');
+        addToast(t('pages.account.sshKeys.modal.createSshKey.toast.created', {}), 'success');
 
         onClose();
         addSshKey(key);
@@ -49,14 +51,19 @@ export default function SshKeyCreateModal({ opened, onClose }: ModalProps) {
   };
 
   return (
-    <Modal title='Create SSH Key' onClose={onClose} opened={opened}>
+    <Modal title={t('pages.account.sshKeys.modal.createSshKey.title', {})} onClose={onClose} opened={opened}>
       <Stack>
-        <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+        <TextInput
+          withAsterisk
+          label={t('common.form.name', {})}
+          placeholder={t('common.form.name', {})}
+          {...form.getInputProps('name')}
+        />
 
         <TextArea
           withAsterisk
-          label='Public Key'
-          placeholder='Public Key'
+          label={t('pages.account.sshKeys.modal.createSshKey.form.publicKey', {})}
+          placeholder={t('pages.account.sshKeys.modal.createSshKey.form.publicKey', {})}
           rows={3}
           resize='none'
           {...form.getInputProps('publicKey')}
@@ -64,10 +71,10 @@ export default function SshKeyCreateModal({ opened, onClose }: ModalProps) {
 
         <Group mt='md'>
           <Button onClick={doCreate} loading={loading} disabled={!form.isValid()}>
-            Create
+            {t('common.button.create', {})}
           </Button>
           <Button variant='default' onClick={onClose}>
-            Close
+            {t('common.button.close', {})}
           </Button>
         </Group>
       </Stack>

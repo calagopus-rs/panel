@@ -11,12 +11,14 @@ import ServerContentContainer from '@/elements/containers/ServerContentContainer
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 import { useServerStore } from '@/stores/server.ts';
 import SubuserCreateOrUpdateModal from './modals/SubuserCreateOrUpdateModal.tsx';
 import SubuserRow from './SubuserRow.tsx';
 
 export default function ServerSubusers() {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { server, subusers, setSubusers, addSubuser } = useServerStore();
   const { setAvailablePermissions } = useGlobalStore();
@@ -38,7 +40,7 @@ export default function ServerSubusers() {
     createSubuser(server.uuid, { email, permissions, ignoredFiles, captcha })
       .then((subuser) => {
         addSubuser(subuser);
-        addToast('Subuser created.', 'success');
+        addToast(t('pages.server.subusers.modal.createSubuser.toast.created', {}), 'success');
         setOpenModal(null);
       })
       .catch((msg) => {
@@ -48,12 +50,12 @@ export default function ServerSubusers() {
 
   return (
     <ServerContentContainer
-      title='Subusers'
+      title={t('pages.server.subusers.title', {})}
       search={search}
       setSearch={setSearch}
       contentRight={
         <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
-          Create
+          {t('common.button.create', {})}
         </Button>
       }
     >
@@ -65,7 +67,14 @@ export default function ServerSubusers() {
 
       <ContextMenuProvider>
         <Table
-          columns={['', 'Username', '2FA Enabled', 'Permissions', 'Ignored Files', '']}
+          columns={[
+            '',
+            t('common.table.columns.username', {}),
+            t('pages.server.subusers.table.columns.twoFactorEnabled', {}),
+            t('pages.server.subusers.table.columns.permissions', {}),
+            t('pages.server.subusers.table.columns.ignoredFiles', {}),
+            '',
+          ]}
           loading={loading}
           pagination={subusers}
           onPageSelect={setPage}

@@ -11,9 +11,11 @@ import Switch from '@/elements/input/Switch.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import { serverSettingssReinstallSchema } from '@/lib/schemas/server/settings.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 export default function SettingsReinstallModal({ opened, onClose }: ModalProps) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { server, updateServer } = useServerStore();
   const navigate = useNavigate();
@@ -33,7 +35,7 @@ export default function SettingsReinstallModal({ opened, onClose }: ModalProps) 
 
     installServer(server.uuid, form.values)
       .then(() => {
-        addToast('Reinstalling server...', 'success');
+        addToast(t('pages.server.settings.reinstall.modal.toast.reinstalling', {}), 'success');
 
         navigate(`/server/${server.uuidShort}`);
         updateServer({ status: 'installing' });
@@ -45,10 +47,10 @@ export default function SettingsReinstallModal({ opened, onClose }: ModalProps) 
   };
 
   return (
-    <Modal title='Reinstall Server' onClose={onClose} opened={opened}>
+    <Modal title={t('pages.server.settings.reinstall.modal.title', {})} onClose={onClose} opened={opened}>
       <form onSubmit={form.onSubmit(() => doReinstall())}>
         <Switch
-          label='Do you want to empty the filesystem of this server before reinstallation?'
+          label={t('common.form.truncateDirectory', {})}
           name='truncate'
           defaultChecked={form.values.truncateDirectory}
           onChange={(e) => form.setFieldValue('truncateDirectory', e.target.checked)}
@@ -56,10 +58,10 @@ export default function SettingsReinstallModal({ opened, onClose }: ModalProps) 
 
         <Group mt='md'>
           <Button color='red' type='submit' loading={loading} disabled={!form.isValid()}>
-            Reinstall
+            {t('pages.server.settings.reinstall.modal.button', {})}
           </Button>
           <Button variant='default' onClick={onClose}>
-            Close
+            {t('common.button.close', {})}
           </Button>
         </Group>
       </form>
