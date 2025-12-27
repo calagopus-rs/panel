@@ -13,10 +13,12 @@ import TextInput from '@/elements/input/TextInput.tsx';
 import { dashboardAccountSchema } from '@/lib/schemas/dashboard.ts';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 import { AccountCardProps } from './DashboardAccount.tsx';
 
 export default function AccountContainer({ blurred }: AccountCardProps) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
   const { languages } = useGlobalStore();
@@ -54,7 +56,7 @@ export default function AccountContainer({ blurred }: AccountCardProps) {
 
     updateAccount(form.values)
       .then(() => {
-        addToast('Account updated.', 'success');
+        addToast(t('pages.account.account.containers.account.toast.updated', {}), 'success');
 
         setUser({
           ...user!,
@@ -71,22 +73,22 @@ export default function AccountContainer({ blurred }: AccountCardProps) {
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }} className={blurred ? 'blur-xs pointer-events-none select-none' : ''}>
       <Card h='100%'>
         <Title order={2} c='white'>
-          Account
+          {t('pages.account.account.containers.account.title', {})}
         </Title>
         <form onSubmit={form.onSubmit(() => doUpdate())}>
           <Stack className='mt-4'>
             <Group grow>
               <TextInput
                 withAsterisk
-                label='First Name'
-                placeholder='First Name'
+                label={t('pages.account.account.containers.account.form.nameFirst', {})}
+                placeholder={t('pages.account.account.containers.account.form.nameFirst', {})}
                 autoComplete='given-name'
                 {...form.getInputProps('nameFirst')}
               />
               <TextInput
                 withAsterisk
-                label='Last Name'
-                placeholder='Last Name'
+                label={t('pages.account.account.containers.account.form.nameLast', {})}
+                placeholder={t('pages.account.account.containers.account.form.nameLast', {})}
                 autoComplete='family-name'
                 {...form.getInputProps('nameLast')}
               />
@@ -94,15 +96,15 @@ export default function AccountContainer({ blurred }: AccountCardProps) {
             <Group grow>
               <TextInput
                 withAsterisk
-                label='Username'
-                placeholder='Username'
+                label={t('pages.account.account.containers.account.form.username', {})}
+                placeholder={t('pages.account.account.containers.account.form.username', {})}
                 autoComplete='username'
                 {...form.getInputProps('username')}
               />
               <Select
                 withAsterisk
-                label='Language'
-                placeholder='Language'
+                label={t('pages.account.account.containers.account.form.language', {})}
+                placeholder={t('pages.account.account.containers.account.form.language', {})}
                 data={languages.map((language) => ({
                   label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
                   value: language,
@@ -114,45 +116,45 @@ export default function AccountContainer({ blurred }: AccountCardProps) {
             <Group grow>
               <Select
                 withAsterisk
-                label='Toast Position'
-                placeholder='Toast Position'
+                label={t('pages.account.account.containers.account.form.toastPosition', {})}
+                placeholder={t('pages.account.account.containers.account.form.toastPosition', {})}
                 data={[
                   {
-                    label: 'Top Left',
+                    label: t('common.enum.userToastPosition.topLeft', {}),
                     value: 'top_left',
                   },
                   {
-                    label: 'Top Center',
+                    label: t('common.enum.userToastPosition.topCenter', {}),
                     value: 'top_center',
                   },
                   {
-                    label: 'Top Right',
+                    label: t('common.enum.userToastPosition.topRight', {}),
                     value: 'top_right',
                   },
                   {
-                    label: 'Bottom Left',
+                    label: t('common.enum.userToastPosition.bottomLeft', {}),
                     value: 'bottom_left',
                   },
                   {
-                    label: 'Bottom Center',
+                    label: t('common.enum.userToastPosition.bottomCenter', {}),
                     value: 'bottom_center',
                   },
                   {
-                    label: 'Bottom Right',
+                    label: t('common.enum.userToastPosition.bottomRight', {}),
                     value: 'bottom_right',
                   },
                 ]}
                 {...form.getInputProps('toastPosition')}
               />
               <Switch
-                label='Start on the Grouped Servers page'
+                label={t('pages.account.account.containers.account.form.startOnGroupedServers', {})}
                 checked={form.values.startOnGroupedServers}
                 onChange={(e) => form.setFieldValue('startOnGroupedServers', e.target.checked)}
               />
             </Group>
             <Group>
               <Button type='submit' disabled={!form.isValid()} loading={loading}>
-                Update Account
+                {t('common.button.update', {})}
               </Button>
             </Group>
           </Stack>

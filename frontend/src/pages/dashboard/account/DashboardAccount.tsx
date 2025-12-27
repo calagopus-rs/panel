@@ -4,6 +4,7 @@ import { Grid } from '@mantine/core';
 import Alert from '@/elements/Alert.tsx';
 import AccountContentContainer from '@/elements/containers/AccountContentContainer.tsx';
 import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import AccountContainer from './AccountContainer.tsx';
 import AvatarContainer from './AvatarContainer.tsx';
 import EmailContainer from './EmailContainer.tsx';
@@ -15,20 +16,21 @@ export interface AccountCardProps {
 }
 
 export default function DashboardAccount() {
+  const { t } = useTranslations();
   const { user } = useAuth();
 
   const requireTwoFactorActivation = !user?.totpEnabled && user?.requireTwoFactor;
 
   return (
-    <AccountContentContainer title='Account'>
+    <AccountContentContainer title={t('pages.account.account.title', {})}>
       {requireTwoFactorActivation && (
         <Alert
           icon={<FontAwesomeIcon icon={faShieldAlt} />}
-          title='Two-Factor Authentication Required'
+          title={t('pages.account.account.alert.requireTwoFactor.title', {})}
           color='red'
           mb='md'
         >
-          Two-Factor Authentication is required on your account. Please set it up below to continue using the panel.
+          {t('pages.account.account.alert.requireTwoFactor.description', {})}
         </Alert>
       )}
 

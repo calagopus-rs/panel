@@ -12,8 +12,10 @@ import Modal from '@/elements/modals/Modal.tsx';
 import { dashboardTwoFactorDisableSchema } from '@/lib/schemas/dashboard.ts';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 export default function TwoFactorDisableButton() {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
@@ -41,7 +43,7 @@ export default function TwoFactorDisableButton() {
 
     disableTwoFactor(form.values)
       .then(() => {
-        addToast('Two-factor authentication disabled.', 'success');
+        addToast(t('pages.account.account.containers.twoFactor.toast.disabled', {}), 'success');
         setOpenModal(null);
         setUser({ ...user!, totpEnabled: false });
       })
@@ -54,16 +56,16 @@ export default function TwoFactorDisableButton() {
   return (
     <>
       <Modal
-        title='Disable Two-Factor Verification'
+        title={t('pages.account.account.containers.twoFactor.modal.disableTwoFactor.title', {})}
         onClose={() => setOpenModal(null)}
         opened={openModal === 'disable'}
       >
         <Stack>
-          <Text>Disabling two-factor verification will make your account less secure.</Text>
+          <Text>{t('pages.account.account.containers.twoFactor.modal.disableTwoFactor.description', {})}</Text>
 
           <TextInput
             withAsterisk
-            label='Code'
+            label={t('pages.account.account.containers.twoFactor.modal.disableTwoFactor.form.code', {})}
             placeholder='000000'
             autoComplete='one-time-code'
             {...form.getInputProps('code')}
@@ -71,25 +73,25 @@ export default function TwoFactorDisableButton() {
 
           <PasswordInput
             withAsterisk
-            label='Password'
-            placeholder='Password'
+            label={t('common.form.password', {})}
+            placeholder={t('common.form.password', {})}
             autoComplete='current-password'
             {...form.getInputProps('password')}
           />
 
           <Group>
             <Button color='red' onClick={doDisable} loading={loading} disabled={!form.isValid()}>
-              Disable
+              {t('common.button.disable', {})}
             </Button>
             <Button variant='default' onClick={() => setOpenModal(null)}>
-              Close
+              {t('common.button.close', {})}
             </Button>
           </Group>
         </Stack>
       </Modal>
 
       <Button color='red' onClick={() => setOpenModal('disable')}>
-        Disable Two-Factor
+        {t('pages.account.account.containers.twoFactor.button.disableTwoFactor', {})}
       </Button>
     </>
   );

@@ -12,9 +12,11 @@ import TextInput from '@/elements/input/TextInput.tsx';
 import { dashboardEmailSchema } from '@/lib/schemas/dashboard.ts';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { AccountCardProps } from './DashboardAccount.tsx';
 
 export default function EmailContainer({ blurred }: AccountCardProps) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
@@ -40,7 +42,7 @@ export default function EmailContainer({ blurred }: AccountCardProps) {
 
     updateEmail(form.values)
       .then(() => {
-        addToast('Email updated.', 'success');
+        addToast(t('pages.account.account.containers.email.toast.updated', {}), 'success');
 
         setUser({ ...user!, email: form.values.email });
         form.setFieldValue('password', '');
@@ -55,28 +57,28 @@ export default function EmailContainer({ blurred }: AccountCardProps) {
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }} className={blurred ? 'blur-xs pointer-events-none select-none' : ''}>
       <Card h='100%'>
         <Title order={2} c='white'>
-          Email
+          {t('pages.account.account.containers.email.title', {})}
         </Title>
         <form onSubmit={form.onSubmit(() => doUpdate())}>
           <Stack className='mt-4'>
             <TextInput
               withAsterisk
-              label='New Email'
-              placeholder='New Email'
+              label={t('pages.account.account.containers.email.form.newEmail', {})}
+              placeholder={t('pages.account.account.containers.email.form.newEmail', {})}
               autoComplete='email'
               {...form.getInputProps('email')}
             />
             <PasswordInput
               withAsterisk
-              label='Current Password'
-              placeholder='Current Password'
+              label={t('pages.account.account.containers.email.form.currentPassword', {})}
+              placeholder={t('pages.account.account.containers.email.form.currentPassword', {})}
               autoComplete='current-password'
               {...form.getInputProps('password')}
             />
           </Stack>
           <Group className='mt-auto pt-4'>
             <Button type='submit' disabled={!form.isValid()} loading={loading}>
-              Update Email
+              {t('common.button.update', {})}
             </Button>
           </Group>
         </form>

@@ -17,6 +17,7 @@ import Spinner from '@/elements/Spinner.tsx';
 import { dashboardTwoFactorEnableSchema } from '@/lib/schemas/dashboard.ts';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 export interface TwoFactorSetupResponse {
   otpUrl: string;
@@ -24,6 +25,7 @@ export interface TwoFactorSetupResponse {
 }
 
 export default function TwoFactorSetupButton() {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
@@ -77,12 +79,12 @@ export default function TwoFactorSetupButton() {
   return (
     <>
       <MantineModal.Stack>
-        <Modal {...stageStack.register('setup')} title='Setup Two-Factor Verification'>
+        <Modal
+          {...stageStack.register('setup')}
+          title={t('pages.account.account.containers.twoFactor.modal.setupTwoFactor.title', {})}
+        >
           <Stack>
-            <Text>
-              Help protect your account from unauthorized access. You&apos;ll be prompted for a verification code each
-              time you sign in.
-            </Text>
+            <Text>{t('pages.account.account.containers.twoFactor.modal.setupTwoFactor.description', {})}</Text>
             {!token ? (
               <Spinner.Centered />
             ) : (
@@ -97,14 +99,11 @@ export default function TwoFactorSetupButton() {
                 </div>
               </div>
             )}
-            <Text>
-              Scan the QR code above using the two-step authentication app of your choice. Then, enter the 6-digit code
-              generated into the field below.
-            </Text>
+            <Text>{t('pages.account.account.containers.twoFactor.modal.setupTwoFactor.descriptionQR', {})}</Text>
 
             <TextInput
               withAsterisk
-              label='Code'
+              label={t('pages.account.account.containers.twoFactor.modal.setupTwoFactor.form.code', {})}
               placeholder='000000'
               autoComplete='one-time-code'
               {...form.getInputProps('code')}
@@ -112,18 +111,18 @@ export default function TwoFactorSetupButton() {
 
             <PasswordInput
               withAsterisk
-              label='Password'
-              placeholder='Password'
+              label={t('common.form.password', {})}
+              placeholder={t('common.form.password', {})}
               autoComplete='current-password'
               {...form.getInputProps('password')}
             />
 
             <Group>
               <Button onClick={doEnable} loading={loading} disabled={!form.isValid()}>
-                Enable
+                {t('common.button.enable', {})}
               </Button>
               <Button variant='default' onClick={() => stageStack.closeAll()}>
-                Close
+                {t('common.button.close', {})}
               </Button>
             </Group>
           </Stack>
@@ -134,9 +133,10 @@ export default function TwoFactorSetupButton() {
             setUser({ ...user!, totpEnabled: true });
             stageStack.close('recovery');
           }}
-          title='Recovery Codes'
+          title={t('pages.account.account.containers.twoFactor.modal.recoveryCodes.title', {})}
         >
           <Stack>
+            <Text>{t('pages.account.account.containers.twoFactor.modal.recoveryCodes.description', {})}</Text>
             <CopyOnClick content={recoveryCodes.join('\n')}>
               <Code block className='grid grid-cols-2 w-full gap-x-2'>
                 {recoveryCodes.map((code, i) => (
@@ -154,14 +154,16 @@ export default function TwoFactorSetupButton() {
                   stageStack.closeAll();
                 }}
               >
-                Close
+                {t('common.button.close', {})}
               </Button>
             </Group>
           </Stack>
         </Modal>
       </MantineModal.Stack>
 
-      <Button onClick={() => stageStack.open('setup')}>Setup Two-Factor</Button>
+      <Button onClick={() => stageStack.open('setup')}>
+        {t('pages.account.account.containers.twoFactor.button.setupTwoFactor', {})}
+      </Button>
     </>
   );
 }

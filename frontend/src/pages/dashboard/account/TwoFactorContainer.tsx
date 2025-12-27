@@ -1,27 +1,26 @@
 import { Grid, Title } from '@mantine/core';
 import Card from '@/elements/Card.tsx';
 import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import TwoFactorDisableButton from './actions/TwoFactorDisableButton.tsx';
 import TwoFactorSetupButton from './actions/TwoFactorSetupButton.tsx';
 
 export default function TwoFactorContainer() {
+  const { t } = useTranslations();
   const { user } = useAuth();
 
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card h='100%'>
         <Title order={2} c='white'>
-          Two-Step Verification
+          {t('pages.account.account.containers.twoFactor.title', {})}
         </Title>
         <div className='mt-4'>
-          {user!.totpEnabled ? (
-            <p>Two-Factor Verification is currently enabled.</p>
-          ) : (
-            <p>
-              You do not currently have two-factor verification enabled on your account. Click the button below to begin
-              configuring it.
-            </p>
-          )}
+          <p>
+            {user!.totpEnabled
+              ? t('pages.account.account.containers.twoFactor.twoFactorEnabled', {})
+              : t('pages.account.account.containers.twoFactor.twoFactorDisabled', {})}
+          </p>
         </div>
         <div className='pt-4 flex mt-auto'>
           {user!.totpEnabled ? <TwoFactorDisableButton /> : <TwoFactorSetupButton />}

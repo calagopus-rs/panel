@@ -32,7 +32,7 @@ export default function WebsocketHandler() {
     const socket = new Websocket();
 
     socket.on('auth success', () => setSocketConnectionState(true));
-    socket.on('SOCKET_CLOSE', (reason) => {
+    socket.on('SOCKET_CLOSE', (reason: string) => {
       switch (reason) {
         case 'permission revoked':
           navigate('/');
@@ -48,7 +48,7 @@ export default function WebsocketHandler() {
     });
     socket.on('status', (status) => setState(status));
 
-    socket.on('daemon error', (message) => {
+    socket.on('daemon error', (message: string) => {
       console.warn('Got error message from daemon socket:', message);
     });
 

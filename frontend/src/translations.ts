@@ -14,6 +14,9 @@ const baseTranslations = defineTranslations({
         save: 'Save',
         saveAndStay: 'Save & Stay',
         delete: 'Delete',
+        remove: 'Remove',
+        enable: 'Enable',
+        disable: 'Disable',
         update: 'Update',
         close: 'Close',
         cancel: 'Cancel',
@@ -24,6 +27,12 @@ const baseTranslations = defineTranslations({
       form: {
         name: 'Name',
         description: 'Description',
+        password: 'Password',
+      },
+      contextMenu: {
+        edit: 'Edit',
+        delete: 'Delete',
+        remove: 'Remove',
       },
       table: {
         pagination: {
@@ -40,12 +49,23 @@ const baseTranslations = defineTranslations({
           InstallFailed: 'Install Failed',
         },
       },
+      enum: {
+        userToastPosition: {
+          topLeft: 'Top Left',
+          topCenter: 'Top Center',
+          topRight: 'Top Right',
+          bottomLeft: 'Bottom Left',
+          bottomCenter: 'Bottom Center',
+          bottomRight: 'Bottom Right',
+        },
+      },
       unlimited: 'Unlimited',
     },
     pages: {
       auth: {},
       account: {
         home: {
+          title: 'Servers',
           tooltip: {
             removeFromGroup: 'Remove from Group',
             addToGroup: 'Add to Group',
@@ -101,6 +121,100 @@ const baseTranslations = defineTranslations({
             },
           },
           noServers: 'No Servers could be found, time to add one?',
+        },
+        account: {
+          title: 'Account',
+          alert: {
+            requireTwoFactor: {
+              title: 'Two-Factor Authentication Required',
+              description:
+                'Two-Factor Authentication is required on your account. Please set it up below to continue using the panel.',
+            },
+          },
+          containers: {
+            password: {
+              title: 'Password',
+              toast: {
+                updated: 'Password updated successfully.',
+              },
+              form: {
+                currentPassword: 'Current Password',
+                newPassword: 'New Password',
+                confirmNewPassword: 'Confirm New Password',
+              },
+            },
+            email: {
+              title: 'Email',
+              toast: {
+                updated: 'Email updated successfully.',
+              },
+              form: {
+                newEmail: 'New Email',
+                currentPassword: 'Current Password',
+              },
+            },
+            twoFactor: {
+              title: 'Two-Factor Authentication',
+              toast: {
+                disabled: 'Two-factor authentication disabled successfully.',
+              },
+              modal: {
+                disableTwoFactor: {
+                  title: 'Disable Two-Factor Authentication',
+                  description: 'Disabling two-factor authentication will make your account less secure.',
+                  form: {
+                    code: 'Authentication Code',
+                  },
+                },
+                setupTwoFactor: {
+                  title: 'Setup Two-Factor Authentication',
+                  description:
+                    "Help protect your account from unauthorized access. You'll be prompted for a verification code each time you sign in.",
+                  descriptionQR:
+                    'Scan the QR code above using the two-step authentication app of your choice. Then, enter the 6-digit code generated into the field below.',
+                  form: {
+                    code: 'Authentication Code',
+                  },
+                },
+                recoveryCodes: {
+                  title: 'Recovery Codes',
+                  description:
+                    'Below are your recovery codes. Store these in a safe place. If you lose access to your authentication device, you can use these codes to regain access to your account.',
+                },
+              },
+              button: {
+                disableTwoFactor: 'Disable Two-Factor',
+                setupTwoFactor: 'Setup Two-Factor',
+              },
+              twoFactorEnabled: 'Two-Factor Verification is currently enabled.',
+              twoFactorDisabled:
+                'You do not currently have two-factor verification enabled on your account. Click the button below to begin configuring it.',
+            },
+            account: {
+              title: 'Account Details',
+              toast: {
+                updated: 'Account details updated successfully.',
+              },
+              form: {
+                nameFirst: 'First Name',
+                nameLast: 'Last Name',
+                username: 'Username',
+                language: 'Language',
+                toastPosition: 'Toast Position',
+                startOnGroupedServers: 'Start on the Grouped Servers page',
+              },
+            },
+            avatar: {
+              title: 'Avatar',
+              toast: {
+                updated: 'Avatar updated successfully.',
+                removed: 'Avatar removed successfully.',
+              },
+              form: {
+                avatar: 'Avatar',
+              },
+            },
+          },
         },
       },
       admin: {},

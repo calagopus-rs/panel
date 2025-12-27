@@ -9,9 +9,11 @@ import Card from '@/elements/Card.tsx';
 import FileInput from '@/elements/input/FileInput.tsx';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { AccountCardProps } from './DashboardAccount.tsx';
 
 export default function AvatarContainer({ blurred }: AccountCardProps) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
@@ -27,7 +29,7 @@ export default function AvatarContainer({ blurred }: AccountCardProps) {
       editor.current?.getImageScaledToCanvas().toBlob((blob) => {
         updateAvatar(blob ?? new Blob())
           .then((avatar) => {
-            addToast('Avatar updated.', 'success');
+            addToast(t('pages.account.account.containers.avatar.toast.updated', {}), 'success');
 
             setUser({ ...user!, avatar });
           })
@@ -45,7 +47,7 @@ export default function AvatarContainer({ blurred }: AccountCardProps) {
   const doRemove = () => {
     removeAvatar()
       .then(() => {
-        addToast('Avatar removed.', 'success');
+        addToast(t('pages.account.account.containers.avatar.toast.removed', {}), 'success');
 
         setUser({ ...user!, avatar: undefined });
       })
@@ -58,7 +60,7 @@ export default function AvatarContainer({ blurred }: AccountCardProps) {
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }} className={blurred ? 'blur-xs pointer-events-none select-none' : ''}>
       <Card h='100%'>
         <Title order={2} c='white'>
-          Avatar
+          {t('pages.account.account.containers.avatar.title', {})}
         </Title>
         <Group className='mt-4'>
           <AvatarEditor
@@ -72,8 +74,8 @@ export default function AvatarContainer({ blurred }: AccountCardProps) {
 
           <Stack className='h-full grow'>
             <FileInput
-              label='Avatar'
-              placeholder='Avatar'
+              label={t('pages.account.account.containers.avatar.form.avatar', {})}
+              placeholder={t('pages.account.account.containers.avatar.form.avatar', {})}
               value={file}
               onChange={(file) => setFile(file)}
               accept='image/*'
@@ -82,10 +84,10 @@ export default function AvatarContainer({ blurred }: AccountCardProps) {
 
             <Group>
               <Button loading={loading} disabled={!file} onClick={doUpdate}>
-                Update Avatar
+                {t('common.button.update', {})}
               </Button>
               <Button color='red' loading={loading} disabled={!user!.avatar} onClick={doRemove}>
-                Remove Avatar
+                {t('common.button.remove', {})}
               </Button>
             </Group>
           </Stack>
