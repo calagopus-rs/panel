@@ -422,6 +422,36 @@ pub mod backups_backup {
         pub type Response = Response202;
     }
 }
+pub mod deauthorize_user {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub user: uuid::Uuid,
+                #[schema(inline)]
+                pub servers: Vec<uuid::Uuid>,
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response409 {
+                #[schema(inline)]
+                pub error: compact_str::CompactString,
+            }
+        }
+
+        pub type Response = Response200;
+    }
+}
 pub mod servers {
     use super::*;
 

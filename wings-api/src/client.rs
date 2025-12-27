@@ -131,6 +131,20 @@ impl WingsClient {
         .await
     }
 
+    pub async fn post_deauthorize_user(
+        &self,
+        data: &super::deauthorize_user::post::RequestBody,
+    ) -> Result<super::deauthorize_user::post::Response, ApiHttpError> {
+        request_impl(
+            self,
+            Method::POST,
+            "/api/deauthorize-user",
+            Some(data),
+            None,
+        )
+        .await
+    }
+
     pub async fn get_servers(&self) -> Result<super::servers::get::Response, ApiHttpError> {
         request_impl(self, Method::GET, "/api/servers", None::<&()>, None).await
     }
