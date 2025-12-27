@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
 export const adminSettingsApplicationSchema = z.object({
-  name: z.string(),
-  url: z.string(),
+  name: z.string().min(1).max(64),
+  url: z.url(),
   language: z.string(),
+  twoFactorRequirement: z.enum(['admins', 'all_users', 'none']),
   telemetryEnabled: z.boolean(),
   registrationEnabled: z.boolean(),
 });
@@ -42,21 +43,21 @@ export const adminSettingsEmailSmtpSchema = z.object({
   username: z.string().nullable(),
   password: z.string().nullable(),
   useTls: z.boolean(),
-  fromAddress: z.string(),
+  fromAddress: z.email(),
   fromName: z.string().nullable(),
 });
 
 export const adminSettingsEmailSendmailSchema = z.object({
   type: z.literal('sendmail'),
   command: z.string(),
-  fromAddress: z.string(),
+  fromAddress: z.email(),
   fromName: z.string().nullable(),
 });
 
 export const adminSettingsEmailFilesystemSchema = z.object({
   type: z.literal('filesystem'),
   path: z.string(),
-  fromAddress: z.string(),
+  fromAddress: z.email(),
   fromName: z.string().nullable(),
 });
 
@@ -78,7 +79,7 @@ export const adminSettingsServerSchema = z.object({
 
 export const adminSettingsStorageFilesystemSchema = z.object({
   type: z.literal('filesystem'),
-  path: z.string(),
+  path: z.string().startsWith('/'),
 });
 
 export const adminSettingsStorageS3Schema = z.object({
@@ -98,6 +99,6 @@ export const adminSettingsStorageSchema = z.discriminatedUnion('type', [
 ]);
 
 export const adminSettingsWebauthnSchema = z.object({
-  rpId: z.string(),
-  rpOrigin: z.string(),
+  rpId: z.string().min(1).max(255),
+  rpOrigin: z.url(),
 });

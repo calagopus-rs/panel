@@ -79,6 +79,7 @@ mod get {
 }
 
 mod delete {
+    use crate::routes::api::admin::roles::_role_::GetRole;
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
@@ -88,8 +89,6 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
-
-    use crate::routes::api::admin::roles::_role_::GetRole;
 
     #[derive(ToSchema, Serialize)]
     struct Response {}
@@ -129,6 +128,7 @@ mod delete {
 }
 
 mod patch {
+    use crate::routes::api::admin::roles::_role_::GetRole;
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
@@ -141,8 +141,6 @@ mod patch {
     use utoipa::ToSchema;
     use validator::Validate;
 
-    use crate::routes::api::admin::roles::_role_::GetRole;
-
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[validate(length(min = 3, max = 255))]
@@ -151,6 +149,8 @@ mod patch {
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
         description: Option<compact_str::CompactString>,
+
+        require_two_factor: Option<bool>,
 
         #[validate(custom(function = "shared::permissions::validate_admin_permissions"))]
         admin_permissions: Option<Vec<compact_str::CompactString>>,
@@ -198,6 +198,9 @@ mod patch {
                 role.description = Some(description);
             }
         }
+        if let Some(require_two_factor) = data.require_two_factor {
+            role.require_two_factor = require_two_factor;
+        }
         if let Some(admin_permissions) = data.admin_permissions {
             role.admin_permissions = Arc::new(admin_permissions);
         }
@@ -207,11 +210,12 @@ mod patch {
 
         match sqlx::query!(
             "UPDATE roles
-            SET name = $2, description = $3, admin_permissions = $4, server_permissions = $5
+            SET name = $2, description = $3, require_two_factor = $4, admin_permissions = $5, server_permissions = $6
             WHERE roles.uuid = $1",
             role.uuid,
             &role.name,
             role.description.as_deref(),
+            role.require_two_factor,
             &*role.admin_permissions as &[compact_str::CompactString],
             &*role.server_permissions as &[compact_str::CompactString]
         )
@@ -240,6 +244,7 @@ mod patch {
                     "uuid": role.uuid,
                     "name": role.name,
                     "description": role.description,
+                    "require_two_factor": role.require_two_factor,
                     "admin_permissions": role.admin_permissions,
                     "server_permissions": role.server_permissions,
                 }),

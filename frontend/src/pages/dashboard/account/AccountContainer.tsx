@@ -14,8 +14,9 @@ import { dashboardAccountSchema } from '@/lib/schemas/dashboard.ts';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
+import { AccountCardProps } from './DashboardAccount.tsx';
 
-export default function AccountContainer() {
+export default function AccountContainer({ blurred }: AccountCardProps) {
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
   const { languages } = useGlobalStore();
@@ -67,7 +68,7 @@ export default function AccountContainer() {
   };
 
   return (
-    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+    <Grid.Col span={{ base: 12, md: 6, lg: 4 }} className={blurred ? 'blur-xs pointer-events-none select-none' : ''}>
       <Card h='100%'>
         <Title order={2} c='white'>
           Account

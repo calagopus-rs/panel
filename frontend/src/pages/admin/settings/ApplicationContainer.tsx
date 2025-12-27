@@ -27,6 +27,7 @@ export default function ApplicationContainer() {
       name: '',
       url: '',
       language: 'en-US',
+      twoFactorRequirement: 'none',
       telemetryEnabled: true,
       registrationEnabled: true,
     },
@@ -71,7 +72,20 @@ export default function ApplicationContainer() {
             />
           </Group>
 
-          <TextInput withAsterisk label='URL' placeholder='URL' {...form.getInputProps('url')} />
+          <Group grow>
+            <TextInput withAsterisk label='URL' placeholder='URL' {...form.getInputProps('url')} />
+
+            <Select
+              withAsterisk
+              label='Two-Factor Authentication Requirement'
+              data={[
+                { label: 'Admins', value: 'admins' },
+                { label: 'All Users', value: 'all_users' },
+                { label: 'None', value: 'none' },
+              ]}
+              {...form.getInputProps('twoFactorRequirement')}
+            />
+          </Group>
 
           <Group grow>
             <Switch

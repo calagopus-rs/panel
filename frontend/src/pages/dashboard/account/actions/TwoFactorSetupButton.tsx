@@ -77,7 +77,7 @@ export default function TwoFactorSetupButton() {
   return (
     <>
       <MantineModal.Stack>
-        <Modal {...stageStack.register('setup')} title='Enable Two-Step Verification'>
+        <Modal {...stageStack.register('setup')} title='Setup Two-Factor Verification'>
           <Stack>
             <Text>
               Help protect your account from unauthorized access. You&apos;ll be prompted for a verification code each
@@ -161,7 +161,7 @@ export default function TwoFactorSetupButton() {
         </Modal>
       </MantineModal.Stack>
 
-      <Button onClick={() => stageStack.open('setup')}>Enable Two-Step</Button>
+      <Button onClick={() => stageStack.open('setup')}>Setup Two-Factor</Button>
     </>
   );
 }

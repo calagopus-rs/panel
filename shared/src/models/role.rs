@@ -14,6 +14,8 @@ pub struct Role {
     pub name: compact_str::CompactString,
     pub description: Option<compact_str::CompactString>,
 
+    pub require_two_factor: bool,
+
     pub admin_permissions: Arc<Vec<compact_str::CompactString>>,
     pub server_permissions: Arc<Vec<compact_str::CompactString>>,
 
@@ -33,6 +35,10 @@ impl BaseModel for Role {
             (
                 "roles.description",
                 compact_str::format_compact!("{prefix}description"),
+            ),
+            (
+                "roles.require_two_factor",
+                compact_str::format_compact!("{prefix}require_two_factor"),
             ),
             (
                 "roles.admin_permissions",
@@ -58,6 +64,8 @@ impl BaseModel for Role {
             name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
             description: row
                 .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
+            require_two_factor: row
+                .try_get(compact_str::format_compact!("{prefix}require_two_factor").as_str())?,
             admin_permissions: Arc::new(
                 row.try_get(compact_str::format_compact!("{prefix}admin_permissions").as_str())?,
             ),
@@ -74,19 +82,21 @@ impl Role {
         database: &crate::database::Database,
         name: &str,
         description: Option<&str>,
+        two_factor_required: bool,
         admin_permissions: &[compact_str::CompactString],
         server_permissions: &[compact_str::CompactString],
     ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
-            INSERT INTO roles (name, description, admin_permissions, server_permissions)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO roles (name, description, require_two_factor, admin_permissions, server_permissions)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING {}
             "#,
             Self::columns_sql(None)
         ))
         .bind(name)
         .bind(description)
+        .bind(two_factor_required)
         .bind(admin_permissions)
         .bind(server_permissions)
         .fetch_one(database.write())

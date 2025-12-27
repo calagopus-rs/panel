@@ -10,6 +10,7 @@ import getPermissions from '@/api/getPermissions.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
 import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
+import Switch from '@/elements/input/Switch.tsx';
 import TextArea from '@/elements/input/TextArea.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
@@ -27,6 +28,7 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
     initialValues: {
       name: '',
       description: null,
+      requireTwoFactor: false,
       adminPermissions: [],
       serverPermissions: [],
     },
@@ -85,6 +87,13 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
           <Group grow align='start'>
             <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
           </Group>
+
+          <Switch
+            label='Require Two Factor'
+            description='Require users with this role to use two factor authentication.'
+            checked={form.values.requireTwoFactor}
+            onChange={(e) => form.setFieldValue('requireTwoFactor', e.target.checked)}
+          />
 
           <Group grow align='normal'>
             {availablePermissions?.serverPermissions && (

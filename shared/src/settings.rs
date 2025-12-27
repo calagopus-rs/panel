@@ -11,6 +11,14 @@ use std::{
 use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use utoipa::ToSchema;
 
+#[derive(ToSchema, Serialize, Deserialize, Clone, Copy)]
+#[serde(rename_all = "snake_case")]
+pub enum TwoFactorRequirement {
+    Admins,
+    AllUsers,
+    None,
+}
+
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum StorageDriver {
@@ -110,6 +118,7 @@ pub struct AppSettingsApp {
     pub name: compact_str::CompactString,
     pub url: compact_str::CompactString,
     pub language: compact_str::CompactString,
+    pub two_factor_requirement: TwoFactorRequirement,
 
     pub telemetry_enabled: bool,
     pub registration_enabled: bool,
@@ -126,6 +135,12 @@ impl AppSettingsApp {
         values.push(self.url.clone());
         keys.push("app::language");
         values.push(self.language.clone());
+        keys.push("app::two_factor_requirement");
+        values.push(match self.two_factor_requirement {
+            TwoFactorRequirement::Admins => "admins".into(),
+            TwoFactorRequirement::AllUsers => "all_users".into(),
+            TwoFactorRequirement::None => "none".into(),
+        });
         keys.push("app::telemetry_enabled");
         values.push(self.telemetry_enabled.to_compact_string());
         keys.push("app::registration_enabled");
@@ -147,6 +162,11 @@ impl AppSettingsApp {
             language: map
                 .remove("app::language")
                 .unwrap_or_else(|| "en-US".into()),
+            two_factor_requirement: match map.remove("app::two_factor_requirement").as_deref() {
+                Some("admins") => TwoFactorRequirement::Admins,
+                Some("all_users") => TwoFactorRequirement::AllUsers,
+                _ => TwoFactorRequirement::None,
+            },
             telemetry_enabled: map
                 .remove("app::telemetry_enabled")
                 .map(|s| s == "true")

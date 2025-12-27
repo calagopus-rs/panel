@@ -1,6 +1,6 @@
 use super::{GetState, State};
 use axum::{
-    extract::Request,
+    extract::{MatchedPath, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
@@ -24,6 +24,7 @@ pub async fn auth(
     state: GetState,
     ip: shared::GetIp,
     cookies: Cookies,
+    matched_path: MatchedPath,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
@@ -34,6 +35,12 @@ pub async fn auth(
     {
         return Ok(err.into_response());
     }
+
+    const IGNORED_TWO_FACTOR_PATHS: &[&str] = &[
+        "/api/client/account",
+        "/api/client/account/two-factor",
+        "/api/client/account/logout",
+    ];
 
     if let Some(session_id) = cookies.get("session") {
         if session_id.value().len() != 81 {
@@ -86,6 +93,7 @@ pub async fn auth(
             .await;
 
         let settings = state.settings.get().await;
+        let require_two_factor = user.require_two_factor(&settings);
         let secure = settings.app.url.starts_with("https://");
         drop(settings);
 
@@ -101,6 +109,15 @@ pub async fn auth(
                 )
                 .build(),
         );
+
+        if !IGNORED_TWO_FACTOR_PATHS.contains(&matched_path.as_str())
+            && !user.totp_enabled
+            && require_two_factor
+        {
+            return Ok(ApiResponse::error("two-factor authentication required")
+                .with_status(StatusCode::FORBIDDEN)
+                .into_response());
+        }
 
         req.extensions_mut().insert(PermissionManager::new(&user));
         req.extensions_mut().insert(UserActivityLogger {
@@ -156,6 +173,19 @@ pub async fn auth(
                 }
             })
             .await;
+
+        let settings = state.settings.get().await;
+        let require_two_factor = user.require_two_factor(&settings);
+        drop(settings);
+
+        if !IGNORED_TWO_FACTOR_PATHS.contains(&matched_path.as_str())
+            && !user.totp_enabled
+            && require_two_factor
+        {
+            return Ok(ApiResponse::error("two-factor authentication required")
+                .with_status(StatusCode::FORBIDDEN)
+                .into_response());
+        }
 
         req.extensions_mut()
             .insert(PermissionManager::new(&user).add_api_key(&api_key));

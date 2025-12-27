@@ -15,10 +15,10 @@ export default function TwoFactorContainer() {
         </Title>
         <div className='mt-4'>
           {user!.totpEnabled ? (
-            <p>Two-Step Verification is currently enabled.</p>
+            <p>Two-Factor Verification is currently enabled.</p>
           ) : (
             <p>
-              You do not currently have two-step verification enabled on your account. Click the button below to begin
+              You do not currently have two-factor verification enabled on your account. Click the button below to begin
               configuring it.
             </p>
           )}

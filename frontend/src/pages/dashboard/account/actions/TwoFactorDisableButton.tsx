@@ -53,9 +53,13 @@ export default function TwoFactorDisableButton() {
 
   return (
     <>
-      <Modal title='Disable Two-Step Verification' onClose={() => setOpenModal(null)} opened={openModal === 'disable'}>
+      <Modal
+        title='Disable Two-Factor Verification'
+        onClose={() => setOpenModal(null)}
+        opened={openModal === 'disable'}
+      >
         <Stack>
-          <Text>Disabling two-step verification will make your account less secure.</Text>
+          <Text>Disabling two-factor verification will make your account less secure.</Text>
 
           <TextInput
             withAsterisk
@@ -85,7 +89,7 @@ export default function TwoFactorDisableButton() {
       </Modal>
 
       <Button color='red' onClick={() => setOpenModal('disable')}>
-        Disable Two-Step
+        Disable Two-Factor
       </Button>
     </>
   );
