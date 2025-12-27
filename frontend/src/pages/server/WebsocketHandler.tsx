@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import getWebsocketToken from '@/api/server/getWebsocketToken.ts';
 import { Websocket } from '@/plugins/Websocket.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 export default function WebsocketHandler() {
@@ -9,6 +11,8 @@ export default function WebsocketHandler() {
   const { uuid } = useServerStore((state) => state.server);
   const { socketInstance, setSocketInstance, setSocketConnectionState } = useServerStore();
   const { setState } = useServerStore();
+  const { addToast } = useToast();
+  const navigate = useNavigate();
 
   const updateToken = (uuid: string, socket: Websocket) => {
     if (updatingToken) {
@@ -28,7 +32,17 @@ export default function WebsocketHandler() {
     const socket = new Websocket();
 
     socket.on('auth success', () => setSocketConnectionState(true));
-    socket.on('SOCKET_CLOSE', () => setSocketConnectionState(false));
+    socket.on('SOCKET_CLOSE', (reason) => {
+      switch (reason) {
+        case 'permission revoked':
+          navigate('/');
+          addToast('Connection to the server has been closed: permission revoked.', 'error');
+          break;
+        default:
+          setSocketConnectionState(false);
+          break;
+      }
+    });
     socket.on('SOCKET_ERROR', () => {
       setSocketConnectionState(false);
     });

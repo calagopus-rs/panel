@@ -120,7 +120,7 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
   };
 
   return (
-    <Modal title={`${propSchedule?.uuid ? 'Update' : 'Create'} Schedule`} onClose={onClose} opened={opened}>
+    <Modal title={`${propSchedule?.uuid ? 'Update' : 'Create'} Schedule`} onClose={onClose} opened={opened} size='lg'>
       <Stack>
         <TextInput
           label='Schedule Name'

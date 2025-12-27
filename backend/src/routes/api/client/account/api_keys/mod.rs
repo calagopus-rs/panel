@@ -100,6 +100,8 @@ mod post {
         #[validate(length(min = 3, max = 31))]
         #[schema(min_length = 3, max_length = 31)]
         name: compact_str::CompactString,
+        #[schema(value_type = Vec<String>)]
+        allowed_ips: Vec<sqlx::types::ipnetwork::IpNetwork>,
 
         #[validate(custom(function = "shared::permissions::validate_user_permissions"))]
         user_permissions: Vec<compact_str::CompactString>,
@@ -107,6 +109,8 @@ mod post {
         admin_permissions: Vec<compact_str::CompactString>,
         #[validate(custom(function = "shared::permissions::validate_server_permissions"))]
         server_permissions: Vec<compact_str::CompactString>,
+
+        expires: Option<chrono::DateTime<chrono::Utc>>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -160,9 +164,11 @@ mod post {
             &state.database,
             user.uuid,
             &data.name,
+            &data.allowed_ips,
             &data.user_permissions,
             &data.admin_permissions,
             &data.server_permissions,
+            data.expires.map(|dt| dt.naive_utc()),
         )
         .await
         {
@@ -188,9 +194,11 @@ mod post {
                     "uuid": api_key.uuid,
                     "identifier": api_key.key_start,
                     "name": api_key.name,
+                    "allowed_ips": api_key.allowed_ips,
                     "user_permissions": api_key.user_permissions,
                     "admin_permissions": api_key.admin_permissions,
                     "server_permissions": api_key.server_permissions,
+                    "expires": api_key.expires,
                 }),
             )
             .await;

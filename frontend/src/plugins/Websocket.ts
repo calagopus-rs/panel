@@ -52,7 +52,7 @@ export class Websocket extends EventEmitter {
         this.emit('SOCKET_RECONNECT');
         this.authenticate();
       },
-      onclose: () => this.emit('SOCKET_CLOSE'),
+      onclose: (e) => this.emit('SOCKET_CLOSE', e.reason),
       onerror: (error) => this.emit('SOCKET_ERROR', error),
     });
 

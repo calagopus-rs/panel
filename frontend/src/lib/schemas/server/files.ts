@@ -28,6 +28,7 @@ export const serverFilesSearchSchema = z.object({
     .object({
       include: z.string().array(),
       exclude: z.string().array(),
+      caseInsensitive: z.boolean(),
     })
     .nullable(),
   sizeFilter: z

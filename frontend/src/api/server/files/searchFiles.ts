@@ -6,6 +6,7 @@ interface Data {
   pathFilter: {
     include: string[];
     exclude: string[];
+    caseInsensitive: boolean;
   } | null;
   sizeFilter: {
     min: number;

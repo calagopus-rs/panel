@@ -709,6 +709,18 @@ impl User {
         Ok(())
     }
 
+    pub fn require_two_factor(&self, settings: &crate::settings::AppSettings) -> bool {
+        if let Some(role) = &self.role {
+            role.require_two_factor
+        } else {
+            match settings.app.two_factor_requirement {
+                crate::settings::TwoFactorRequirement::Admins => self.admin,
+                crate::settings::TwoFactorRequirement::AllUsers => true,
+                crate::settings::TwoFactorRequirement::None => false,
+            }
+        }
+    }
+
     #[inline]
     pub fn into_api_object(self, storage_url_retriever: &StorageUrlRetriever<'_>) -> ApiUser {
         ApiUser {
@@ -730,6 +742,8 @@ impl User {
         self,
         storage_url_retriever: &StorageUrlRetriever<'_>,
     ) -> ApiFullUser {
+        let require_two_factor = self.require_two_factor(storage_url_retriever.get_settings());
+
         ApiFullUser {
             uuid: self.uuid,
             username: self.username,
@@ -743,6 +757,7 @@ impl User {
             name_last: self.name_last,
             admin: self.admin,
             totp_enabled: self.totp_enabled,
+            require_two_factor,
             language: self.language,
             toast_position: self.toast_position,
             start_on_grouped_servers: self.start_on_grouped_servers,
@@ -841,6 +856,7 @@ pub struct ApiFullUser {
 
     pub admin: bool,
     pub totp_enabled: bool,
+    pub require_two_factor: bool,
 
     pub language: compact_str::CompactString,
     pub toast_position: UserToastPosition,

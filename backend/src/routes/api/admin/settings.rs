@@ -44,6 +44,7 @@ mod put {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct PayloadApp {
+        #[validate(length(min = 1, max = 64))]
         name: Option<compact_str::CompactString>,
         #[validate(url)]
         url: Option<compact_str::CompactString>,
@@ -52,12 +53,14 @@ mod put {
             custom(function = "shared::validate_language")
         )]
         language: Option<compact_str::CompactString>,
+        two_factor_requirement: Option<shared::settings::TwoFactorRequirement>,
         telemetry_enabled: Option<bool>,
         registration_enabled: Option<bool>,
     }
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct PayloadWebauthn {
+        #[validate(length(min = 1, max = 255))]
         rp_id: Option<compact_str::CompactString>,
         #[validate(url)]
         rp_origin: Option<compact_str::CompactString>,
@@ -139,6 +142,9 @@ mod put {
             }
             if let Some(language) = app.language {
                 settings.app.language = language;
+            }
+            if let Some(two_factor_requirement) = app.two_factor_requirement {
+                settings.app.two_factor_requirement = two_factor_requirement;
             }
             if let Some(telemetry_enabled) = app.telemetry_enabled {
                 settings.app.telemetry_enabled = telemetry_enabled;

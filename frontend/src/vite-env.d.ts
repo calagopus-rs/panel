@@ -223,6 +223,7 @@ declare global {
     uuid: string;
     name: string;
     description: string | null;
+    requireTwoFactor: boolean;
     serverPermissions: string[];
     adminPermissions: string[];
     created: Date;
@@ -859,7 +860,6 @@ declare global {
     nameLast: string;
     password?: string | null;
     admin: boolean;
-    totpEnabled: boolean;
     language: string;
     roleUuid: string;
   }
@@ -868,6 +868,8 @@ declare global {
     uuid: string;
     role: Role;
     avatar?: string;
+    totpEnabled: boolean;
+    requireTwoFactor: boolean;
     toastPosition: UserToastPosition;
     startOnGroupedServers: boolean;
     created: Date;
@@ -883,9 +885,11 @@ declare global {
 
   interface UpdateUserApiKey {
     name: string;
+    allowedIps: string[];
     userPermissions: string[];
     serverPermissions: string[];
     adminPermissions: string[];
+    expires?: Date | null;
   }
 
   interface UserApiKey extends UpdateUserApiKey {
@@ -919,8 +923,6 @@ declare global {
     lastUsed: Date | null;
     created: Date;
   }
-
-  type AuthenticationType = 'password' | 'public_key';
 
   interface CaptchaProviderNone {
     type: 'none';
@@ -1103,6 +1105,8 @@ declare global {
     };
   }
 
+  type TwoFactorRequirement = 'admins' | 'all_users' | 'none';
+
   interface AdminSettings {
     oobeStep: OobeStepKey | null;
     storageDriver: StorageDriver;
@@ -1112,6 +1116,7 @@ declare global {
       name: string;
       url: string;
       language: string;
+      twoFactorRequirement: TwoFactorRequirement;
       telemetryEnabled: boolean;
       registrationEnabled: boolean;
     };

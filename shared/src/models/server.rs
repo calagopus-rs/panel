@@ -1085,6 +1085,33 @@ impl Server {
         permissions
     }
 
+    pub fn wings_subuser_permissions<'a>(
+        &self,
+        subuser: &'a super::server_subuser::ServerSubuser,
+    ) -> Vec<&'a str> {
+        let mut permissions = Vec::new();
+        if subuser.user.admin {
+            permissions.reserve_exact(5);
+            permissions.push("websocket.connect");
+
+            permissions.push("*");
+            permissions.push("admin.websocket.errors");
+            permissions.push("admin.websocket.install");
+            permissions.push("admin.websocket.transfer");
+
+            return permissions;
+        }
+
+        permissions.reserve_exact(subuser.permissions.len() + 1);
+        permissions.push("websocket.connect");
+
+        for permission in subuser.permissions.iter() {
+            permissions.push(permission.as_str());
+        }
+
+        permissions
+    }
+
     pub async fn backup_configuration(
         &self,
         database: &crate::database::Database,

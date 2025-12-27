@@ -32,6 +32,9 @@ importers:
       '@mantine/core':
         specifier: ^8.3.10
         version: 8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@mantine/dates':
+        specifier: ^8.3.10
+        version: 8.3.10(@mantine/core@8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mantine/hooks@8.3.10(react@19.2.3))(dayjs@1.11.19)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@mantine/form':
         specifier: ^8.3.10
         version: 8.3.10(react@19.2.3)
@@ -588,6 +591,15 @@ packages:
       react: ^18.x || ^19.x
       react-dom: ^18.x || ^19.x
 
+  '@mantine/dates@8.3.10':
+    resolution: {integrity: sha512-P1uZ+alYGp7fsmkfd+7Fur4AGrqT0X6BWLiVTomzrbyykA+m4TSwPyQjKfsDc7XRqaqx992br/U65T82zy+qGQ==}
+    peerDependencies:
+      '@mantine/core': 8.3.10
+      '@mantine/hooks': 8.3.10
+      dayjs: '>=1.0.0'
+      react: ^18.x || ^19.x
+      react-dom: ^18.x || ^19.x
+
   '@mantine/form@8.3.10':
     resolution: {integrity: sha512-TuBmCUIH0qHUig+y9My3bLL9CRoW4g9bijIF6743gqVh0o/daSwplc2TTVMj6sl+F1MR+SJiHtAC8FoR7fdhNw==}
     peerDependencies:
@@ -932,6 +944,9 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  dayjs@1.11.19:
+    resolution: {integrity: sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==}
 
   debounce@2.2.0:
     resolution: {integrity: sha512-Xks6RUDLZFdz8LIdR6q0MTH44k7FikOmnh5xkSjMig6ch45afc8sjTjRQf3P6ax8dMgcQrYO/AR2RGWURrruqw==}
@@ -1975,6 +1990,15 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
+  '@mantine/dates@8.3.10(@mantine/core@8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mantine/hooks@8.3.10(react@19.2.3))(dayjs@1.11.19)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      '@mantine/core': 8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@mantine/hooks': 8.3.10(react@19.2.3)
+      clsx: 2.1.1
+      dayjs: 1.11.19
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+
   '@mantine/form@8.3.10(react@19.2.3)':
     dependencies:
       fast-deep-equal: 3.1.3
@@ -2256,6 +2280,8 @@ snapshots:
   cookie@1.1.1: {}
 
   csstype@3.2.3: {}
+
+  dayjs@1.11.19: {}
 
   debounce@2.2.0: {}
 

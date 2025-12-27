@@ -41,7 +41,7 @@ export default function DashboardApiKeys() {
 
       <ContextMenuProvider>
         <Table
-          columns={['Name', 'Key', 'User / Server / Admin Permissions', 'Last Used', 'Created', '']}
+          columns={['Name', 'Key', 'User / Server / Admin Permissions', 'Last Used', 'Expires', 'Created', '']}
           loading={loading}
           pagination={apiKeys}
           onPageSelect={setPage}

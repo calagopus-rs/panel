@@ -81,7 +81,7 @@ mod get {
 
         activity_logger
             .log(
-                "server:file.read",
+                "server:file.read-content",
                 serde_json::json!({
                     "file": params.file,
                 }),

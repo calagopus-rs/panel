@@ -34,6 +34,10 @@ impl<'a> StorageUrlRetriever<'a> {
         Self { settings }
     }
 
+    pub fn get_settings(&self) -> &super::settings::AppSettings {
+        &self.settings
+    }
+
     pub fn get_url(&self, path: &str) -> String {
         match &self.settings.storage_driver {
             super::settings::StorageDriver::Filesystem { .. } => {

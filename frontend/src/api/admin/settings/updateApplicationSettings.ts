@@ -10,6 +10,7 @@ export default async (data: z.infer<typeof adminSettingsApplicationSchema>): Pro
         app: {
           name: data.name,
           url: data.url,
+          two_factor_requirement: data.twoFactorRequirement,
           telemetry_enabled: data.telemetryEnabled,
           registration_enabled: data.registrationEnabled,
         },

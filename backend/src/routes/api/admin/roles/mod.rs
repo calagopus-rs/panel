@@ -94,6 +94,8 @@ mod post {
         #[schema(max_length = 1024)]
         description: Option<compact_str::CompactString>,
 
+        require_two_factor: bool,
+
         #[validate(custom(function = "shared::permissions::validate_admin_permissions"))]
         admin_permissions: Vec<compact_str::CompactString>,
         #[validate(custom(function = "shared::permissions::validate_server_permissions"))]
@@ -128,6 +130,7 @@ mod post {
             &state.database,
             &data.name,
             data.description.as_deref(),
+            data.require_two_factor,
             &data.admin_permissions,
             &data.server_permissions,
         )
@@ -155,6 +158,7 @@ mod post {
                     "uuid": role.uuid,
                     "name": role.name,
                     "description": role.description,
+                    "require_two_factor": role.require_two_factor,
                     "admin_permissions": role.admin_permissions,
                     "server_permissions": role.server_permissions,
                 }),

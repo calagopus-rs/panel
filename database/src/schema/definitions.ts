@@ -159,8 +159,8 @@ export const userSecurityKeysTable = new DatabaseTable('user_security_keys')
   .addColumn('credential_id', bytea().notNull())
   .addColumn('passkey', jsonb())
   .addColumn('registration', jsonb())
-  .addColumn('created', timestamp().defaultNow().notNull())
   .addColumn('last_used', timestamp())
+  .addColumn('created', timestamp().defaultNow().notNull())
   .addConfigBuilder((cols) => [
     index('user_security_keys_user_uuid_idx').on(cols.user_uuid),
     uniqueIndex('user_security_keys_user_uuid_name_idx').on(cols.user_uuid, cols.name),
@@ -196,11 +196,13 @@ export const userApiKeysTable = new DatabaseTable('user_api_keys')
   .addColumn('name', varchar({ length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull())
   .addColumn('key_start', char({ length: 16 }).notNull())
   .addColumn('key', text().notNull())
+  .addColumn('allowed_ips', inet().array().default([]).notNull())
   .addColumn('user_permissions', varchar({ length: 64 }).array().notNull())
   .addColumn('admin_permissions', varchar({ length: 64 }).array().notNull())
   .addColumn('server_permissions', varchar({ length: 64 }).array().notNull())
-  .addColumn('created', timestamp().defaultNow().notNull())
   .addColumn('last_used', timestamp())
+  .addColumn('expires', timestamp())
+  .addColumn('created', timestamp().defaultNow().notNull())
   .addConfigBuilder((cols) => [
     index('user_api_keys_user_uuid_idx').on(cols.user_uuid),
     uniqueIndex('user_api_keys_user_uuid_name_idx').on(cols.user_uuid, cols.name),
@@ -223,8 +225,8 @@ export const userOauthLinksTable = new DatabaseTable('user_oauth_links')
       .notNull(),
   )
   .addColumn('identifier', varchar({ length: 255 }).notNull())
-  .addColumn('created', timestamp().defaultNow().notNull())
   .addColumn('last_used', timestamp())
+  .addColumn('created', timestamp().defaultNow().notNull())
   .addConfigBuilder((cols) => [
     index('user_oauth_links_user_uuid_idx').on(cols.user_uuid),
     index('user_oauth_links_oauth_provider_uuid_idx').on(cols.oauth_provider_uuid),
@@ -250,6 +252,7 @@ export const rolesTable = new DatabaseTable('roles')
   .addColumn('uuid', uuid().default(sql`gen_random_uuid()`).primaryKey().notNull())
   .addColumn('name', varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull())
   .addColumn('description', text())
+  .addColumn('require_two_factor', boolean().default(false).notNull())
   .addColumn('admin_permissions', varchar({ length: 64 }).array().notNull())
   .addColumn('server_permissions', varchar({ length: 64 }).array().notNull())
   .addColumn('created', timestamp().defaultNow().notNull())

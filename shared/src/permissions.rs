@@ -534,6 +534,7 @@ pub(crate) static BASE_SERVER_PERMISSIONS: LazyLock<IndexMap<&'static str, Permi
                         ),
                         ("delete", "Allows to delete files or directories."),
                         ("archive", "Allows to archive the contents of a directory."),
+                        ("sftp", "Allows a user to connect via SFTP to manage files."),
                     ]),
                 },
             ),

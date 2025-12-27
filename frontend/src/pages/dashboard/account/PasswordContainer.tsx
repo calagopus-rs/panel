@@ -10,8 +10,9 @@ import Card from '@/elements/Card.tsx';
 import PasswordInput from '@/elements/input/PasswordInput.tsx';
 import { dashboardPasswordSchema } from '@/lib/schemas/dashboard.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { AccountCardProps } from './DashboardAccount.tsx';
 
-export default function PasswordContainer() {
+export default function PasswordContainer({ blurred }: AccountCardProps) {
   const { addToast } = useToast();
 
   const [loading, setLoading] = useState(false);
@@ -44,7 +45,7 @@ export default function PasswordContainer() {
   };
 
   return (
-    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+    <Grid.Col span={{ base: 12, md: 6, lg: 4 }} className={blurred ? 'blur-xs pointer-events-none select-none' : ''}>
       <Card h='100%'>
         <Title order={2} c='white'>
           Password

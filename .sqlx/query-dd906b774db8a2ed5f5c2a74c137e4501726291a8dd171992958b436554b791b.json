@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE roles\n            SET name = $2, description = $3, require_two_factor = $4, admin_permissions = $5, server_permissions = $6\n            WHERE roles.uuid = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Text",
+        "Bool",
+        "VarcharArray",
+        "VarcharArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dd906b774db8a2ed5f5c2a74c137e4501726291a8dd171992958b436554b791b"
+}

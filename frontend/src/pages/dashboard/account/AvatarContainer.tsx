@@ -9,8 +9,9 @@ import Card from '@/elements/Card.tsx';
 import FileInput from '@/elements/input/FileInput.tsx';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { AccountCardProps } from './DashboardAccount.tsx';
 
-export default function AvatarContainer() {
+export default function AvatarContainer({ blurred }: AccountCardProps) {
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
@@ -54,7 +55,7 @@ export default function AvatarContainer() {
   };
 
   return (
-    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+    <Grid.Col span={{ base: 12, md: 6, lg: 4 }} className={blurred ? 'blur-xs pointer-events-none select-none' : ''}>
       <Card h='100%'>
         <Title order={2} c='white'>
           Avatar

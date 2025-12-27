@@ -14,12 +14,14 @@ pub struct UserApiKey {
 
     pub name: compact_str::CompactString,
     pub key_start: compact_str::CompactString,
+    pub allowed_ips: Vec<sqlx::types::ipnetwork::IpNetwork>,
 
     pub user_permissions: Arc<Vec<compact_str::CompactString>>,
     pub admin_permissions: Arc<Vec<compact_str::CompactString>>,
     pub server_permissions: Arc<Vec<compact_str::CompactString>>,
 
     pub last_used: Option<chrono::NaiveDateTime>,
+    pub expires: Option<chrono::NaiveDateTime>,
     pub created: chrono::NaiveDateTime,
 }
 
@@ -44,6 +46,10 @@ impl BaseModel for UserApiKey {
                 compact_str::format_compact!("{prefix}key_start"),
             ),
             (
+                "user_api_keys.allowed_ips",
+                compact_str::format_compact!("{prefix}allowed_ips"),
+            ),
+            (
                 "user_api_keys.user_permissions",
                 compact_str::format_compact!("{prefix}user_permissions"),
             ),
@@ -60,6 +66,10 @@ impl BaseModel for UserApiKey {
                 compact_str::format_compact!("{prefix}last_used"),
             ),
             (
+                "user_api_keys.expires",
+                compact_str::format_compact!("{prefix}expires"),
+            ),
+            (
                 "user_api_keys.created",
                 compact_str::format_compact!("{prefix}created"),
             ),
@@ -74,6 +84,8 @@ impl BaseModel for UserApiKey {
             uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
             name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
             key_start: row.try_get(compact_str::format_compact!("{prefix}key_start").as_str())?,
+            allowed_ips: row
+                .try_get(compact_str::format_compact!("{prefix}allowed_ips").as_str())?,
             user_permissions: Arc::new(
                 row.try_get(compact_str::format_compact!("{prefix}user_permissions").as_str())?,
             ),
@@ -84,19 +96,23 @@ impl BaseModel for UserApiKey {
                 row.try_get(compact_str::format_compact!("{prefix}server_permissions").as_str())?,
             ),
             last_used: row.try_get(compact_str::format_compact!("{prefix}last_used").as_str())?,
+            expires: row.try_get(compact_str::format_compact!("{prefix}expires").as_str())?,
             created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
 
 impl UserApiKey {
+    #[allow(clippy::too_many_arguments)]
     pub async fn create(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,
         name: &str,
+        allowed_ips: &[sqlx::types::ipnetwork::IpNetwork],
         user_permissions: &[compact_str::CompactString],
         admin_permissions: &[compact_str::CompactString],
         server_permissions: &[compact_str::CompactString],
+        expires: Option<chrono::NaiveDateTime>,
     ) -> Result<(String, Self), crate::database::DatabaseError> {
         let key = format!(
             "c7sp_{}",
@@ -105,8 +121,8 @@ impl UserApiKey {
 
         let row = sqlx::query(&format!(
             r#"
-            INSERT INTO user_api_keys (user_uuid, name, key_start, key, user_permissions, admin_permissions, server_permissions, created)
-            VALUES ($1, $2, $3, crypt($4, gen_salt('xdes', 321)), $5, $6, $7, NOW())
+            INSERT INTO user_api_keys (user_uuid, name, key_start, key, allowed_ips, user_permissions, admin_permissions, server_permissions, expires, created)
+            VALUES ($1, $2, $3, crypt($4, gen_salt('xdes', 321)), $5, $6, $7, $8, $9, NOW())
             RETURNING {}
             "#,
             Self::columns_sql(None)
@@ -115,9 +131,11 @@ impl UserApiKey {
         .bind(name)
         .bind(&key[0..16])
         .bind(&key)
+        .bind(allowed_ips)
         .bind(user_permissions)
         .bind(admin_permissions)
         .bind(server_permissions)
+        .bind(expires)
         .fetch_one(database.write())
         .await?;
 
@@ -133,7 +151,7 @@ impl UserApiKey {
             r#"
             SELECT {}
             FROM user_api_keys
-            WHERE user_api_keys.user_uuid = $1 AND user_api_keys.uuid = $2
+            WHERE user_api_keys.user_uuid = $1 AND user_api_keys.uuid = $2 AND (user_api_keys.expires IS NULL OR user_api_keys.expires > NOW())
             "#,
             Self::columns_sql(None)
         ))
@@ -159,6 +177,7 @@ impl UserApiKey {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM user_api_keys
             WHERE user_api_keys.user_uuid = $1 AND ($2 IS NULL OR user_api_keys.name ILIKE '%' || $2 || '%')
+                AND (user_api_keys.expires IS NULL OR user_api_keys.expires > NOW())
             ORDER BY user_api_keys.created
             LIMIT $3 OFFSET $4
             "#,
@@ -184,16 +203,30 @@ impl UserApiKey {
         })
     }
 
+    pub async fn delete_expired(database: &crate::database::Database) -> Result<u64, sqlx::Error> {
+        Ok(sqlx::query(
+            r#"
+            DELETE FROM user_api_keys
+            WHERE user_api_keys.expires IS NOT NULL AND user_api_keys.expires < NOW()
+            "#,
+        )
+        .execute(database.write())
+        .await?
+        .rows_affected())
+    }
+
     #[inline]
     pub fn into_api_object(self) -> ApiUserApiKey {
         ApiUserApiKey {
             uuid: self.uuid,
             name: self.name,
             key_start: self.key_start,
+            allowed_ips: self.allowed_ips,
             user_permissions: self.user_permissions,
             admin_permissions: self.admin_permissions,
             server_permissions: self.server_permissions,
             last_used: self.last_used.map(|dt| dt.and_utc()),
+            expires: self.expires.map(|dt| dt.and_utc()),
             created: self.created.and_utc(),
         }
     }
@@ -243,11 +276,14 @@ pub struct ApiUserApiKey {
 
     pub name: compact_str::CompactString,
     pub key_start: compact_str::CompactString,
+    #[schema(value_type = Vec<String>)]
+    pub allowed_ips: Vec<sqlx::types::ipnetwork::IpNetwork>,
 
     pub user_permissions: Arc<Vec<compact_str::CompactString>>,
     pub admin_permissions: Arc<Vec<compact_str::CompactString>>,
     pub server_permissions: Arc<Vec<compact_str::CompactString>>,
 
     pub last_used: Option<chrono::DateTime<chrono::Utc>>,
+    pub expires: Option<chrono::DateTime<chrono::Utc>>,
     pub created: chrono::DateTime<chrono::Utc>,
 }
