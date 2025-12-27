@@ -8,6 +8,8 @@ import getPermissions from '@/api/getPermissions.ts';
 import createApiKey from '@/api/me/api-keys/createApiKey.ts';
 import updateApiKey from '@/api/me/api-keys/updateApiKey.ts';
 import Button from '@/elements/Button.tsx';
+import DateTimePicker from '@/elements/input/DateTimePicker.tsx';
+import TagsInput from '@/elements/input/TagsInput.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import PermissionSelector from '@/elements/PermissionSelector.tsx';
@@ -18,9 +20,11 @@ import { useUserStore } from '@/stores/user.ts';
 
 const schema = z.object({
   name: z.string().min(3).max(31),
+  allowedIps: z.ipv4().or(z.ipv6()).or(z.cidrv4()).or(z.cidrv6()).array(),
   userPermissions: z.array(z.string()),
   serverPermissions: z.array(z.string()),
   adminPermissions: z.array(z.string()),
+  expires: z.date().nullable(),
 });
 
 type Props = ModalProps & {
@@ -37,9 +41,11 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
   const form = useForm<z.infer<typeof schema>>({
     initialValues: {
       name: '',
+      allowedIps: [],
       userPermissions: [],
       serverPermissions: [],
       adminPermissions: [],
+      expires: null,
     },
     validateInputOnBlur: true,
     validate: zod4Resolver(schema),
@@ -49,9 +55,11 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
     if (contextApiKey) {
       form.setValues({
         name: contextApiKey.name,
+        allowedIps: contextApiKey.allowedIps,
         userPermissions: contextApiKey.userPermissions,
         serverPermissions: contextApiKey.serverPermissions,
         adminPermissions: contextApiKey.adminPermissions,
+        expires: contextApiKey.expires ? new Date(contextApiKey.expires) : null,
       });
     }
   }, [contextApiKey]);
@@ -98,7 +106,23 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
   return (
     <Modal title={`${contextApiKey ? 'Update' : 'Create'} API Key`} onClose={onClose} opened={opened} size='xl'>
       <Stack>
-        <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+        <Group grow>
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+
+          <DateTimePicker
+            label='Expires'
+            placeholder='Expires'
+            clearable
+            value={form.values.expires}
+            onChange={(value) => form.setFieldValue('expires', value ? new Date(value) : null)}
+          />
+        </Group>
+
+        <TagsInput
+          label='Allowed IPs'
+          placeholder='e.g. 192.168.1.1, 2001:db8::1'
+          {...form.getInputProps('allowedIps')}
+        />
 
         {availablePermissions?.userPermissions && (
           <PermissionSelector

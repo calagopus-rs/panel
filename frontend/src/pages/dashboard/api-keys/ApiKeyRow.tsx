@@ -83,6 +83,14 @@ export default function ApiKeyRow({ apiKey }: { apiKey: UserApiKey }) {
             </TableData>
 
             <TableData>
+              {!apiKey.expires ? (
+                'N/A'
+              ) : (
+                <Tooltip label={formatDateTime(apiKey.expires)}>{formatTimestamp(apiKey.expires)}</Tooltip>
+              )}
+            </TableData>
+
+            <TableData>
               <Tooltip label={formatDateTime(apiKey.created)}>{formatTimestamp(apiKey.created)}</Tooltip>
             </TableData>
 

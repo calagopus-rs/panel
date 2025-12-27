@@ -332,6 +332,26 @@ async fn main() {
             }),
         )
         .await;
+    background_task_builder
+        .add_task(
+            "delete_expired_api_keys",
+            Box::new(|state| {
+                Box::pin(async move {
+                    let deleted_api_keys =
+                        shared::models::user_api_key::UserApiKey::delete_expired(&state.database)
+                            .await?;
+
+                    if deleted_api_keys > 0 {
+                        tracing::info!("deleted {} expired user api keys", deleted_api_keys);
+                    }
+
+                    tokio::time::sleep(std::time::Duration::from_mins(30)).await;
+
+                    Ok(())
+                })
+            }),
+        )
+        .await;
 
     background_tasks
         .merge_builder(background_task_builder)

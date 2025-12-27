@@ -153,6 +153,19 @@ pub async fn auth(
             Err(err) => return Ok(ApiResponse::from(err).into_response()),
         };
 
+        if !api_key.allowed_ips.is_empty()
+            && !api_key
+                .allowed_ips
+                .iter()
+                .any(|allowed_ip| allowed_ip.contains(ip.0))
+        {
+            return Ok(
+                ApiResponse::error("ip address not allowed for this api key")
+                    .with_status(StatusCode::FORBIDDEN)
+                    .into_response(),
+            );
+        }
+
         state
             .database
             .batch_action("update_user_api_key", api_key.uuid, {

@@ -88,6 +88,8 @@ mod patch {
         #[validate(length(min = 3, max = 31))]
         #[schema(min_length = 3, max_length = 31)]
         name: Option<compact_str::CompactString>,
+        #[schema(value_type = Vec<String>)]
+        allowed_ips: Option<Vec<sqlx::types::ipnetwork::IpNetwork>>,
 
         #[validate(custom(function = "shared::permissions::validate_user_permissions"))]
         user_permissions: Option<Vec<compact_str::CompactString>>,
@@ -95,6 +97,8 @@ mod patch {
         admin_permissions: Option<Vec<compact_str::CompactString>>,
         #[validate(custom(function = "shared::permissions::validate_server_permissions"))]
         server_permissions: Option<Vec<compact_str::CompactString>>,
+
+        expires: Option<Option<chrono::DateTime<chrono::Utc>>>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -162,6 +166,9 @@ mod patch {
         if let Some(name) = data.name {
             api_key.name = name;
         }
+        if let Some(allowed_ips) = data.allowed_ips {
+            api_key.allowed_ips = allowed_ips;
+        }
         if let Some(user_permissions) = data.user_permissions {
             api_key.user_permissions = Arc::new(user_permissions);
         }
@@ -171,16 +178,21 @@ mod patch {
         if let Some(server_permissions) = data.server_permissions {
             api_key.server_permissions = Arc::new(server_permissions);
         }
+        if let Some(expires) = data.expires {
+            api_key.expires = expires.map(|dt| dt.naive_utc());
+        }
 
         match sqlx::query!(
             "UPDATE user_api_keys
-            SET name = $2, user_permissions = $3, admin_permissions = $4, server_permissions = $5
+            SET name = $2, allowed_ips = $3, user_permissions = $4, admin_permissions = $5, server_permissions = $6, expires = $7
             WHERE user_api_keys.uuid = $1",
             api_key.uuid,
             &api_key.name,
+            &api_key.allowed_ips,
             &api_key.user_permissions as &[compact_str::CompactString],
             &api_key.admin_permissions as &[compact_str::CompactString],
             &api_key.server_permissions as &[compact_str::CompactString],
+            api_key.expires.as_ref(),
         )
         .execute(state.database.write())
         .await
@@ -207,9 +219,11 @@ mod patch {
                     "uuid": api_key.uuid,
                     "identifier": api_key.key_start,
                     "name": api_key.name,
+                    "allowed_ips": api_key.allowed_ips,
                     "user_permissions": api_key.user_permissions,
                     "admin_permissions": api_key.admin_permissions,
                     "server_permissions": api_key.server_permissions,
+                    "expires": api_key.expires,
                 }),
             )
             .await;

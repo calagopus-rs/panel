@@ -885,9 +885,11 @@ declare global {
 
   interface UpdateUserApiKey {
     name: string;
+    allowedIps: string[];
     userPermissions: string[];
     serverPermissions: string[];
     adminPermissions: string[];
+    expires?: Date | null;
   }
 
   interface UserApiKey extends UpdateUserApiKey {
