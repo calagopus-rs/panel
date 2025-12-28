@@ -142,11 +142,11 @@ export default function FileSearchModal({ opened, onClose }: ModalProps) {
                         'contentFilter',
                         e.target.checked
                           ? {
-                            query: '',
-                            maxSearchSize: settings.server.maxFileManagerContentSearchSize,
-                            includeUnmatched: false,
-                            caseInsensitive: true,
-                          }
+                              query: '',
+                              maxSearchSize: settings.server.maxFileManagerContentSearchSize,
+                              includeUnmatched: false,
+                              caseInsensitive: true,
+                            }
                           : null,
                       )
                     }
