@@ -128,7 +128,7 @@ export default function OobeRegister({ onNext }: OobeComponentProps) {
 
           <Group justify='flex-end' mt='xl'>
             <Button type='submit' disabled={!form.isValid()} loading={loading}>
-              {t('pages.oobe.register.button', {})}
+              {t('pages.oobe.register.button.create', {})}
             </Button>
           </Group>
         </Stack>

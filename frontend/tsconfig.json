@@ -5,6 +5,7 @@
     "module": "esnext",
     "target": "esnext",
     "baseUrl": ".",
+    "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "paths": {
