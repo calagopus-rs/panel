@@ -186,7 +186,22 @@ export default function Terminal() {
     setIsAtBottom(true);
 
     const listeners: Record<string, (msg: string) => void> = {
-      [SocketEvent.STATUS]: (s) => addLine(t('pages.server.console.message.serverMarkedAs', { state: s }), true),
+      [SocketEvent.STATUS]: (s) =>
+        addLine(
+          t('pages.server.console.message.serverMarkedAs', {
+            state:
+              s === 'offline'
+                ? t('common.enum.serverState.offline', {})
+                : s === 'running'
+                  ? t('common.enum.serverState.running', {})
+                  : s === 'starting'
+                    ? t('common.enum.serverState.starting', {})
+                    : s === 'stopping'
+                      ? t('common.enum.serverState.stopping', {})
+                      : s,
+          }),
+          true,
+        ),
       [SocketEvent.CONSOLE_OUTPUT]: (l) => addLine(l),
       [SocketEvent.INSTALL_OUTPUT]: (l) => addLine(l),
       [SocketEvent.TRANSFER_LOGS]: (l) => addLine(l),

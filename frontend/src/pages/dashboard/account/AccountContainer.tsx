@@ -109,7 +109,6 @@ export default function AccountContainer({ blurred }: AccountCardProps) {
                   label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
                   value: language,
                 }))}
-                searchable
                 {...form.getInputProps('language')}
               />
             </Group>

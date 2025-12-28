@@ -82,6 +82,12 @@
             "bottomLeft": "Unten Links",
             "bottomCenter": "Unten Mitte",
             "bottomRight": "Unten Rechts"
+          },
+          "serverState": {
+            "offline": "Offline",
+            "running": "Läuft",
+            "starting": "Starte",
+            "stopping": "Stoppe"
           }
         },
         "unlimited": "Unendlich",
@@ -279,6 +285,9 @@
               }
             },
             "noServers": "Es konnten keine Server gefunden werden, Zeit einen hinzuzufügen?"
+          },
+          "admin": {
+            "title": "Admin"
           },
           "account": {
             "title": "Account",
@@ -524,6 +533,9 @@
         },
         "admin": {},
         "server": {
+          "viewAdmin": {
+            "title": "Im Admin-Bereich ansehen"
+          },
           "console": {
             "title": "Konsole",
             "input": {
@@ -569,6 +581,9 @@
               "inbound": "Eingehend",
               "outbound": "Ausgehend"
             }
+          },
+          "files": {
+            "title": "Dateien"
           },
           "databases": {
             "title": "Datenbanken",
@@ -625,6 +640,9 @@
                 }
               }
             }
+          },
+          "schedules": {
+            "title": "Zeitpläne"
           },
           "subusers": {
             "title": "Subuser",

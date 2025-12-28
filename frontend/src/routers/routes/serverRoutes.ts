@@ -22,13 +22,14 @@ import ServerSchedules from '@/pages/server/schedules/ServerSchedules.tsx';
 import ServerSettings from '@/pages/server/settings/ServerSettings.tsx';
 import ServerStartup from '@/pages/server/startup/ServerStartup.tsx';
 import ServerSubusers from '@/pages/server/subusers/ServerSubusers.tsx';
+import { getTranslations } from '@/providers/TranslationProvider.tsx';
 
 const ServerConsole = lazy(() => import('@/pages/server/console/ServerConsole.tsx'));
 const FileEditor = lazy(() => import('@/pages/server/files/FileEditor.tsx'));
 
 const routes: ServerRouteDefinition[] = [
   {
-    name: 'Console',
+    name: () => getTranslations().t('pages.server.console.title', {}),
     icon: faTerminal,
     path: '/',
     element: ServerConsole,
@@ -36,7 +37,7 @@ const routes: ServerRouteDefinition[] = [
     permission: null,
   },
   {
-    name: 'Files',
+    name: () => getTranslations().t('pages.server.files.title', {}),
     icon: faFolderOpen,
     path: '/files',
     element: ServerFiles,
@@ -49,14 +50,14 @@ const routes: ServerRouteDefinition[] = [
     permission: 'file.*',
   },
   {
-    name: 'Databases',
+    name: () => getTranslations().t('pages.server.databases.title', {}),
     icon: faDatabase,
     path: '/databases',
     element: ServerDatabases,
     permission: 'database.*',
   },
   {
-    name: 'Schedules',
+    name: () => getTranslations().t('pages.server.schedules.title', {}),
     icon: faStopwatch,
     path: '/schedules',
     element: ServerSchedules,
@@ -69,42 +70,42 @@ const routes: ServerRouteDefinition[] = [
     permission: 'schedule.*',
   },
   {
-    name: 'Subusers',
+    name: () => getTranslations().t('pages.server.subusers.title', {}),
     icon: faUsers,
     path: '/subusers',
     element: ServerSubusers,
     permission: 'user.*',
   },
   {
-    name: 'Backups',
+    name: () => getTranslations().t('pages.server.backups.title', {}),
     icon: faBoxArchive,
     path: '/backups',
     element: ServerBackups,
     permission: 'backups.*',
   },
   {
-    name: 'Network',
+    name: () => getTranslations().t('pages.server.network.title', {}),
     icon: faNetworkWired,
     path: '/network',
     element: ServerNetwork,
     permission: 'allocations.*',
   },
   {
-    name: 'Startup',
+    name: () => getTranslations().t('pages.server.startup.title', {}),
     icon: faPlay,
     path: '/startup',
     element: ServerStartup,
     permission: 'startup.*',
   },
   {
-    name: 'Settings',
+    name: () => getTranslations().t('pages.server.settings.title', {}),
     icon: faCog,
     path: '/settings',
     element: ServerSettings,
     permission: ['settings.*', 'file.sftp'],
   },
   {
-    name: 'Activity',
+    name: () => getTranslations().t('pages.server.activity.title', {}),
     icon: faBriefcase,
     path: '/activity',
     element: ServerActivity,

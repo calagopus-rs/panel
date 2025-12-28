@@ -10,6 +10,7 @@ import CloseButton from '@/elements/CloseButton.tsx';
 import MantineDivider from '@/elements/Divider.tsx';
 import Drawer from '@/elements/Drawer.tsx';
 import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useWindows } from '@/providers/WindowProvider.tsx';
 import RouterRoutes from '@/RouterRoutes.tsx';
 
@@ -103,6 +104,7 @@ function Divider() {
 }
 
 function Footer() {
+  const { t } = useTranslations();
   const { user, doLogout } = useAuth();
 
   return (
@@ -121,7 +123,7 @@ function Footer() {
             {user!.admin && (
               <NavLink to='/admin' className='cursor-pointer!'>
                 <Badge size='xs' className='cursor-pointer!'>
-                  Admin
+                  {t('pages.account.admin.title', {})}
                 </Badge>
               </NavLink>
             )}

@@ -1,4 +1,4 @@
-import { faArrowUpRightFromSquare, faCancel, faServer } from '@fortawesome/free-solid-svg-icons';
+import { faArrowUpRightFromSquare, faCancel, faGraduationCap, faServer } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Suspense, useEffect, useState } from 'react';
 import { NavLink, Route, Routes, useParams } from 'react-router';
@@ -18,18 +18,21 @@ import WebsocketHandler from '@/pages/server/WebsocketHandler.tsx';
 import WebsocketListener from '@/pages/server/WebsocketListener.tsx';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import serverRoutes from '@/routers/routes/serverRoutes.ts';
 import { useGlobalStore } from '@/stores/global.ts';
 import { useServerStore } from '@/stores/server.ts';
 
 export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
-  const params = useParams<'id'>();
-  const [loading, setLoading] = useState(true);
-  const [abortLoading, setAbortLoading] = useState(false);
+  const { t } = useTranslations();
+  const { settings } = useGlobalStore();
   const { addToast } = useToast();
   const { user } = useAuth();
 
-  const { settings } = useGlobalStore();
+  const params = useParams<'id'>();
+  const [loading, setLoading] = useState(true);
+  const [abortLoading, setAbortLoading] = useState(false);
+
   const { server, updateServer, backupRestoreProgress } = useServerStore();
   const resetState = useServerStore((state) => state.reset);
   const setServer = useServerStore((state) => state.setServer);
@@ -80,9 +83,17 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
 
           <Sidebar.Divider />
 
-          <Sidebar.Link to='/' end icon={faServer} name='Servers' />
+          <Sidebar.Link to='/' end icon={faServer} name={t('pages.account.home.title', {})} />
           {user!.admin && (
-            <Sidebar.Link to={`/admin/servers/${params.id}`} end icon={faArrowUpRightFromSquare} name='View admin' />
+            <>
+              <Sidebar.Link to='/admin' end icon={faGraduationCap} name={t('pages.account.admin.title', {})} />
+              <Sidebar.Link
+                to={`/admin/servers/${params.id}`}
+                end
+                icon={faArrowUpRightFromSquare}
+                name={t('pages.server.viewAdmin.title', {})}
+              />
+            </>
           )}
 
           <Sidebar.Divider />
@@ -164,7 +175,7 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
                     loading={abortLoading}
                     onClick={doAbortInstall}
                   >
-                    Cancel
+                    {t('common.button.cancel', {})}
                   </Button>
                 </Notification>
               ) : null}

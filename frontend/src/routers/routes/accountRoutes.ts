@@ -15,47 +15,48 @@ import DashboardOAuthLinks from '@/pages/dashboard/oauth-links/DashboardOAuthLin
 import DashboardSecurityKeys from '@/pages/dashboard/security-keys/DashboardSecurityKeys.tsx';
 import DashboardSessions from '@/pages/dashboard/sessions/DashboardSessions.tsx';
 import DashboardSshKeys from '@/pages/dashboard/ssh-keys/DashboardSshKeys.tsx';
+import { getTranslations } from '@/providers/TranslationProvider.tsx';
 
 const routes: RouteDefinition[] = [
   {
-    name: 'Account',
+    name: () => getTranslations().t('pages.account.account.title', {}),
     icon: faUser,
     path: '/',
     element: DashboardAccount,
     exact: true,
   },
   {
-    name: 'Security Keys',
+    name: () => getTranslations().t('pages.account.securityKeys.title', {}),
     icon: faUnlockKeyhole,
     path: '/security-keys',
     element: DashboardSecurityKeys,
   },
   {
-    name: 'API Keys',
+    name: () => getTranslations().t('pages.account.apiKeys.title', {}),
     icon: faCloud,
     path: '/api-keys',
     element: DashboardApiKeys,
   },
   {
-    name: 'SSH Keys',
+    name: () => getTranslations().t('pages.account.sshKeys.title', {}),
     icon: faKey,
     path: '/ssh-keys',
     element: DashboardSshKeys,
   },
   {
-    name: 'OAuth Links',
+    name: () => getTranslations().t('pages.account.oauthLinks.title', {}),
     icon: faFingerprint,
     path: '/oauth-links',
     element: DashboardOAuthLinks,
   },
   {
-    name: 'Sessions',
+    name: () => getTranslations().t('pages.account.sessions.title', {}),
     icon: faUserSecret,
     path: '/sessions',
     element: DashboardSessions,
   },
   {
-    name: 'Activity',
+    name: () => getTranslations().t('pages.account.activity.title', {}),
     icon: faBriefcase,
     path: '/activity',
     element: DashboardActivity,

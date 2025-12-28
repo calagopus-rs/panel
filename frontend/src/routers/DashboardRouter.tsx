@@ -9,10 +9,12 @@ import DashboardHomeAll from '@/pages/dashboard/home/DashboardHomeAll.tsx';
 import DashboardHomeGrouped from '@/pages/dashboard/home/DashboardHomeGrouped.tsx';
 import NotFound from '@/pages/NotFound.tsx';
 import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import accountRoutes from '@/routers/routes/accountRoutes.ts';
 import { useGlobalStore } from '@/stores/global.ts';
 
 export default function DashboardRouter({ isNormal }: { isNormal: boolean }) {
+  const { t } = useTranslations();
   const { user } = useAuth();
   const { settings } = useGlobalStore();
 
@@ -29,8 +31,10 @@ export default function DashboardRouter({ isNormal }: { isNormal: boolean }) {
 
           <Sidebar.Divider />
 
-          <Sidebar.Link to='/' end icon={faServer} name='Servers' />
-          {user!.admin && <Sidebar.Link to='/admin' end icon={faGraduationCap} name='Admin' />}
+          <Sidebar.Link to='/' end icon={faServer} name={t('pages.account.home.title', {})} />
+          {user!.admin && (
+            <Sidebar.Link to='/admin' end icon={faGraduationCap} name={t('pages.account.admin.title', {})} />
+          )}
 
           <Sidebar.Divider />
 

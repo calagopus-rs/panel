@@ -82,6 +82,12 @@
             "bottomLeft": "Bottom Left",
             "bottomCenter": "Bottom Center",
             "bottomRight": "Bottom Right"
+          },
+          "serverState": {
+            "offline": "Offline",
+            "running": "Running",
+            "starting": "Starting",
+            "stopping": "Stopping"
           }
         },
         "unlimited": "Unlimited",
@@ -279,6 +285,9 @@
               }
             },
             "noServers": "No Servers could be found, time to add one?"
+          },
+          "admin": {
+            "title": "Admin"
           },
           "account": {
             "title": "Account",
@@ -524,6 +533,9 @@
         },
         "admin": {},
         "server": {
+          "viewAdmin": {
+            "title": "View admin"
+          },
           "console": {
             "title": "Console",
             "input": {
@@ -547,7 +559,6 @@
               "diskUsage": "Disk Usage",
               "networkIn": "Network (In)",
               "networkOut": "Network (Out)",
-              "offline": "Offline",
               "normalizeCpuLoad": "Normalize CPU Load (shifted to max 100%)"
             },
             "power": {
@@ -569,6 +580,9 @@
               "inbound": "Inbound",
               "outbound": "Outbound"
             }
+          },
+          "files": {
+            "title": "Files"
           },
           "databases": {
             "title": "Databases",
@@ -625,6 +639,9 @@
                 }
               }
             }
+          },
+          "schedules": {
+            "title": "Schedules"
           },
           "subusers": {
             "title": "Subusers",

@@ -19,7 +19,7 @@ import { OobeComponentProps } from '@/routers/OobeRouter.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 
 export default function OobeConfiguration({ onNext }: OobeComponentProps) {
-  const { t } = useTranslations();
+  const { t, setLanguage } = useTranslations();
   const { languages } = useGlobalStore();
 
   const [loading, setLoading] = useState(false);
@@ -44,6 +44,7 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
       .then((settings) => {
         form.setValues({
           applicationName: settings.app.name,
+          applicationLanguage: settings.app.language,
           applicationUrl: settings.app.url,
           applicationTelemetry: settings.app.telemetryEnabled,
           applicationRegistration: settings.app.registrationEnabled,
@@ -64,6 +65,7 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
       registrationEnabled: form.values.applicationRegistration,
     })
       .then(() => {
+        setLanguage(form.values.applicationLanguage);
         onNext();
       })
       .catch((msg) => {
@@ -98,8 +100,7 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
               label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
               value: language,
             }))}
-            searchable
-            {...form.getInputProps('language')}
+            {...form.getInputProps('applicationLanguage')}
           />
 
           <TextInput

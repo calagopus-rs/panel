@@ -135,16 +135,14 @@ export default function ServerDetails() {
       <StatCard
         icon={faClock}
         label={t('pages.server.console.details.uptime', {})}
-        value={
-          state === 'offline' ? t('pages.server.console.details.offline', {}) : formatMiliseconds(stats?.uptime || 0)
-        }
+        value={state === 'offline' ? t('common.enum.serverState.offline', {}) : formatMiliseconds(stats?.uptime || 0)}
       />
       <StatCard
         icon={faMicrochip}
         label={t('pages.server.console.details.cpuLoad', {})}
         value={
           state === 'offline'
-            ? t('pages.server.console.details.offline', {})
+            ? t('common.enum.serverState.offline', {})
             : doNormalizeCpuLoad
               ? `${((stats?.cpuAbsolute / (server.limits.cpu || 100)) * 100).toFixed(2)}%`
               : `${stats?.cpuAbsolute.toFixed(2)}%`
@@ -163,7 +161,7 @@ export default function ServerDetails() {
       <StatCard
         icon={faMemory}
         label={t('pages.server.console.details.memoryLoad', {})}
-        value={state === 'offline' ? t('pages.server.console.details.offline', {}) : bytesToString(stats?.memoryBytes)}
+        value={state === 'offline' ? t('common.enum.serverState.offline', {}) : bytesToString(stats?.memoryBytes)}
         limit={server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : t('common.unlimited', {})}
       />
       <StatCard
@@ -175,9 +173,7 @@ export default function ServerDetails() {
       <StatCard
         icon={faCloudDownload}
         label={t('pages.server.console.details.networkIn', {})}
-        value={
-          state === 'offline' ? t('pages.server.console.details.offline', {}) : bytesToString(stats?.network.rxBytes)
-        }
+        value={state === 'offline' ? t('common.enum.serverState.offline', {}) : bytesToString(stats?.network.rxBytes)}
         details={
           state === 'offline' ? null : `${bytesToString(Math.round(networkRef.current.rxSpeed), undefined, true)}/s`
         }
@@ -185,9 +181,7 @@ export default function ServerDetails() {
       <StatCard
         icon={faCloudUpload}
         label={t('pages.server.console.details.networkOut', {})}
-        value={
-          state === 'offline' ? t('pages.server.console.details.offline', {}) : bytesToString(stats?.network.txBytes)
-        }
+        value={state === 'offline' ? t('common.enum.serverState.offline', {}) : bytesToString(stats?.network.txBytes)}
         details={
           state === 'offline' ? null : `${bytesToString(Math.round(networkRef.current.txSpeed), undefined, true)}/s`
         }
