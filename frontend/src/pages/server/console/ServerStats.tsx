@@ -35,7 +35,7 @@ function ChartBlock({
         </h3>
         {legend && <span className='text-sm flex items-center'>{legend}</span>}
       </div>
-      <div className='z-10 ml-2 min-h-full'>{children}</div>
+      <div className='z-10 min-h-full'>{children}</div>
     </Card>
   );
 }
