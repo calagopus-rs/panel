@@ -21,7 +21,7 @@ export const TableHeader = ({ name }: { name?: string }) => {
     return <Table.Th className='py-2' />;
   }
 
-  return <Table.Th>{name}</Table.Th>;
+  return <Table.Th className='font-normal!'>{name}</Table.Th>;
 };
 
 export const TableHead = ({ children }: { children: ReactNode }) => {

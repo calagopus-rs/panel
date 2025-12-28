@@ -1,0 +1,823 @@
+{
+  "": {
+    "items": {
+      "user": {
+        "zero": "{count} Utilizatori",
+        "one": "{count} Utilizator",
+        "two": "{count} Utilizatori",
+        "few": "{count} Utilizatori",
+        "many": "{count} Utilizatori",
+        "other": "{count} Utilizatori"
+      },
+      "sshKey": {
+        "zero": "{count} Chei SSH",
+        "one": "{count} Cheie SSH",
+        "two": "{count} Chei SSH",
+        "few": "{count} Chei SSH",
+        "many": "{count} Chei SSH",
+        "other": "{count} Chei SSH"
+      }
+    },
+    "translations": {
+      "common": {
+        "button": {
+          "create": "Creează",
+          "add": "Adaugă",
+          "save": "Salvează",
+          "saveAndStay": "Salvează și Rămâi",
+          "edit": "Editează",
+          "delete": "Șterge",
+          "remove": "Elimină",
+          "enable": "Activează",
+          "disable": "Dezactivează",
+          "update": "Actualizează",
+          "close": "Închide",
+          "cancel": "Anulează",
+          "continue": "Continuă",
+          "skip": "Sari peste"
+        },
+        "input": {
+          "search": "Caută..."
+        },
+        "form": {
+          "name": "Nume",
+          "description": "Descriere",
+          "password": "Parolă",
+          "host": "Gazdă",
+          "username": "Nume utilizator",
+          "truncateDirectory": "Doriți să goliți sistemul de fișiere al acestui server înainte de a restaura backup-ul?"
+        },
+        "table": {
+          "pagination": {
+            "results": "Se afișează de la {start} la {end} din {total} rezultate.",
+            "empty": "Nu s-au găsit elemente, este aproape ca și cum s-ar ascunde."
+          },
+          "columns": {
+            "name": "Nume",
+            "description": "Descriere",
+            "username": "Nume utilizator",
+            "size": "Dimensiune",
+            "lastUsed": "Ultima utilizare",
+            "created": "Creat",
+            "actor": "Actor",
+            "event": "Eveniment",
+            "ip": "IP",
+            "when": "Când"
+          }
+        },
+        "server": {
+          "noAllocation": "Fără alocare",
+          "state": {
+            "suspended": "Suspendat",
+            "restoringBackup": "Restaurare backup",
+            "installing": "Instalare",
+            "InstallFailed": "Instalare eșuată"
+          }
+        },
+        "enum": {
+          "userToastPosition": {
+            "topLeft": "Stânga sus",
+            "topCenter": "Centru sus",
+            "topRight": "Dreapta sus",
+            "bottomLeft": "Stânga jos",
+            "bottomCenter": "Centru jos",
+            "bottomRight": "Dreapta jos"
+          }
+        },
+        "unlimited": "Nelimitat",
+        "na": "N/A",
+        "yes": "Da",
+        "no": "Nu",
+        "system": "Sistem"
+      },
+      "pages": {
+        "oobe": {
+          "welcome": {
+            "title": "Bun venit la Calagopus",
+            "subtitle": "Hai să punem în funcțiune sistemul tău de gestionare a serverelor de jocuri!",
+            "wizardIntro": "Acest asistent de configurare te va ghida prin:",
+            "steps": {
+              "account": "Crearea contului de administrator",
+              "settings": "Configurarea setărilor esențiale ale sistemului",
+              "location": "Configurarea locației serverului",
+              "node": "Adăugarea primului nod",
+              "server": "Implementarea primului server de jocuri"
+            },
+            "button": {
+              "start": "Începe"
+            }
+          },
+          "register": {
+            "title": "Creează cont de administrator",
+            "alert": {
+              "title": "Notificare de securitate",
+              "description": "Alege o parolă puternică. Acest cont va avea acces administrativ complet la toate serverele și setările."
+            },
+            "form": {
+              "username": "Nume utilizator",
+              "usernamePlaceholder": "admin",
+              "email": "Adresă de email",
+              "emailPlaceholder": "admin@example.com",
+              "firstName": "Prenume",
+              "firstNamePlaceholder": "Alan",
+              "lastName": "Nume de familie",
+              "lastNamePlaceholder": "Turing",
+              "password": "Parolă",
+              "passwordPlaceholder": "Introdu o parolă puternică",
+              "confirmPassword": "Confirmă parola",
+              "confirmPasswordPlaceholder": "Reintroду parola"
+            },
+            "button": {
+              "create": "Creează cont și continuă"
+            }
+          },
+          "login": {
+            "title": "Autentifică-te din nou",
+            "alert": "Ai fost deconectat în timpul procesului de configurare. Te rugăm să te autentifici din nou pentru a continua de unde ai rămas.",
+            "form": {
+              "username": "Nume utilizator",
+              "usernamePlaceholder": "admin",
+              "password": "Parolă",
+              "passwordPlaceholder": "Introdu o parolă puternică"
+            },
+            "button": {
+              "login": "Autentifică-te și continuă"
+            }
+          },
+          "location": {
+            "title": "Configurare locație",
+            "form": {
+              "locationName": "Nume locație",
+              "locationNamePlaceholder": "Casa mea",
+              "backupName": "Nume configurare backup",
+              "backupNamePlaceholder": "Unicorn Cloud",
+              "backupDisk": "Disc backup",
+              "backupDiskPlaceholder": "Disc backup"
+            },
+            "button": {
+              "create": "Creează și continuă"
+            }
+          },
+          "node": {
+            "title": "Configurare nod",
+            "form": {
+              "name": "Nume",
+              "namePlaceholder": "Serverul meu",
+              "url": "URL",
+              "urlPlaceholder": "URL",
+              "urlDescription": "folosit pentru comunicarea internă cu nodul",
+              "publicUrl": "URL public",
+              "publicUrlPlaceholder": "URL",
+              "publicUrlDescription": "folosit pentru websocket/descărcări",
+              "sftpHost": "Gazdă SFTP",
+              "sftpHostPlaceholder": "Gazdă SFTP",
+              "sftpPort": "Port SFTP",
+              "sftpPortPlaceholder": "Port SFTP",
+              "memory": "Memorie",
+              "disk": "Disc"
+            },
+            "error": {
+              "noLocations": "Ceva nu a mers bine. Nu s-au găsit locații."
+            },
+            "button": {
+              "create": "Creează și continuă"
+            }
+          },
+          "configuration": {
+            "title": "Setări aplicație",
+            "form": {
+              "applicationName": "Nume aplicație",
+              "applicationNamePlaceholder": "Calagopus",
+              "language": "Limbă",
+              "languagePlaceholder": "Limbă",
+              "applicationUrl": "URL aplicație",
+              "applicationUrlPlaceholder": "https://calagop.us",
+              "telemetry": "Activează telemetria",
+              "telemetryDescription": "Permite Calagopus să colecteze date de utilizare limitate și anonime pentru a ajuta la îmbunătățirea aplicației.",
+              "registration": "Activează înregistrarea",
+              "registrationDescription": "Permite utilizatorilor noi să își înregistreze propriul cont."
+            },
+            "button": {
+              "submit": "Actualizează setările și continuă"
+            }
+          },
+          "finished": {
+            "title": "Configurare completă!",
+            "subtitle": "Panoul tău Calagopus este gata de utilizare",
+            "setupTitle": "Ce am configurat",
+            "items": {
+              "account": "Cont de administrator",
+              "configuration": {
+                "title": "Configurare sistem",
+                "subtitle": "Setările și preferințele panoului configurate"
+              },
+              "location": "Locație",
+              "node": "Nod"
+            },
+            "badge": {
+              "skipped": "Sărit peste"
+            },
+            "button": "Mergi la tabloul de bord"
+          }
+        },
+        "auth": {},
+        "account": {
+          "home": {
+            "title": "Servere",
+            "tooltip": {
+              "removeFromGroup": "Elimină din grup",
+              "addToGroup": "Adaugă la grup",
+              "noGroups": "Niciun grup disponibil pentru a adăuga serverul",
+              "noGroup": "Acest server nu este în niciun grup"
+            },
+            "tabs": {
+              "groupedServers": {
+                "title": "Servere grupate",
+                "page": {
+                  "button": {
+                    "createGroup": "Creează grup"
+                  },
+                  "modal": {
+                    "createServerGroup": {
+                      "title": "Creează grup de servere",
+                      "toast": {
+                        "created": "Grup de servere creat."
+                      }
+                    },
+                    "editServerGroup": {
+                      "title": "Editează grup de servere",
+                      "toast": {
+                        "updated": "Grup de servere actualizat."
+                      }
+                    },
+                    "deleteServerGroup": {
+                      "title": "Confirmă ștergerea grupului de servere",
+                      "content": "Ești sigur că vrei să ștergi **{group}** din contul tău?",
+                      "toast": {
+                        "deleted": "Grup de servere șters."
+                      }
+                    }
+                  },
+                  "noGroups": "Nu s-au găsit grupuri, este timpul să creezi unul?"
+                }
+              },
+              "allServers": {
+                "title": "Toate serverele",
+                "page": {
+                  "input": {
+                    "showOtherUsersServers": "Arată serverele altor utilizatori"
+                  },
+                  "modal": {
+                    "addToServerGroup": {
+                      "title": "Adaugă {server} la grupul de servere",
+                      "form": {
+                        "serverGroup": "Grup de servere"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "noServers": "Nu s-au găsit servere, este timpul să adaugi unul?"
+          },
+          "account": {
+            "title": "Cont",
+            "alert": {
+              "requireTwoFactor": {
+                "title": "Autentificare cu doi factori necesară",
+                "description": "Autentificarea cu doi factori este necesară pentru contul tău. Te rugăm să o configurezi mai jos pentru a continua să folosești panoul."
+              }
+            },
+            "containers": {
+              "password": {
+                "title": "Parolă",
+                "toast": {
+                  "updated": "Parolă actualizată cu succes."
+                },
+                "form": {
+                  "currentPassword": "Parolă actuală",
+                  "newPassword": "Parolă nouă",
+                  "confirmNewPassword": "Confirmă parola nouă"
+                }
+              },
+              "email": {
+                "title": "Email",
+                "toast": {
+                  "updated": "Email actualizat cu succes."
+                },
+                "form": {
+                  "newEmail": "Email nou",
+                  "currentPassword": "Parolă actuală"
+                }
+              },
+              "twoFactor": {
+                "title": "Autentificare cu doi factori",
+                "toast": {
+                  "disabled": "Autentificare cu doi factori dezactivată cu succes."
+                },
+                "modal": {
+                  "disableTwoFactor": {
+                    "title": "Dezactivează autentificarea cu doi factori",
+                    "description": "Dezactivarea autentificării cu doi factori va face contul tău mai puțin sigur.",
+                    "form": {
+                      "code": "Cod de autentificare"
+                    }
+                  },
+                  "setupTwoFactor": {
+                    "title": "Configurează autentificarea cu doi factori",
+                    "description": "Ajută la protejarea contului tău împotriva accesului neautorizat. Ți se va solicita un cod de verificare de fiecare dată când te autentifici.",
+                    "descriptionQR": "Scanează codul QR de mai sus folosind aplicația de autentificare în doi pași la alegere. Apoi, introdu codul de 6 cifre generat în câmpul de mai jos.",
+                    "form": {
+                      "code": "Cod de autentificare"
+                    }
+                  },
+                  "recoveryCodes": {
+                    "title": "Coduri de recuperare",
+                    "description": "Mai jos sunt codurile tale de recuperare. Păstrează-le într-un loc sigur. Dacă pierzi accesul la dispozitivul de autentificare, poți folosi aceste coduri pentru a redobândi accesul la contul tău."
+                  }
+                },
+                "button": {
+                  "disableTwoFactor": "Dezactivează autentificarea cu doi factori",
+                  "setupTwoFactor": "Configurează autentificarea cu doi factori"
+                },
+                "twoFactorEnabled": "Verificarea în doi pași este activată în prezent.",
+                "twoFactorDisabled": "Momentan nu ai activată verificarea în doi pași pe contul tău. Apasă pe butonul de mai jos pentru a începe configurarea."
+              },
+              "account": {
+                "title": "Detalii cont",
+                "toast": {
+                  "updated": "Detalii cont actualizate cu succes."
+                },
+                "form": {
+                  "nameFirst": "Prenume",
+                  "nameLast": "Nume de familie",
+                  "username": "Nume utilizator",
+                  "language": "Limbă",
+                  "toastPosition": "Poziție notificări",
+                  "startOnGroupedServers": "Începe pe pagina Servere grupate"
+                }
+              },
+              "avatar": {
+                "title": "Avatar",
+                "toast": {
+                  "updated": "Avatar actualizat cu succes.",
+                  "removed": "Avatar eliminat cu succes."
+                },
+                "form": {
+                  "avatar": "Avatar"
+                }
+              }
+            }
+          },
+          "securityKeys": {
+            "title": "Chei de securitate",
+            "modal": {
+              "createSecurityKey": {
+                "title": "Creează cheie de securitate",
+                "toast": {
+                  "created": "Cheie de securitate creată cu succes.",
+                  "aborted": "Crearea cheii de securitate anulată."
+                }
+              },
+              "editSecurityKey": {
+                "title": "Editează cheie de securitate",
+                "toast": {
+                  "updated": "Cheie de securitate actualizată cu succes."
+                }
+              },
+              "deleteSecurityKey": {
+                "title": "Confirmă ștergerea cheii de securitate",
+                "content": "Ești sigur că vrei să ștergi **{key}** din contul tău?",
+                "toast": {
+                  "deleted": "Cheie de securitate ștearsă cu succes."
+                }
+              }
+            }
+          },
+          "sessions": {
+            "title": "Sesiuni",
+            "table": {
+              "columns": {
+                "ip": "IP",
+                "thisDevice": "Acest dispozitiv?",
+                "userAgent": "User Agent"
+              }
+            },
+            "modal": {
+              "deleteSession": {
+                "title": "Confirmă ștergerea sesiunii",
+                "content": "Ești sigur că vrei să ștergi sesiunea **{ip}** din contul tău?",
+                "toast": {
+                  "deleted": "Sesiune ștearsă."
+                }
+              }
+            }
+          },
+          "sshKeys": {
+            "title": "Chei SSH",
+            "button": {
+              "import": "Importă"
+            },
+            "table": {
+              "columns": {
+                "fingerprint": "Amprentă"
+              }
+            },
+            "modal": {
+              "createSshKey": {
+                "title": "Creează cheie SSH",
+                "toast": {
+                  "created": "Cheie SSH creată."
+                },
+                "form": {
+                  "publicKey": "Cheie publică"
+                }
+              },
+              "editSshKey": {
+                "title": "Editează cheie SSH",
+                "toast": {
+                  "updated": "Cheie SSH actualizată."
+                }
+              },
+              "importSshKeys": {
+                "title": "Importă chei SSH",
+                "toast": {
+                  "created": "{sshKeys} create."
+                },
+                "form": {
+                  "provider": "Furnizor",
+                  "username": "Nume utilizator"
+                }
+              },
+              "deleteSshKey": {
+                "title": "Confirmă ștergerea cheii SSH",
+                "content": "Ești sigur că vrei să ștergi **{name}** din contul tău?",
+                "toast": {
+                  "removed": "Cheie SSH eliminată."
+                }
+              }
+            }
+          },
+          "oauthLinks": {
+            "title": "Legături OAuth",
+            "button": {
+              "connect": "Conectează",
+              "connectTo": "Conectează la {provider}"
+            },
+            "table": {
+              "columns": {
+                "providerName": "Nume furnizor",
+                "identifier": "Identificator"
+              }
+            },
+            "modal": {
+              "deleteOAuthLink": {
+                "title": "Confirmă ștergerea legăturii OAuth",
+                "content": "Ești sigur că vrei să ștergi conexiunea **{provider}** din contul tău?",
+                "toast": {
+                  "removed": "Legătură OAuth eliminată."
+                }
+              }
+            }
+          },
+          "apiKeys": {
+            "title": "Chei API",
+            "table": {
+              "columns": {
+                "key": "Cheie",
+                "permissions": "Permisiuni utilizator / server / admin",
+                "expires": "Expiră"
+              }
+            },
+            "modal": {
+              "createApiKey": {
+                "title": "Creează cheie API",
+                "toast": {
+                  "created": "Cheie API creată."
+                }
+              },
+              "updateApiKey": {
+                "title": "Actualizează cheie API",
+                "toast": {
+                  "updated": "Cheie API actualizată."
+                }
+              },
+              "deleteApiKey": {
+                "title": "Confirmă ștergerea cheii API",
+                "content": "Ești sigur că vrei să ștergi **{name}** din contul tău?",
+                "toast": {
+                  "removed": "Cheie API eliminată."
+                }
+              }
+            },
+            "form": {
+              "allowedIps": "IP-uri permise",
+              "allowedIpsPlaceholder": "de ex. 192.168.1.1, 2001:db8::1",
+              "userPermissions": "Permisiuni utilizator",
+              "serverPermissions": "Permisiuni server",
+              "adminPermissions": "Permisiuni admin"
+            }
+          },
+          "activity": {
+            "title": "Activitate"
+          }
+        },
+        "admin": {},
+        "server": {
+          "console": {
+            "title": "Consolă",
+            "input": {
+              "placeholder": "Tastează o comandă...",
+              "ariaLabel": "Câmp de introducere comenzi consolă."
+            },
+            "message": {
+              "serverMarkedAs": "Server marcat ca {state}...",
+              "transferFailed": "Transferul a eșuat.",
+              "pullingImage": "Serverul tău descarcă în prezent imaginea docker. Te rugăm să aștepți...",
+              "pulling": "Descărcare",
+              "extracting": "Extragere",
+              "layer": "Strat"
+            },
+            "details": {
+              "address": "Adresă",
+              "port": "Port",
+              "uptime": "Uptime",
+              "cpuLoad": "Încărcare CPU",
+              "memoryLoad": "Încărcare memorie",
+              "diskUsage": "Utilizare disc",
+              "networkIn": "Rețea (Intrare)",
+              "networkOut": "Rețea (Ieșire)",
+              "offline": "Offline",
+              "normalizeCpuLoad": "Normalizează încărcarea CPU (schimbat la maxim 100%)"
+            },
+            "power": {
+              "start": "Pornește",
+              "stop": "Oprește",
+              "restart": "Repornește",
+              "kill": "Termină",
+              "modal": {
+                "forceStop": {
+                  "title": "Oprește forțat procesul",
+                  "content": "Oprirea forțată a unui server poate duce la coruperea datelor."
+                }
+              }
+            },
+            "stats": {
+              "cpuLoad": "Încărcare CPU",
+              "memoryLoad": "Încărcare memorie",
+              "network": "Rețea",
+              "inbound": "Intrare",
+              "outbound": "Ieșire"
+            }
+          },
+          "databases": {
+            "title": "Baze de date",
+            "subtitle": "{current} din {max} baze de date maxime create.",
+            "tooltip": {
+              "limitReached": "Acest server este limitat la {max} baze de date."
+            },
+            "table": {
+              "columns": {
+                "type": "Tip",
+                "address": "Adresă",
+                "locked": "Blocat?"
+              }
+            },
+            "button": {
+              "details": "Detalii",
+              "rotatePassword": "Rotește parola"
+            },
+            "modal": {
+              "createDatabase": {
+                "title": "Creează bază de date",
+                "toast": {
+                  "created": "Bază de date creată."
+                },
+                "form": {
+                  "databaseName": "Nume bază de date",
+                  "databaseHost": "Gazdă bază de date",
+                  "noHostsFound": "Nicio gazdă găsită"
+                }
+              },
+              "editDatabase": {
+                "title": "Editează bază de date",
+                "toast": {
+                  "updated": "Bază de date actualizată."
+                },
+                "form": {
+                  "locked": "Blocat"
+                }
+              },
+              "databaseDetails": {
+                "title": "Detalii conexiune bază de date",
+                "toast": {
+                  "passwordRotated": "Parola a fost rotită."
+                },
+                "form": {
+                  "jdbcConnectionString": "Șir de conexiune JDBC"
+                }
+              },
+              "deleteDatabase": {
+                "title": "Confirmă ștergerea bazei de date",
+                "content": "Ștergerea unei baze de date este o acțiune permanentă, nu poate fi anulată. Aceasta va șterge permanent baza de date **{name}** și va elimina toate datele asociate.",
+                "toast": {
+                  "deleted": "Bază de date ștearsă."
+                }
+              }
+            }
+          },
+          "subusers": {
+            "title": "Subutilizatori",
+            "table": {
+              "columns": {
+                "twoFactorEnabled": "2FA activat",
+                "permissions": "Permisiuni",
+                "ignoredFiles": "Fișiere ignorate"
+              }
+            },
+            "modal": {
+              "createSubuser": {
+                "title": "Creează subutilizator",
+                "toast": {
+                  "created": "Subutilizator creat."
+                },
+                "form": {
+                  "email": "Email",
+                  "emailPlaceholder": "Introdu emailul cu care ar trebui salvat acest subutilizator.",
+                  "permissions": "Permisiuni",
+                  "ignoredFiles": "Fișiere ignorate"
+                }
+              },
+              "updateSubuser": {
+                "title": "Actualizează subutilizator",
+                "toast": {
+                  "updated": "Subutilizator actualizat."
+                }
+              },
+              "removeSubuser": {
+                "title": "Confirmă eliminarea subutilizatorului",
+                "content": "Ești sigur că vrei să elimini pe **{username}** de la acest server?",
+                "toast": {
+                  "removed": "Subutilizator eliminat."
+                }
+              }
+            }
+          },
+          "backups": {
+            "title": "Backup-uri",
+            "subtitle": "{current} din {max} backup-uri maxime create.",
+            "tooltip": {
+              "limitReached": "Acest server este limitat la {max} backup-uri."
+            },
+            "table": {
+              "columns": {
+                "checksum": "Checksum",
+                "files": "Fișiere",
+                "locked": "Blocat?"
+              }
+            },
+            "button": {
+              "browse": "Răsfoiește",
+              "download": "Descarcă",
+              "downloadAs": "Descarcă ca {format}",
+              "restore": "Restaurează"
+            },
+            "toast": {
+              "downloadStarted": "Descărcare începută.",
+              "restoringBackup": "Restaurare backup..."
+            },
+            "modal": {
+              "createBackup": {
+                "title": "Creează backup",
+                "toast": {
+                  "created": "Backup creat."
+                },
+                "form": {
+                  "ignoredFiles": "Fișiere ignorate"
+                }
+              },
+              "editBackup": {
+                "title": "Editează backup",
+                "toast": {
+                  "updated": "Backup actualizat."
+                },
+                "form": {
+                  "locked": "Blocat"
+                }
+              },
+              "restoreBackup": {
+                "title": "Restaurează backup"
+              },
+              "deleteBackup": {
+                "title": "Confirmă ștergerea backup-ului",
+                "content": "Ești sigur că vrei să ștergi **{name}** de la acest server?",
+                "toast": {
+                  "deleted": "Backup șters."
+                }
+              }
+            }
+          },
+          "network": {
+            "title": "Rețea",
+            "subtitle": "{current} din {max} alocări maxime atribuite.",
+            "tooltip": {
+              "limitReached": "Acest server este limitat la {max} alocări.",
+              "primary": "Primar"
+            },
+            "table": {
+              "columns": {
+                "hostname": "Nume gazdă",
+                "port": "Port",
+                "notes": "Note"
+              }
+            },
+            "button": {
+              "setPrimary": "Setează ca primar",
+              "unsetPrimary": "Elimină ca primar"
+            },
+            "toast": {
+              "created": "Alocare creată.",
+              "updated": "Alocare actualizată.",
+              "removed": "Alocare eliminată.",
+              "setPrimary": "Alocare setată ca primară.",
+              "unsetPrimary": "Alocare eliminată ca primară."
+            },
+            "modal": {
+              "editAllocation": {
+                "title": "Editează alocare",
+                "form": {
+                  "notes": "Note"
+                }
+              },
+              "removeAllocation": {
+                "title": "Confirmă eliminarea alocării",
+                "content": "Ești sigur că vrei să elimini **{allocation}** de la acest server?"
+              }
+            }
+          },
+          "startup": {
+            "title": "Pornire",
+            "form": {
+              "startupCommand": "Comandă de pornire",
+              "dockerImage": "Imagine Docker"
+            },
+            "variables": "Variabile",
+            "dockerImageDescription": "Imaginea Docker folosită pentru a rula acest server. Aceasta poate fi schimbată pentru a folosi o imagine diferită.",
+            "dockerImageDescriptionCustom": "Imaginea Docker folosită pentru a rula acest server. Aceasta a fost setată de un administrator și nu poate fi schimbată.",
+            "toast": {
+              "startupCommandUpdated": "Comandă de pornire actualizată.",
+              "dockerImageUpdated": "Imagine Docker actualizată.",
+              "variablesUpdated": "Variabile actualizate."
+            }
+          },
+          "settings": {
+            "title": "Setări",
+            "rename": {
+              "title": "Redenumește server",
+              "form": {
+                "serverName": "Nume server"
+              },
+              "toast": {
+                "renamed": "Server redenumit."
+              }
+            },
+            "timezone": {
+              "title": "Fus orar",
+              "form": {
+                "timezone": "Fus orar",
+                "system": "Sistem"
+              },
+              "toast": {
+                "updated": "Fus orar server actualizat."
+              }
+            },
+            "autokill": {
+              "title": "Auto-Kill",
+              "form": {
+                "enabled": "Activat",
+                "secondsUntilAutoKill": "Secunde până la auto-kill"
+              },
+              "toast": {
+                "updated": "Auto-kill server actualizat."
+              }
+            },
+            "reinstall": {
+              "title": "Reinstalează server",
+              "button": "Reinstalează server",
+              "modal": {
+                "title": "Reinstalează server",
+                "button": "Reinstalează",
+                "toast": {
+                  "reinstalling": "Reinstalare server..."
+                }
+              }
+            }
+          },
+          "activity": {
+            "title": "Activitate"
+          }
+        }
+      }
+    }
+  }
+}
