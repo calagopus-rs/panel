@@ -542,6 +542,13 @@
               "placeholder": "Type a command...",
               "ariaLabel": "Console command input."
             },
+            "toast": {
+              "installCancelled": "Server install cancelled."
+            },
+            "notification": {
+              "restoringBackup": "Your Server is currently restoring from a backup. Please wait...",
+              "installing": "Your Server is currently being installed. Please wait..."
+            },
             "message": {
               "serverMarkedAs": "Server marked as {state}...",
               "transferFailed": "Transfer has failed.",

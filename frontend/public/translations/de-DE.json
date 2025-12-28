@@ -542,6 +542,13 @@
               "placeholder": "Gib einen Befehl ein...",
               "ariaLabel": "Konsolenbefehl Eingabe."
             },
+            "toast": {
+              "installCancelled": "Server-Installation abgebrochen."
+            },
+            "notification": {
+              "restoringBackup": "Dein Server stellt gerade ein Backup wieder her. Bitte warten...",
+              "installing": "Dein Server wird gerade installiert. Bitte warten..."
+            },
             "message": {
               "serverMarkedAs": "Server markiert als {state}...",
               "transferFailed": "Übertragung fehlgeschlagen.",

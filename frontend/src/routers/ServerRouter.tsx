@@ -45,7 +45,7 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
 
   useEffect(() => {
     if (!server?.status && abortLoading) {
-      addToast('Server reinstall aborted.', 'success');
+      addToast(t('pages.server.console.toast.installCancelled', {}), 'success');
       setAbortLoading(false);
     }
   }, [abortLoading, server?.status]);
@@ -162,12 +162,12 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
               <WebsocketListener />
               {server.status === 'restoring_backup' ? (
                 <Notification className='mb-4' loading>
-                  Your Server is currently restoring from a backup. Please wait...
+                  {t('pages.server.console.notification.restoringBackup', {})}
                   <Progress value={backupRestoreProgress} />
                 </Notification>
               ) : server.status === 'installing' ? (
                 <Notification className='mb-4' loading>
-                  Your Server is currently being installed. Please wait...
+                  {t('pages.server.console.notification.installing', {})}
                   <Button
                     className='ml-2'
                     leftSection={<FontAwesomeIcon icon={faCancel} />}

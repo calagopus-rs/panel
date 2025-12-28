@@ -1,3 +1,4 @@
 {
-	"biome.configurationPath": "frontend/biome.json"
+	"biome.configurationPath": "frontend/biome.json",
+	"typescript.experimental.useTsgo": true
 }
