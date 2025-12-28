@@ -14,9 +14,11 @@ import NumberInput from '@/elements/input/NumberInput.tsx';
 import SizeInput from '@/elements/input/SizeInput.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import { oobeNodeSchema } from '@/lib/schemas/oobe.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { OobeComponentProps } from '@/routers/OobeRouter.tsx';
 
 export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
+  const { t } = useTranslations();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -45,13 +47,13 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
           setLocationUuid(locations.data[0].uuid);
           setLoading(false);
         } else {
-          setError('Something went wrong. No locations were found.');
+          setError(t('pages.oobe.node.error.noLocations', {}));
         }
       })
       .catch((msg) => {
         setError(httpErrorToHuman(msg));
       });
-  }, []);
+  }, [t]);
 
   const onSubmit = async () => {
     setLoading(true);
@@ -82,7 +84,7 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
   return (
     <Stack gap='lg' py='md'>
       <Title order={2} mb='xs'>
-        Node Configuration
+        {t('pages.oobe.node.title', {})}
       </Title>
 
       {error && <AlertError error={error} setError={setError} />}
@@ -92,8 +94,8 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
           <Group grow>
             <TextInput
               withAsterisk
-              label='Name'
-              placeholder='My Server'
+              label={t('pages.oobe.node.form.name', {})}
+              placeholder={t('pages.oobe.node.form.namePlaceholder', {})}
               leftSection={<FontAwesomeIcon icon={faAddressCard} size='sm' />}
               {...form.getInputProps('name')}
             />
@@ -102,32 +104,32 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
           <Group grow>
             <TextInput
               withAsterisk
-              label='URL'
-              description='used for internal communication with the node'
+              label={t('pages.oobe.node.form.url', {})}
+              description={t('pages.oobe.node.form.urlDescription', {})}
               leftSection={<FontAwesomeIcon icon={faGlobe} size='sm' />}
-              placeholder='URL'
+              placeholder={t('pages.oobe.node.form.urlPlaceholder', {})}
               {...form.getInputProps('url')}
             />
             <TextInput
-              label='Public URL'
-              description='used for websocket/downloads'
+              label={t('pages.oobe.node.form.publicUrl', {})}
+              description={t('pages.oobe.node.form.publicUrlDescription', {})}
               leftSection={<FontAwesomeIcon icon={faGlobeAmericas} size='sm' />}
-              placeholder='URL'
+              placeholder={t('pages.oobe.node.form.publicUrlPlaceholder', {})}
               {...form.getInputProps('publicUrl')}
             />
           </Group>
 
           <Group grow>
             <TextInput
-              label='SFTP Host'
-              placeholder='SFTP Host'
+              label={t('pages.oobe.node.form.sftpHost', {})}
+              placeholder={t('pages.oobe.node.form.sftpHostPlaceholder', {})}
               leftSection={<FontAwesomeIcon icon={faNetworkWired} size='sm' />}
               {...form.getInputProps('sftpHost')}
             />
             <NumberInput
               withAsterisk
-              label='SFTP Port'
-              placeholder='SFTP Port'
+              label={t('pages.oobe.node.form.sftpPort', {})}
+              placeholder={t('pages.oobe.node.form.sftpPortPlaceholder', {})}
               leftSection={<FontAwesomeIcon icon={faNetworkWired} size='sm' />}
               min={1}
               max={65535}
@@ -138,7 +140,7 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
           <Group grow>
             <SizeInput
               withAsterisk
-              label='Memory'
+              label={t('pages.oobe.node.form.memory', {})}
               mode='mb'
               min={0}
               value={form.values.memory}
@@ -146,7 +148,7 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
             />
             <SizeInput
               withAsterisk
-              label='Disk'
+              label={t('pages.oobe.node.form.disk', {})}
               mode='mb'
               min={0}
               value={form.values.disk}
@@ -157,11 +159,11 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
           <Group justify='flex-end' mt='xl'>
             {!!skipFrom && (
               <Button variant='outline' onClick={() => skipFrom('node')}>
-                Skip
+                {t('common.button.skip', {})}
               </Button>
             )}
             <Button type='submit' disabled={!form.isValid()} loading={loading}>
-              Create & Continue
+              {t('pages.oobe.node.button.create', {})}
             </Button>
           </Group>
         </Stack>

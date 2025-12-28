@@ -15,10 +15,12 @@ import TextInput from '@/elements/input/TextInput.tsx';
 import { to } from '@/lib/routes.ts';
 import { oobeLoginSchema } from '@/lib/schemas/oobe.ts';
 import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { OobeComponentProps, steps } from '@/routers/OobeRouter.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 
 export default function OobeLogin({ onNext }: OobeComponentProps) {
+  const { t } = useTranslations();
   const { doLogin } = useAuth();
   const navigate = useNavigate();
   const { settings } = useGlobalStore();
@@ -62,28 +64,28 @@ export default function OobeLogin({ onNext }: OobeComponentProps) {
   return (
     <Stack gap='lg' py='md'>
       <Title order={2} mb='xs'>
-        Log back in
+        {t('pages.oobe.login.title', {})}
       </Title>
 
       {error && <AlertError error={error} setError={setError} />}
 
       <Alert icon={<FontAwesomeIcon icon={faInfoCircle} />} color='blue' variant='light'>
-        You got logged out during the setup process. Please log back in to continue where you left off.
+        {t('pages.oobe.login.alert', {})}
       </Alert>
 
       <form onSubmit={form.onSubmit(() => onSubmit())}>
         <Stack gap='md'>
           <TextInput
-            label='Username'
-            placeholder='admin'
+            label={t('pages.oobe.login.form.username', {})}
+            placeholder={t('pages.oobe.login.form.usernamePlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
             required
             {...form.getInputProps('username')}
           />
 
           <PasswordInput
-            label='Password'
-            placeholder='Enter a strong password'
+            label={t('pages.oobe.login.form.password', {})}
+            placeholder={t('pages.oobe.login.form.passwordPlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faLock} size='sm' />}
             required
             {...form.getInputProps('password')}
@@ -91,7 +93,7 @@ export default function OobeLogin({ onNext }: OobeComponentProps) {
 
           <Group justify='flex-end' mt='xl'>
             <Button type='submit' disabled={!form.isValid()} loading={loading}>
-              Log in & Continue
+              {t('pages.oobe.login.button.login', {})}
             </Button>
           </Group>
         </Stack>

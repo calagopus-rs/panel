@@ -10,8 +10,10 @@ import Table, { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 export default function DashboardActivity() {
+  const { t } = useTranslations();
   const [activities, setActivities] = useState<ResponseMeta<UserActivity>>(getEmptyPaginationSet());
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
@@ -20,18 +22,29 @@ export default function DashboardActivity() {
   });
 
   return (
-    <AccountContentContainer title='Activity'>
+    <AccountContentContainer title={t('pages.account.activity.title', {})}>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
-          Activity
+          {t('pages.account.activity.title', {})}
         </Title>
         <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput
+            placeholder={t('common.input.search', {})}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            w={250}
+          />
         </Group>
       </Group>
 
       <Table
-        columns={['Actor', 'Event', 'IP', 'When', '']}
+        columns={[
+          t('common.table.columns.actor', {}),
+          t('common.table.columns.event', {}),
+          t('common.table.columns.ip', {}),
+          t('common.table.columns.when', {}),
+          '',
+        ]}
         loading={loading}
         pagination={activities}
         onPageSelect={setPage}

@@ -10,9 +10,9 @@ export default function DashboardHomeTitle() {
   const { user } = useAuth();
 
   return (
-    <AccountContentContainer title='Servers'>
+    <AccountContentContainer title={t('pages.account.home.title', {})}>
       <Title order={1} c='white' mb='md'>
-        Servers
+        {t('pages.account.home.title', {})}
       </Title>
 
       <SubNavigation

@@ -10,10 +10,12 @@ import ServerContentContainer from '@/elements/containers/ServerContentContainer
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import AllocationRow from './AllocationRow.tsx';
 
 export default function ServerNetwork() {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { server, allocations, setAllocations, addAllocation } = useServerStore();
 
@@ -26,7 +28,7 @@ export default function ServerNetwork() {
     createAllocation(server.uuid)
       .then((alloc) => {
         addAllocation(alloc);
-        addToast('Allocation created.', 'success');
+        addToast(t('pages.server.network.toast.created', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -35,14 +37,17 @@ export default function ServerNetwork() {
 
   return (
     <ServerContentContainer
-      title='Network'
-      subtitle={`${allocations.total} of ${server.featureLimits.allocations} maximum allocations assigned.`}
+      title={t('pages.server.network.title', {})}
+      subtitle={t('pages.server.network.subtitle', {
+        current: allocations.total,
+        max: server.featureLimits.allocations,
+      })}
       search={search}
       setSearch={setSearch}
       contentRight={
         <ConditionalTooltip
           enabled={allocations.total >= server.featureLimits.allocations}
-          label={`This server is limited to ${server.featureLimits.allocations} allocations.`}
+          label={t('pages.server.network.tooltip.limitReached', { max: server.featureLimits.allocations })}
         >
           <Button
             disabled={allocations.total >= server.featureLimits.allocations}
@@ -50,14 +55,21 @@ export default function ServerNetwork() {
             color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
-            Add
+            {t('common.button.add', {})}
           </Button>
         </ConditionalTooltip>
       }
     >
       <ContextMenuProvider>
         <Table
-          columns={['', 'Hostname', 'Port', 'Notes', 'Created', '']}
+          columns={[
+            '',
+            t('pages.server.network.table.columns.hostname', {}),
+            t('pages.server.network.table.columns.port', {}),
+            t('pages.server.network.table.columns.notes', {}),
+            t('common.table.columns.created', {}),
+            '',
+          ]}
           loading={loading}
           pagination={allocations}
           onPageSelect={setPage}

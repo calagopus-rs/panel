@@ -4,15 +4,16 @@ import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import deleteSubuser from '@/api/server/subusers/deleteSubuser.ts';
 import updateSubuser from '@/api/server/subusers/updateSubuser.ts';
-import Code from '@/elements/Code.tsx';
 import ContextMenu from '@/elements/ContextMenu.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import { TableData, TableRow } from '@/elements/Table.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import SubuserCreateOrUpdateModal from './modals/SubuserCreateOrUpdateModal.tsx';
 
 export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { server, removeSubuser } = useServerStore();
 
@@ -24,7 +25,7 @@ export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
         subuser.permissions = permissions;
         subuser.ignoredFiles = ignoredFiles;
         setOpenModal(null);
-        addToast('Subuser updated.', 'success');
+        addToast(t('pages.server.subusers.modal.updateSubuser.toast.updated', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -34,7 +35,7 @@ export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
   const doRemove = async () => {
     await deleteSubuser(server.uuid, subuser.user.username)
       .then(() => {
-        addToast('Subuser removed.', 'success');
+        addToast(t('pages.server.subusers.modal.removeSubuser.toast.removed', {}), 'success');
         removeSubuser(subuser);
       })
       .catch((msg) => {
@@ -54,17 +55,22 @@ export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
       <ConfirmationModal
         opened={openModal === 'remove'}
         onClose={() => setOpenModal(null)}
-        title='Confirm Subuser Removal'
-        confirm='Remove'
+        title={t('pages.server.subusers.modal.removeSubuser.title', {})}
+        confirm={t('common.button.remove', {})}
         onConfirmed={doRemove}
       >
-        Are you sure you want to remove <Code>{subuser.user.username}</Code> from this server?
+        {t('pages.server.subusers.modal.removeSubuser.content', { username: subuser.user.username }).md()}
       </ConfirmationModal>
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('update'), color: 'gray' },
-          { icon: faTrash, label: 'Remove', onClick: () => setOpenModal('remove'), color: 'red' },
+          { icon: faPencil, label: t('common.button.edit', {}), onClick: () => setOpenModal('update'), color: 'gray' },
+          {
+            icon: faTrash,
+            label: t('common.button.remove', {}),
+            onClick: () => setOpenModal('remove'),
+            color: 'red',
+          },
         ]}
       >
         {({ openMenu }) => (

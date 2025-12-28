@@ -2,9 +2,11 @@ import { faCheckCircle, faRocket } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, List, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import Button from '@/elements/Button.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { OobeComponentProps } from '@/routers/OobeRouter.tsx';
 
 export default function OobeWelcome({ onNext }: OobeComponentProps) {
+  const { t } = useTranslations();
   return (
     <Stack gap='xl' py='md'>
       <Group justify='center' mb='md'>
@@ -13,16 +15,16 @@ export default function OobeWelcome({ onNext }: OobeComponentProps) {
 
       <div>
         <Title order={2} ta='center' mb='md'>
-          Welcome to Calagopus
+          {t('pages.oobe.welcome.title', {})}
         </Title>
         <Text size='lg' ta='center' c='dimmed'>
-          Let's get your game server management system up and running!
+          {t('pages.oobe.welcome.subtitle', {})}
         </Text>
       </div>
 
       <Stack gap='md' mt='lg'>
         <Text size='sm' fw={500}>
-          This setup wizard will guide you through:
+          {t('pages.oobe.welcome.wizardIntro', {})}
         </Text>
 
         <List
@@ -35,17 +37,17 @@ export default function OobeWelcome({ onNext }: OobeComponentProps) {
             </ThemeIcon>
           }
         >
-          <List.Item>Creating your administrator account</List.Item>
-          <List.Item>Configuring essential system settings</List.Item>
-          <List.Item>Setting up your server location</List.Item>
-          <List.Item>Adding your first node</List.Item>
-          <List.Item>Deploying your first game server</List.Item>
+          <List.Item>{t('pages.oobe.welcome.steps.account', {})}</List.Item>
+          <List.Item>{t('pages.oobe.welcome.steps.settings', {})}</List.Item>
+          <List.Item>{t('pages.oobe.welcome.steps.location', {})}</List.Item>
+          <List.Item>{t('pages.oobe.welcome.steps.node', {})}</List.Item>
+          <List.Item>{t('pages.oobe.welcome.steps.server', {})}</List.Item>
         </List>
       </Stack>
 
       <Group justify='flex-end' mt='xl'>
         <Button leftSection={<FontAwesomeIcon icon={faRocket} />} onClick={onNext}>
-          Get Started
+          {t('pages.oobe.welcome.button.start', {})}
         </Button>
       </Group>
     </Stack>

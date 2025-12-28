@@ -16,10 +16,12 @@ import TextArea from '@/elements/input/TextArea.tsx';
 import VariableContainer from '@/elements/VariableContainer.tsx';
 import { useKeyboardShortcut } from '@/plugins/useKeyboardShortcuts.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 import { useServerStore } from '@/stores/server.ts';
 
 export default function ServerStartup() {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { settings } = useGlobalStore();
   const { server, updateServer, variables, setVariables, updateVariable } = useServerStore();
@@ -33,7 +35,7 @@ export default function ServerStartup() {
     debounce((command: string) => {
       updateCommand(server.uuid, command)
         .then(() => {
-          addToast('Startup command updated.', 'success');
+          addToast(t('pages.server.startup.toast.startupCommandUpdated', {}), 'success');
           updateServer({ startup: command });
         })
         .catch((msg) => {
@@ -59,7 +61,7 @@ export default function ServerStartup() {
     if (dockerImage !== server.image) {
       updateDockerImage(server.uuid, dockerImage)
         .then(() => {
-          addToast('Docker image updated.', 'success');
+          addToast(t('pages.server.startup.toast.dockerImageUpdated', {}), 'success');
           updateServer({ image: dockerImage });
         })
         .catch((msg) => {
@@ -75,7 +77,7 @@ export default function ServerStartup() {
       Object.entries(values).map(([envVariable, value]) => ({ envVariable, value })),
     )
       .then(() => {
-        addToast('Variables updated.', 'success');
+        addToast(t('pages.server.startup.toast.variablesUpdated', {}), 'success');
         for (const [envVariable, value] of Object.entries(values)) {
           updateVariable(envVariable, { value });
         }
@@ -103,13 +105,13 @@ export default function ServerStartup() {
   );
 
   return (
-    <ServerContentContainer title='Startup'>
+    <ServerContentContainer title={t('pages.server.startup.title', {})}>
       <div className='grid grid-cols-3 gap-4'>
         <Card className='flex flex-col justify-between rounded-md p-4 h-full col-span-2'>
           <TextArea
             withAsterisk
-            label='Startup Command'
-            placeholder='Startup Command'
+            label={t('pages.server.startup.form.startupCommand', {})}
+            placeholder={t('pages.server.startup.form.startupCommand', {})}
             value={command}
             onChange={(e) => setCommand(e.target.value)}
             disabled={!settings.server.allowEditingStartupCommand}
@@ -129,7 +131,7 @@ export default function ServerStartup() {
         <Card className='flex flex-col justify-between rounded-md p-4 h-full'>
           <Select
             withAsterisk
-            label='Docker Image'
+            label={t('pages.server.startup.form.dockerImage', {})}
             value={dockerImage}
             onChange={(value) => setDockerImage(value ?? '')}
             data={Object.entries(server.egg.dockerImages).map(([key, value]) => ({
@@ -140,20 +142,19 @@ export default function ServerStartup() {
             disabled={!settings.server.allowOverwritingCustomDockerImage}
           />
           <p className='text-gray-400 mt-2'>
-            The Docker image used to run this server.{' '}
             {Object.values(server.egg.dockerImages).includes(server.image) ||
             settings.server.allowOverwritingCustomDockerImage
-              ? 'This can be changed to use a different image.'
-              : 'This has been set by an administrator and cannot be changed.'}
+              ? t('pages.server.startup.dockerImageDescription', {})
+              : t('pages.server.startup.dockerImageDescriptionCustom', {})}
           </p>
         </Card>
       </div>
 
       <Group justify='space-between' my='md'>
-        <Title order={2}>Variables</Title>
+        <Title order={2}>{t('pages.server.startup.variables', {})}</Title>
         <Group>
           <Button onClick={doUpdate} disabled={Object.keys(values).length === 0} loading={loading} color='blue'>
-            Save
+            {t('common.button.save', {})}
           </Button>
         </Group>
       </Group>

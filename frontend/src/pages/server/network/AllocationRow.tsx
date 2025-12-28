@@ -11,10 +11,12 @@ import { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import AllocationEditModal from './modals/AllocationEditModal.tsx';
 
 export default function AllocationRow({ allocation }: { allocation: ServerAllocation }) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { server, allocations, removeAllocation, setAllocations, updateServer } = useServerStore();
 
@@ -31,7 +33,7 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
           })),
         });
         updateServer({ allocation });
-        addToast('Allocation set as primary.', 'success');
+        addToast(t('pages.server.network.toast.setPrimary', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -49,7 +51,7 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
           })),
         });
         updateServer({ allocation: null });
-        addToast('Allocation unset as primary.', 'success');
+        addToast(t('pages.server.network.toast.unsetPrimary', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -60,7 +62,7 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
     await deleteAllocation(server.uuid, allocation.uuid)
       .then(() => {
         removeAllocation(allocation);
-        addToast('Allocation removed.', 'success');
+        addToast(t('pages.server.network.toast.removed', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -74,29 +76,38 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
       <ConfirmationModal
         opened={openModal === 'remove'}
         onClose={() => setOpenModal(null)}
-        title='Confirm Allocation Removal'
-        confirm='Remove'
+        title={t('pages.server.network.modal.removeAllocation.title', {})}
+        confirm={t('common.button.remove', {})}
         onConfirmed={doRemove}
       >
-        Are you sure you want to remove
-        <Code>
-          {allocation.ipAlias ?? allocation.ip}:{allocation.port}
-        </Code>
-        from this server?
+        {t('pages.server.network.modal.removeAllocation.content', {
+          allocation: `${allocation.ipAlias ?? allocation.ip}:${allocation.port}`,
+        }).md()}
       </ConfirmationModal>
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
-          { icon: faStar, label: 'Set Primary', hidden: allocation.isPrimary, onClick: doSetPrimary, color: 'gray' },
+          { icon: faPencil, label: t('common.button.edit', {}), onClick: () => setOpenModal('edit'), color: 'gray' },
           {
             icon: faStar,
-            label: 'Unset Primary',
+            label: t('pages.server.network.button.setPrimary', {}),
+            hidden: allocation.isPrimary,
+            onClick: doSetPrimary,
+            color: 'gray',
+          },
+          {
+            icon: faStar,
+            label: t('pages.server.network.button.unsetPrimary', {}),
             hidden: !allocation.isPrimary,
             onClick: doUnsetPrimary,
             color: 'red',
           },
-          { icon: faTrash, label: 'Remove', onClick: () => setOpenModal('remove'), color: 'red' },
+          {
+            icon: faTrash,
+            label: t('common.button.remove', {}),
+            onClick: () => setOpenModal('remove'),
+            color: 'red',
+          },
         ]}
       >
         {({ openMenu }) => (
@@ -108,7 +119,7 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
           >
             <td className='relative w-10 text-center'>
               {allocation.isPrimary && (
-                <Tooltip label='Primary'>
+                <Tooltip label={t('pages.server.network.tooltip.primary', {})}>
                   <FontAwesomeIcon icon={faStar} className='text-yellow-500 ml-3' />
                 </Tooltip>
               )}
@@ -122,7 +133,7 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
               <Code>{allocation.port}</Code>
             </TableData>
 
-            <TableData>{allocation.notes ?? 'No notes'}</TableData>
+            <TableData>{allocation.notes ?? t('common.na', {})}</TableData>
 
             <TableData>
               <Tooltip label={formatDateTime(allocation.created)}>{formatTimestamp(allocation.created)}</Tooltip>

@@ -10,9 +10,11 @@ import { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 
 export default function SessionRow({ session }: { session: UserSession }) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { removeSession } = useUserStore();
 
@@ -22,7 +24,7 @@ export default function SessionRow({ session }: { session: UserSession }) {
     await deleteSession(session.uuid)
       .then(() => {
         removeSession(session);
-        addToast('Session deleted.', 'success');
+        addToast(t('pages.account.sessions.modal.deleteSession.toast.deleted', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -34,20 +36,18 @@ export default function SessionRow({ session }: { session: UserSession }) {
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title='Confirm Session Deletion'
-        confirm='Delete'
+        title={t('pages.account.sessions.modal.deleteSession.title', {})}
+        confirm={t('common.button.delete', {})}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete the session
-        <Code>{session.ip}</Code>
-        from your account?
+        {t('pages.account.sessions.modal.deleteSession.content', { ip: session.ip }).md()}
       </ConfirmationModal>
 
       <ContextMenu
         items={[
           {
             icon: faTrash,
-            label: 'Remove',
+            label: t('common.button.remove', {}),
             disabled: session.isUsing,
             onClick: () => setOpenModal('delete'),
             color: 'red',
@@ -66,7 +66,7 @@ export default function SessionRow({ session }: { session: UserSession }) {
                 <Code>{session.ip}</Code>
               </CopyOnClick>
             </TableData>
-            <TableData>{session.isUsing ? 'Yes' : 'No'}</TableData>
+            <TableData>{session.isUsing ? t('common.yes', {}) : t('common.no', {})}</TableData>
             <TableData>{session.userAgent}</TableData>
             <TableData>
               <Tooltip label={formatDateTime(session.lastUsed)}>{formatTimestamp(session.lastUsed)}</Tooltip>

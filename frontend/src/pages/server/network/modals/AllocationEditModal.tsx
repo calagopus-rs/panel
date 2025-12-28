@@ -10,6 +10,7 @@ import TextArea from '@/elements/input/TextArea.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import { serverAllocationsEditSchema } from '@/lib/schemas/server/allocations.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
@@ -17,6 +18,7 @@ type Props = ModalProps & {
 };
 
 export default function AllocationEditModal({ allocation, opened, onClose }: Props) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { server } = useServerStore();
 
@@ -38,7 +40,7 @@ export default function AllocationEditModal({ allocation, opened, onClose }: Pro
         allocation.notes = form.values.notes || null;
 
         onClose();
-        addToast('Allocation updated.', 'success');
+        addToast(t('pages.server.network.toast.updated', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -47,17 +49,22 @@ export default function AllocationEditModal({ allocation, opened, onClose }: Pro
   };
 
   return (
-    <Modal title='Edit Allocation' onClose={onClose} opened={opened}>
+    <Modal title={t('pages.server.network.modal.editAllocation.title', {})} onClose={onClose} opened={opened}>
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Stack>
-          <TextArea label='Notes' placeholder='Notes' rows={3} {...form.getInputProps('notes')} />
+          <TextArea
+            label={t('pages.server.network.modal.editAllocation.form.notes', {})}
+            placeholder={t('pages.server.network.modal.editAllocation.form.notes', {})}
+            rows={3}
+            {...form.getInputProps('notes')}
+          />
 
           <Group>
             <Button type='submit' loading={loading}>
-              Edit
+              {t('common.button.edit', {})}
             </Button>
             <Button variant='default' onClick={onClose}>
-              Close
+              {t('common.button.close', {})}
             </Button>
           </Group>
         </Stack>

@@ -14,10 +14,12 @@ import Select from '@/elements/input/Select.tsx';
 import Switch from '@/elements/input/Switch.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import { oobeConfigurationSchema } from '@/lib/schemas/oobe.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { OobeComponentProps } from '@/routers/OobeRouter.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 
 export default function OobeConfiguration({ onNext }: OobeComponentProps) {
+  const { t } = useTranslations();
   const { languages } = useGlobalStore();
 
   const [loading, setLoading] = useState(false);
@@ -57,6 +59,7 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
       name: form.values.applicationName,
       language: form.values.applicationLanguage,
       url: form.values.applicationUrl,
+      twoFactorRequirement: 'none',
       telemetryEnabled: form.values.applicationTelemetry,
       registrationEnabled: form.values.applicationRegistration,
     })
@@ -72,7 +75,7 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
   return (
     <Stack gap='lg' py='md'>
       <Title order={2} mb='xs'>
-        Application Settings
+        {t('pages.oobe.configuration.title', {})}
       </Title>
 
       {error && <AlertError error={error} setError={setError} />}
@@ -80,8 +83,8 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
       <form onSubmit={form.onSubmit(() => onSubmit())}>
         <Stack gap='md'>
           <TextInput
-            label='Application Name'
-            placeholder='Calagopus'
+            label={t('pages.oobe.configuration.form.applicationName', {})}
+            placeholder={t('pages.oobe.configuration.form.applicationNamePlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faAddressCard} size='sm' />}
             required
             {...form.getInputProps('applicationName')}
@@ -89,8 +92,8 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
 
           <Select
             withAsterisk
-            label='Language'
-            placeholder='Language'
+            label={t('pages.oobe.configuration.form.language', {})}
+            placeholder={t('pages.oobe.configuration.form.languagePlaceholder', {})}
             data={languages.map((language) => ({
               label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
               value: language,
@@ -100,30 +103,30 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
           />
 
           <TextInput
-            label='Application URL'
-            placeholder='https://calagop.us'
+            label={t('pages.oobe.configuration.form.applicationUrl', {})}
+            placeholder={t('pages.oobe.configuration.form.applicationUrlPlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faGlobe} size='sm' />}
             required
             {...form.getInputProps('applicationUrl')}
           />
 
           <Switch
-            label='Enable Telemetry'
-            description='Allow Calagopus to collect limited and anonymous usage data to help improve the application.'
+            label={t('pages.oobe.configuration.form.telemetry', {})}
+            description={t('pages.oobe.configuration.form.telemetryDescription', {})}
             checked={form.values.applicationTelemetry}
             onChange={(e) => form.setFieldValue('applicationTelemetry', e.target.checked)}
           />
 
           <Switch
-            label='Enable Registration'
-            description='Allow new users to register their own account.'
+            label={t('pages.oobe.configuration.form.registration', {})}
+            description={t('pages.oobe.configuration.form.registrationDescription', {})}
             checked={form.values.applicationRegistration}
             onChange={(e) => form.setFieldValue('applicationRegistration', e.target.checked)}
           />
 
           <Group justify='flex-end' mt='xl'>
             <Button type='submit' disabled={!form.isValid()} loading={loading}>
-              Update Settings & Continue
+              {t('pages.oobe.configuration.button.submit', {})}
             </Button>
           </Group>
         </Stack>

@@ -2,17 +2,18 @@ import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import deleteSecurityKey from '@/api/me/security-keys/deleteSecurityKey.ts';
-import Code from '@/elements/Code.tsx';
 import ContextMenu from '@/elements/ContextMenu.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 import SecurityKeyEditModal from './modals/SecurityKeyEditModal.tsx';
 
 export default function SecurityKeyRow({ securityKey }: { securityKey: UserSecurityKey }) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { removeSecurityKey } = useUserStore();
 
@@ -22,7 +23,7 @@ export default function SecurityKeyRow({ securityKey }: { securityKey: UserSecur
     await deleteSecurityKey(securityKey.uuid)
       .then(() => {
         removeSecurityKey(securityKey);
-        addToast('Security key removed.', 'success');
+        addToast(t('pages.account.securityKeys.modal.deleteSecurityKey.toast.deleted', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -40,19 +41,27 @@ export default function SecurityKeyRow({ securityKey }: { securityKey: UserSecur
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title='Confirm Security Key Deletion'
-        confirm='Delete'
+        title={t('pages.account.securityKeys.modal.deleteSecurityKey.title', {})}
+        confirm={t('common.button.delete', {})}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete
-        <Code>{securityKey.name}</Code>
-        from your account?
+        {t('pages.account.securityKeys.modal.deleteSecurityKey.content', { key: securityKey.name }).md()}
       </ConfirmationModal>
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
-          { icon: faTrash, label: 'Delete', onClick: () => setOpenModal('delete'), color: 'red' },
+          {
+            icon: faPencil,
+            label: t('common.button.edit', {}),
+            onClick: () => setOpenModal('edit'),
+            color: 'gray',
+          },
+          {
+            icon: faTrash,
+            label: t('common.button.delete', {}),
+            onClick: () => setOpenModal('delete'),
+            color: 'red',
+          },
         ]}
       >
         {({ openMenu }) => (
@@ -66,7 +75,7 @@ export default function SecurityKeyRow({ securityKey }: { securityKey: UserSecur
 
             <TableData>
               {!securityKey.lastUsed ? (
-                'N/A'
+                t('common.na', {})
               ) : (
                 <Tooltip label={formatDateTime(securityKey.lastUsed)}>{formatTimestamp(securityKey.lastUsed)}</Tooltip>
               )}

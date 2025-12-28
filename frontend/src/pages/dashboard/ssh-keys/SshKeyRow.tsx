@@ -10,10 +10,12 @@ import { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 import SshKeyEditModal from './modals/SshKeyEditModal.tsx';
 
 export default function SshKeyRow({ sshKey }: { sshKey: UserSshKey }) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { removeSshKey } = useUserStore();
 
@@ -23,7 +25,7 @@ export default function SshKeyRow({ sshKey }: { sshKey: UserSshKey }) {
     await deleteSshKey(sshKey.uuid)
       .then(() => {
         removeSshKey(sshKey);
-        addToast('SSH key removed.', 'success');
+        addToast(t('pages.account.sshKeys.modal.deleteSshKey.toast.removed', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -37,19 +39,17 @@ export default function SshKeyRow({ sshKey }: { sshKey: UserSshKey }) {
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title='Confirm SSH Key Deletion'
-        confirm='Delete'
+        title={t('pages.account.sshKeys.modal.deleteSshKey.title', {})}
+        confirm={t('common.button.delete', {})}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete
-        <Code>{sshKey.name}</Code>
-        from your account?
+        {t('pages.account.sshKeys.modal.deleteSshKey.content', { name: sshKey.name }).md()}
       </ConfirmationModal>
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
-          { icon: faTrash, label: 'Delete', onClick: () => setOpenModal('delete'), color: 'red' },
+          { icon: faPencil, label: t('common.button.edit', {}), onClick: () => setOpenModal('edit'), color: 'gray' },
+          { icon: faTrash, label: t('common.button.delete', {}), onClick: () => setOpenModal('delete'), color: 'red' },
         ]}
       >
         {({ openMenu }) => (

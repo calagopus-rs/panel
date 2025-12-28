@@ -13,9 +13,11 @@ import Modal from '@/elements/modals/Modal.tsx';
 import { databaseTypeLabelMapping } from '@/lib/enums.ts';
 import { serverDatabaseCreateSchema } from '@/lib/schemas/server/databases.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { server, addDatabase } = useServerStore();
 
@@ -40,7 +42,7 @@ export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
 
     createDatabase(server.uuid, form.values)
       .then((database) => {
-        addToast('Database created.', 'success');
+        addToast(t('pages.server.databases.modal.createDatabase.toast.created', {}), 'success');
         onClose();
         addDatabase(database);
       })
@@ -51,17 +53,22 @@ export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
   };
 
   return (
-    <Modal title='Create Database' onClose={onClose} opened={opened}>
+    <Modal title={t('pages.server.databases.modal.createDatabase.title', {})} onClose={onClose} opened={opened}>
       <form onSubmit={form.onSubmit(() => doCreate())}>
         <Stack>
-          <TextInput withAsterisk label='Database Name' placeholder='Database Name' {...form.getInputProps('name')} />
+          <TextInput
+            withAsterisk
+            label={t('pages.server.databases.modal.createDatabase.form.databaseName', {})}
+            placeholder={t('pages.server.databases.modal.createDatabase.form.databaseName', {})}
+            {...form.getInputProps('name')}
+          />
 
           <Select
             withAsterisk
-            label='Database Host'
-            placeholder='Database Host'
+            label={t('pages.server.databases.modal.createDatabase.form.databaseHost', {})}
+            placeholder={t('pages.server.databases.modal.createDatabase.form.databaseHost', {})}
             searchable
-            nothingFoundMessage='No hosts found'
+            nothingFoundMessage={t('pages.server.databases.modal.createDatabase.form.noHostsFound', {})}
             data={Object.values(
               databaseHosts.reduce(
                 (acc, { uuid, name, type }) => (
@@ -79,10 +86,10 @@ export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
 
           <Group>
             <Button type='submit' loading={loading} disabled={!form.isValid()}>
-              Create
+              {t('common.button.create', {})}
             </Button>
             <Button variant='default' onClick={onClose}>
-              Close
+              {t('common.button.close', {})}
             </Button>
           </Group>
         </Stack>

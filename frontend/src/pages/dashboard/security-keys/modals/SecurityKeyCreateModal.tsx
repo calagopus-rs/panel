@@ -11,6 +11,7 @@ import Button from '@/elements/Button.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 
 const schema = z.object({
@@ -18,6 +19,7 @@ const schema = z.object({
 });
 
 export default function SecurityKeyCreateModal({ opened, onClose }: ModalProps) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { addSecurityKey } = useUserStore();
 
@@ -41,6 +43,7 @@ export default function SecurityKeyCreateModal({ opened, onClose }: ModalProps) 
           .then((credential) => {
             postSecurityKeyChallenge(key.uuid, credential as PublicKeyCredential)
               .then(() => {
+                addToast(t('pages.account.securityKeys.modal.createSecurityKey.toast.created', {}), 'success');
                 addSecurityKey(key);
                 onClose();
               })
@@ -55,7 +58,7 @@ export default function SecurityKeyCreateModal({ opened, onClose }: ModalProps) 
           })
           .catch((error) => {
             console.error(error);
-            addToast('Security Key add operation was aborted.', 'error');
+            addToast(t('pages.account.securityKeys.modal.createSecurityKey.toast.aborted', {}), 'error');
             deleteSecurityKey(key.uuid);
             setLoading(false);
           });
@@ -67,15 +70,20 @@ export default function SecurityKeyCreateModal({ opened, onClose }: ModalProps) 
   };
 
   return (
-    <Modal title='Create Security Key' onClose={onClose} opened={opened}>
-      <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+    <Modal title={t('pages.account.securityKeys.modal.createSecurityKey.title', {})} onClose={onClose} opened={opened}>
+      <TextInput
+        withAsterisk
+        label={t('common.form.name', {})}
+        placeholder={t('common.form.name', {})}
+        {...form.getInputProps('name')}
+      />
 
       <Group mt='md'>
         <Button onClick={doCreate} loading={loading} disabled={!form.isValid()}>
-          Create
+          {t('common.button.create', {})}
         </Button>
         <Button variant='default' onClick={onClose}>
-          Close
+          {t('common.button.close', {})}
         </Button>
       </Group>
     </Modal>

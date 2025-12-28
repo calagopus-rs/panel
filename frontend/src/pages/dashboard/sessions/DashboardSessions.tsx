@@ -5,10 +5,12 @@ import AccountContentContainer from '@/elements/containers/AccountContentContain
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 import SessionRow from './SessionRow.tsx';
 
 export default function DashboardSessions() {
+  const { t } = useTranslations();
   const { sessions, setSessions } = useUserStore();
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
@@ -17,19 +19,30 @@ export default function DashboardSessions() {
   });
 
   return (
-    <AccountContentContainer title='Sessions'>
+    <AccountContentContainer title={t('pages.account.sessions.title', {})}>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
-          Sessions
+          {t('pages.account.sessions.title', {})}
         </Title>
         <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput
+            placeholder={t('common.input.search', {})}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            w={250}
+          />
         </Group>
       </Group>
 
       <ContextMenuProvider>
         <Table
-          columns={['IP', 'This Device?', 'User Agent', 'Last Used', '']}
+          columns={[
+            t('pages.account.sessions.table.columns.ip', {}),
+            t('pages.account.sessions.table.columns.thisDevice', {}),
+            t('pages.account.sessions.table.columns.userAgent', {}),
+            t('common.table.columns.lastUsed', {}),
+            '',
+          ]}
           loading={loading}
           pagination={sessions}
           onPageSelect={setPage}

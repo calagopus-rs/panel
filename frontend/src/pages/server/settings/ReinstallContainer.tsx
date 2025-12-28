@@ -2,9 +2,11 @@ import { Grid, Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import Button from '@/elements/Button.tsx';
 import Card from '@/elements/Card.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import SettingsReinstallModal from './modals/SettingsReinstallModal.tsx';
 
 export default function ReinstallContainer() {
+  const { t } = useTranslations();
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -13,12 +15,12 @@ export default function ReinstallContainer() {
         <SettingsReinstallModal opened={modalOpen} onClose={() => setModalOpen(false)} />
 
         <Title order={2} c='white'>
-          Reinstall Server
+          {t('pages.server.settings.reinstall.title', {})}
         </Title>
 
         <Group pt='md' mt='auto'>
           <Button color='red' onClick={() => setModalOpen(true)}>
-            Reinstall Server
+            {t('pages.server.settings.reinstall.button', {})}
           </Button>
         </Group>
       </Card>

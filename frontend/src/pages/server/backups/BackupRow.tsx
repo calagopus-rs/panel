@@ -22,11 +22,13 @@ import { streamingArchiveFormatLabelMapping } from '@/lib/enums.ts';
 import { bytesToString } from '@/lib/size.ts';
 import { formatTimestamp } from '@/lib/time.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import BackupEditModal from './modals/BackupEditModal.tsx';
 import BackupRestoreModal from './modals/BackupRestoreModal.tsx';
 
 export default function BackupRow({ backup }: { backup: ServerBackupWithProgress }) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { server, removeBackup } = useServerStore();
   const navigate = useNavigate();
@@ -36,7 +38,7 @@ export default function BackupRow({ backup }: { backup: ServerBackupWithProgress
   const doDownload = (archiveFormat: StreamingArchiveFormat) => {
     downloadBackup(server.uuid, backup.uuid, archiveFormat)
       .then(({ url }) => {
-        addToast('Download started.', 'success');
+        addToast(t('pages.server.backups.toast.downloadStarted', {}), 'success');
         window.open(url, '_blank');
       })
       .catch((msg) => {
@@ -47,7 +49,7 @@ export default function BackupRow({ backup }: { backup: ServerBackupWithProgress
   const doDelete = async () => {
     await deleteBackup(server.uuid, backup.uuid)
       .then(() => {
-        addToast('Backup deleted.', 'success');
+        addToast(t('pages.server.backups.modal.deleteBackup.toast.deleted', {}), 'success');
         setOpenModal(null);
         removeBackup(backup);
       })
@@ -64,19 +66,19 @@ export default function BackupRow({ backup }: { backup: ServerBackupWithProgress
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title='Confirm Backup Deletion'
-        confirm='Delete'
+        title={t('pages.server.backups.modal.deleteBackup.title', {})}
+        confirm={t('common.button.delete', {})}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete <Code>{backup.name}</Code> from this server?
+        {t('pages.server.backups.modal.deleteBackup.content', { name: backup.name }).md()}
       </ConfirmationModal>
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
+          { icon: faPencil, label: t('common.button.edit', {}), onClick: () => setOpenModal('edit'), color: 'gray' },
           {
             icon: faShare,
-            label: 'Browse',
+            label: t('pages.server.backups.button.browse', {}),
             hidden: !backup.isBrowsable,
             onClick: () =>
               navigate(
@@ -88,13 +90,13 @@ export default function BackupRow({ backup }: { backup: ServerBackupWithProgress
           },
           {
             icon: faFileArrowDown,
-            label: 'Download',
+            label: t('pages.server.backups.button.download', {}),
             onClick: !backup.isStreaming ? () => doDownload('tar_gz') : () => null,
             color: 'gray',
             items: backup.isStreaming
               ? Object.entries(streamingArchiveFormatLabelMapping).map(([mime, label]) => ({
                   icon: faFileArrowDown,
-                  label: `Download as ${label}`,
+                  label: t('pages.server.backups.button.downloadAs', { format: label }),
                   onClick: () => doDownload(mime as StreamingArchiveFormat),
                   color: 'gray',
                 }))
@@ -102,13 +104,13 @@ export default function BackupRow({ backup }: { backup: ServerBackupWithProgress
           },
           {
             icon: faRotateLeft,
-            label: 'Restore',
+            label: t('pages.server.backups.button.restore', {}),
             onClick: () => setOpenModal('restore'),
             color: 'gray',
           },
           {
             icon: faTrash,
-            label: 'Delete',
+            label: t('common.button.delete', {}),
             disabled: backup.isLocked,
             onClick: () => setOpenModal('delete'),
             color: 'red',

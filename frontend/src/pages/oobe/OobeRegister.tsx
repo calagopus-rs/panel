@@ -13,9 +13,11 @@ import PasswordInput from '@/elements/input/PasswordInput.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import { oobeRegister } from '@/lib/schemas/oobe.ts';
 import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { OobeComponentProps } from '@/routers/OobeRouter.tsx';
 
 export default function OobeRegister({ onNext }: OobeComponentProps) {
+  const { t } = useTranslations();
   const { doLogin } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -59,28 +61,33 @@ export default function OobeRegister({ onNext }: OobeComponentProps) {
   return (
     <Stack gap='lg' py='md'>
       <Title order={2} mb='xs'>
-        Create Administrator Account
+        {t('pages.oobe.register.title', {})}
       </Title>
 
       {error && <AlertError error={error} setError={setError} />}
 
-      <Alert icon={<FontAwesomeIcon icon={faShieldHalved} />} title='Security Notice' color='blue' variant='light'>
-        Choose a strong password. This account will have complete administrative access to all servers and settings.
+      <Alert
+        icon={<FontAwesomeIcon icon={faShieldHalved} />}
+        title={t('pages.oobe.register.alert.title', {})}
+        color='blue'
+        variant='light'
+      >
+        {t('pages.oobe.register.alert.description', {})}
       </Alert>
 
       <form onSubmit={form.onSubmit(() => onSubmit())}>
         <Stack gap='md'>
           <TextInput
-            label='Username'
-            placeholder='admin'
+            label={t('pages.oobe.register.form.username', {})}
+            placeholder={t('pages.oobe.register.form.usernamePlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
             required
             {...form.getInputProps('username')}
           />
 
           <TextInput
-            label='Email Address'
-            placeholder='admin@example.com'
+            label={t('pages.oobe.register.form.email', {})}
+            placeholder={t('pages.oobe.register.form.emailPlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faEnvelope} size='sm' />}
             type='email'
             required
@@ -88,32 +95,32 @@ export default function OobeRegister({ onNext }: OobeComponentProps) {
           />
 
           <TextInput
-            label='First Name'
-            placeholder='Alan'
+            label={t('pages.oobe.register.form.firstName', {})}
+            placeholder={t('pages.oobe.register.form.firstNamePlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
             required
             {...form.getInputProps('nameFirst')}
           />
 
           <TextInput
-            label='Last Name'
-            placeholder='Turing'
+            label={t('pages.oobe.register.form.lastName', {})}
+            placeholder={t('pages.oobe.register.form.lastNamePlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
             required
             {...form.getInputProps('nameLast')}
           />
 
           <PasswordInput
-            label='Password'
-            placeholder='Enter a strong password'
+            label={t('pages.oobe.register.form.password', {})}
+            placeholder={t('pages.oobe.register.form.passwordPlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faLock} size='sm' />}
             required
             {...form.getInputProps('password')}
           />
 
           <PasswordInput
-            label='Confirm Password'
-            placeholder='Re-enter your password'
+            label={t('pages.oobe.register.form.confirmPassword', {})}
+            placeholder={t('pages.oobe.register.form.confirmPasswordPlaceholder', {})}
             leftSection={<FontAwesomeIcon icon={faLock} size='sm' />}
             required
             {...form.getInputProps('confirmPassword')}
@@ -121,7 +128,7 @@ export default function OobeRegister({ onNext }: OobeComponentProps) {
 
           <Group justify='flex-end' mt='xl'>
             <Button type='submit' disabled={!form.isValid()} loading={loading}>
-              Create Account & Continue
+              {t('pages.oobe.register.button', {})}
             </Button>
           </Group>
         </Stack>

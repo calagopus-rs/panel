@@ -3,6 +3,7 @@ import debounce from 'debounce';
 import { useEffect, useRef, useState } from 'react';
 import Can from '@/elements/Can.tsx';
 import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import Console from './Console.tsx';
 import ServerDetails from './ServerDetails.tsx';
@@ -10,6 +11,7 @@ import ServerPowerControls from './ServerPowerControls.tsx';
 import ServerStats from './ServerStats.tsx';
 
 export default function ServerConsole() {
+  const { t } = useTranslations();
   const server = useServerStore((state) => state.server);
 
   const [maxConsoleHeight, setMaxConsoleHeight] = useState<number | null>(null);
@@ -33,7 +35,7 @@ export default function ServerConsole() {
   }, [statsRef.current]);
 
   return (
-    <ServerContentContainer title='Console' hideTitleComponent>
+    <ServerContentContainer title={t('pages.server.console.title', {})} hideTitleComponent>
       <Group justify='space-between' mb='md'>
         <div className='flex flex-col'>
           <Title order={1} c='white'>

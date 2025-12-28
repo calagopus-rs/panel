@@ -1,6 +1,7 @@
 import { Group, Title } from '@mantine/core';
 import { Dispatch, ReactNode, SetStateAction } from 'react';
 import TextInput from '@/elements/input/TextInput.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import ContentContainer from './ContentContainer.tsx';
 
@@ -23,6 +24,7 @@ export default function ServerContentContainer({
   contentRight,
   children,
 }: Props) {
+  const { t } = useTranslations();
   const { server } = useServerStore();
 
   return (
@@ -36,7 +38,12 @@ export default function ServerContentContainer({
             {subtitle ? <p className='text-xs text-gray-300!'>{subtitle}</p> : null}
           </div>
           <Group>
-            <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+            <TextInput
+              placeholder={t('common.input.search', {})}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              w={250}
+            />
             {contentRight}
           </Group>
         </Group>

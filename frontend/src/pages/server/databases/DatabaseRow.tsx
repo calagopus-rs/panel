@@ -9,12 +9,14 @@ import Spinner from '@/elements/Spinner.tsx';
 import { TableData, TableRow } from '@/elements/Table.tsx';
 import { databaseTypeLabelMapping } from '@/lib/enums.ts';
 import { bytesToString } from '@/lib/size.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import DatabaseDeleteModal from './modals/DatabaseDeleteModal.tsx';
 import DatabaseDetailsModal from './modals/DatabaseDetailsModal.tsx';
 import DatabaseEditModal from './modals/DatabaseEditModal.tsx';
 
 export default function DatabaseRow({ database }: { database: ServerDatabase }) {
+  const { t } = useTranslations();
   const [openModal, setOpenModal] = useState<'edit' | 'details' | 'delete' | null>(null);
   const [size, setSize] = useState(0);
   const [sizeLoading, setSizeLoading] = useState(true);
@@ -35,11 +37,16 @@ export default function DatabaseRow({ database }: { database: ServerDatabase }) 
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
-          { icon: faEye, label: 'Details', onClick: () => setOpenModal('details'), color: 'gray' },
+          { icon: faPencil, label: t('common.button.edit', {}), onClick: () => setOpenModal('edit'), color: 'gray' },
+          {
+            icon: faEye,
+            label: t('pages.server.databases.button.details', {}),
+            onClick: () => setOpenModal('details'),
+            color: 'gray',
+          },
           {
             icon: faTrash,
-            label: 'Delete',
+            label: t('common.button.delete', {}),
             disabled: database.isLocked,
             onClick: () => setOpenModal('delete'),
             color: 'red',

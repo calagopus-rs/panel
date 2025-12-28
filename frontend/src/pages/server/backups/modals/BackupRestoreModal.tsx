@@ -6,6 +6,7 @@ import restoreBackup from '@/api/server/backups/restoreBackup.ts';
 import Button from '@/elements/Button.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
@@ -13,6 +14,7 @@ type Props = ModalProps & {
 };
 
 export default function BackupRestoreModal({ backup, opened, onClose }: Props) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { server, updateServer } = useServerStore();
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ export default function BackupRestoreModal({ backup, opened, onClose }: Props) {
     restoreBackup(server.uuid, backup.uuid, { truncateDirectory: truncate })
       .then(() => {
         onClose();
-        addToast('Restoring backup...', 'success');
+        addToast(t('pages.server.backups.toast.restoringBackup', {}), 'success');
 
         navigate(`/server/${server.uuidShort}`);
         updateServer({ status: 'restoring_backup' });
@@ -38,9 +40,9 @@ export default function BackupRestoreModal({ backup, opened, onClose }: Props) {
   };
 
   return (
-    <Modal title='Restore Backup' onClose={onClose} opened={opened}>
+    <Modal title={t('pages.server.backups.modal.restoreBackup.title', {})} onClose={onClose} opened={opened}>
       <Switch
-        label='Do you want to empty the filesystem of this server before restoring the backup?'
+        label={t('common.form.truncateDirectory', {})}
         name='truncate'
         checked={truncate}
         onChange={(e) => setTruncate(e.target.checked)}
@@ -48,10 +50,10 @@ export default function BackupRestoreModal({ backup, opened, onClose }: Props) {
 
       <Group mt='md'>
         <Button color={truncate ? 'red' : undefined} onClick={doRestore} loading={loading}>
-          Restore
+          {t('pages.server.backups.button.restore', {})}
         </Button>
         <Button variant='default' onClick={onClose}>
-          Close
+          {t('common.button.close', {})}
         </Button>
       </Group>
     </Modal>

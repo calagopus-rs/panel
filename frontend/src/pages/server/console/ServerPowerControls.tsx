@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import Button from '@/elements/Button.tsx';
 import Can from '@/elements/Can.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 export default function ServerPowerControls() {
+  const { t } = useTranslations();
   const [open, setOpen] = useState(false);
   const state = useServerStore((state) => state.state);
   const instance = useServerStore((state) => state.socketInstance);
@@ -33,11 +35,11 @@ export default function ServerPowerControls() {
       <ConfirmationModal
         opened={open}
         onClose={() => setOpen(false)}
-        title='Forcibly Stop Process'
-        confirm='Continue'
+        title={t('pages.server.console.power.modal.forceStop.title', {})}
+        confirm={t('common.button.continue', {})}
         onConfirmed={() => onButtonClick('kill-confirmed')}
       >
-        Forcibly stopping a server can lead to data corruption.
+        {t('pages.server.console.power.modal.forceStop.content', {})}
       </ConfirmationModal>
 
       <Can action='control.start'>
@@ -47,17 +49,17 @@ export default function ServerPowerControls() {
           loading={state === 'starting'}
           onClick={() => onButtonClick('start')}
         >
-          Start
+          {t('pages.server.console.power.start', {})}
         </Button>
       </Can>
       <Can action='control.restart'>
         <Button color='gray' disabled={!state} onClick={() => onButtonClick('restart')}>
-          Restart
+          {t('pages.server.console.power.restart', {})}
         </Button>
       </Can>
       <Can action='control.stop'>
         <Button color='red' disabled={state === 'offline'} onClick={() => onButtonClick(killable ? 'kill' : 'stop')}>
-          {killable ? 'Kill' : 'Stop'}
+          {killable ? t('pages.server.console.power.kill', {}) : t('pages.server.console.power.stop', {})}
         </Button>
       </Can>
     </div>

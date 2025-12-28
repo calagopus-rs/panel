@@ -11,9 +11,11 @@ import TextArea from '@/elements/input/TextArea.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import { serverSettingsRenameSchema } from '@/lib/schemas/server/settings.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 export default function RenameContainer() {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { server, updateServer } = useServerStore();
 
@@ -32,7 +34,7 @@ export default function RenameContainer() {
     setLoading(true);
     renameServer(server.uuid, form.values)
       .then(() => {
-        addToast('Server renamed.', 'success');
+        addToast(t('pages.server.settings.rename.toast.renamed', {}), 'success');
         updateServer(form.values);
       })
       .catch((msg) => {
@@ -47,16 +49,26 @@ export default function RenameContainer() {
         <form onSubmit={form.onSubmit(() => doUpdate())}>
           <Stack h='100%'>
             <Title order={2} c='white'>
-              Rename Server
+              {t('pages.server.settings.rename.title', {})}
             </Title>
 
-            <TextInput withAsterisk label='Server Name' placeholder='Server Name' {...form.getInputProps('name')} />
+            <TextInput
+              withAsterisk
+              label={t('pages.server.settings.rename.form.serverName', {})}
+              placeholder={t('pages.server.settings.rename.form.serverName', {})}
+              {...form.getInputProps('name')}
+            />
 
-            <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
+            <TextArea
+              label={t('common.form.description', {})}
+              placeholder={t('common.form.description', {})}
+              rows={3}
+              {...form.getInputProps('description')}
+            />
 
             <Group h='100%'>
               <Button type='submit' loading={loading} disabled={!form.isValid()}>
-                Save
+                {t('common.button.save', {})}
               </Button>
             </Group>
           </Stack>

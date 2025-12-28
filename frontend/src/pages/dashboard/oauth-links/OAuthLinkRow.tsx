@@ -9,9 +9,11 @@ import { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 
 export default function OAuthLinkRow({ oauthLink }: { oauthLink: UserOAuthLink }) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { removeOAuthLink } = useUserStore();
 
@@ -21,7 +23,7 @@ export default function OAuthLinkRow({ oauthLink }: { oauthLink: UserOAuthLink }
     await deleteOAuthLink(oauthLink.uuid)
       .then(() => {
         removeOAuthLink(oauthLink);
-        addToast('OAuth Link removed.', 'success');
+        addToast(t('pages.account.oauthLinks.modal.deleteOAuthLink.toast.removed', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -33,13 +35,13 @@ export default function OAuthLinkRow({ oauthLink }: { oauthLink: UserOAuthLink }
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title='Confirm OAuth Link Deletion'
-        confirm='Delete'
+        title={t('pages.account.oauthLinks.modal.deleteOAuthLink.title', {})}
+        confirm={t('common.button.delete', {})}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete the
-        <Code>{oauthLink.oauthProvider.name}</Code>
-        connection from your account?
+        {t('pages.account.oauthLinks.modal.deleteOAuthLink.content', {
+          provider: oauthLink.oauthProvider.name,
+        }).md()}
       </ConfirmationModal>
 
       <ContextMenu
@@ -47,7 +49,7 @@ export default function OAuthLinkRow({ oauthLink }: { oauthLink: UserOAuthLink }
           {
             icon: faTrash,
             disabled: !oauthLink.oauthProvider.userManageable,
-            label: 'Remove',
+            label: t('common.button.remove', {}),
             onClick: () => setOpenModal('delete'),
             color: 'red',
           },
@@ -68,7 +70,7 @@ export default function OAuthLinkRow({ oauthLink }: { oauthLink: UserOAuthLink }
 
             <TableData>
               {!oauthLink.lastUsed ? (
-                'N/A'
+                t('common.na', {})
               ) : (
                 <Tooltip label={formatDateTime(oauthLink.lastUsed)}>{formatTimestamp(oauthLink.lastUsed)}</Tooltip>
               )}

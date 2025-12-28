@@ -11,6 +11,7 @@ import Card from '@/elements/Card.tsx';
 import Select from '@/elements/input/Select.tsx';
 import { serverSettingsTimezoneSchema } from '@/lib/schemas/server/settings.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 
 const timezones = Object.keys(zones)
@@ -21,6 +22,7 @@ const timezones = Object.keys(zones)
   }));
 
 export default function TimezoneContainer() {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
 
@@ -39,7 +41,7 @@ export default function TimezoneContainer() {
     setLoading(true);
     updateTimezone(server.uuid, form.values)
       .then(() => {
-        addToast('Server timezone updated.', 'success');
+        addToast(t('pages.server.settings.timezone.toast.updated', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -65,16 +67,16 @@ export default function TimezoneContainer() {
         <form onSubmit={form.onSubmit(() => doUpdate())}>
           <Stack h='100%'>
             <Title order={2} c='white'>
-              Timezone
+              {t('pages.server.settings.timezone.title', {})}
             </Title>
 
             <Stack gap='xs'>
               <Select
                 withAsterisk
-                label='Timezone'
+                label={t('pages.server.settings.timezone.form.timezone', {})}
                 data={[
                   {
-                    label: 'System',
+                    label: t('pages.server.settings.timezone.form.system', {}),
                     value: '',
                   },
                   ...timezones,
@@ -87,7 +89,7 @@ export default function TimezoneContainer() {
 
             <Group mt='auto'>
               <Button type='submit' loading={loading} disabled={!form.isValid()}>
-                Save
+                {t('common.button.save', {})}
               </Button>
             </Group>
           </Stack>
