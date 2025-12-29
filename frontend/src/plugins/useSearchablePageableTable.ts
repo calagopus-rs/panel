@@ -25,17 +25,8 @@ export function useSearchablePaginatedTable<T>({
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(initialPage);
-
-  useEffect(() => {
-    if (modifyParams) {
-      const urlPage = Number(searchParams.get('page')) || initialPage;
-      const urlSearch = searchParams.get('search') || '';
-      setPage(urlPage);
-      setSearch(urlSearch);
-    }
-  }, [modifyParams]);
+  const [search, setSearch] = useState(modifyParams ? searchParams.get('search') || '' : '');
+  const [page, setPage] = useState(modifyParams ? Number(searchParams.get('page')) || initialPage : initialPage);
 
   useEffect(() => {
     if (modifyParams) {
