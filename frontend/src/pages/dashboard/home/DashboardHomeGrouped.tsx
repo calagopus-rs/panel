@@ -1,6 +1,6 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import getServerGroups from '@/api/me/servers/groups/getServerGroups.ts';
 import updateServerGroupsOrder from '@/api/me/servers/groups/updateServerGroupsOrder.ts';
@@ -17,6 +17,8 @@ import ServerGroupItem from './ServerGroupItem.tsx';
 interface DndServerGroup extends UserServerGroup, DndItem {
   id: string;
 }
+
+const MemoizedServerGroupItem = memo(ServerGroupItem);
 
 export default function DashboardHome() {
   const { t } = useTranslations();
@@ -70,7 +72,7 @@ export default function DashboardHome() {
           renderOverlay={(activeItem) =>
             activeItem ? (
               <div style={{ cursor: 'grabbing' }}>
-                <ServerGroupItem
+                <MemoizedServerGroupItem
                   serverGroup={activeItem}
                   dragHandleProps={{
                     style: { cursor: 'grabbing' },
@@ -87,7 +89,7 @@ export default function DashboardHome() {
                   key={serverGroup.id}
                   id={serverGroup.id}
                   renderItem={({ dragHandleProps }) => (
-                    <ServerGroupItem serverGroup={serverGroup} dragHandleProps={dragHandleProps} />
+                    <MemoizedServerGroupItem serverGroup={serverGroup} dragHandleProps={dragHandleProps} />
                   )}
                 />
               ))}

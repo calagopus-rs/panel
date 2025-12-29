@@ -1,7 +1,7 @@
 import { rectSortingStrategy } from '@dnd-kit/sortable';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import getEggVariables from '@/api/admin/nests/eggs/variables/getEggVariables.ts';
 import updateEggVariableOrder from '@/api/admin/nests/eggs/variables/updateEggVariableOrder.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
@@ -16,6 +16,8 @@ import { useAdminStore } from '@/stores/admin.tsx';
 interface DndEggVariable extends NestEggVariable, DndItem {
   id: string;
 }
+
+const MemoizedEggVariableContainer = memo(EggVariableContainer);
 
 export default function AdminEggVariables({
   contextNest,
@@ -101,7 +103,7 @@ export default function AdminEggVariables({
           renderOverlay={(activeVariable) =>
             activeVariable ? (
               <div style={{ cursor: 'grabbing' }}>
-                <EggVariableContainer
+                <MemoizedEggVariableContainer
                   contextNest={contextNest}
                   contextEgg={contextEgg}
                   contextVariable={activeVariable}
@@ -118,7 +120,7 @@ export default function AdminEggVariables({
                   id={variable.id}
                   renderItem={({ dragHandleProps }) => (
                     <div {...dragHandleProps} className='h-full'>
-                      <EggVariableContainer
+                      <MemoizedEggVariableContainer
                         key={variable.uuid ?? index}
                         contextNest={contextNest}
                         contextEgg={contextEgg}

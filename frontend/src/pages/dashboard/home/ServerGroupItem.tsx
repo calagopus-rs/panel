@@ -2,7 +2,7 @@ import { rectSortingStrategy } from '@dnd-kit/sortable';
 import { faChevronDown, faChevronUp, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon } from '@mantine/core';
-import { ComponentProps, useState } from 'react';
+import { ComponentProps, memo, useState } from 'react';
 import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios.ts';
 import deleteServerGroup from '@/api/me/servers/groups/deleteServerGroup.ts';
 import getServerGroupServers from '@/api/me/servers/groups/getServerGroupServers.ts';
@@ -34,6 +34,8 @@ function insertItems<T>(list: T[], items: T[], startIndex: number): T[] {
 interface DndServer extends Server, DndItem {
   id: string;
 }
+
+const MemoizedServerItem = memo(ServerItem);
 
 export default function ServerGroupItem({
   serverGroup,
@@ -165,7 +167,7 @@ export default function ServerGroupItem({
                 renderOverlay={(activeServer) =>
                   activeServer ? (
                     <div style={{ cursor: 'grabbing' }}>
-                      <ServerItem server={activeServer} onGroupRemove={() => null} />
+                      <MemoizedServerItem server={activeServer} onGroupRemove={() => null} />
                     </div>
                   ) : null
                 }
@@ -174,7 +176,7 @@ export default function ServerGroupItem({
                   <div className='gap-4 grid sm:grid-cols-2 mt-4'>
                     {items.map((server, i) => (
                       <SortableItem key={server.id} id={server.id}>
-                        <ServerItem
+                        <MemoizedServerItem
                           server={server}
                           onGroupRemove={() => {
                             const serverOrder = serverGroup.serverOrder.filter(

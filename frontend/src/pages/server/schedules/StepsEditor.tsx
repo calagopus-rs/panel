@@ -1,7 +1,7 @@
 import { faGear, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import updateScheduleStepsOrder from '@/api/server/schedules/steps/updateScheduleStepsOrder.ts';
 import Button from '@/elements/Button.tsx';
@@ -15,6 +15,8 @@ import StepCard from './StepCard.tsx';
 interface DndScheduleStep extends ScheduleStep, DndItem {
   id: string;
 }
+
+const MemoizedStepCard = memo(StepCard);
 
 export default function StepsEditor({ schedule }: { schedule: ServerSchedule }) {
   const { server, scheduleSteps, setScheduleSteps } = useServerStore();
@@ -106,7 +108,7 @@ export default function StepsEditor({ schedule }: { schedule: ServerSchedule }) 
             renderOverlay={(activeStep) =>
               activeStep ? (
                 <div style={{ cursor: 'grabbing' }}>
-                  <StepCard
+                  <MemoizedStepCard
                     schedule={schedule}
                     step={activeStep}
                     onStepUpdate={(step) =>
@@ -126,7 +128,7 @@ export default function StepsEditor({ schedule }: { schedule: ServerSchedule }) 
                     id={step.id}
                     renderItem={({ dragHandleProps }) => (
                       <div {...dragHandleProps}>
-                        <StepCard
+                        <MemoizedStepCard
                           schedule={schedule}
                           step={step}
                           onStepUpdate={(step) =>
