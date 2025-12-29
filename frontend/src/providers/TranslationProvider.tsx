@@ -28,7 +28,6 @@ String.prototype.md = function (): ReactNode {
 let globalTranslationHandle: never = null as never;
 
 const TranslationProvider = ({ children }: { children: ReactNode }) => {
-  const [loading, setLoading] = useState(true);
   const [language, setLanguage] = useState('en-US');
   const [languageData, setLanguageData] = useState<LanguageData | null>(null);
 
@@ -47,9 +46,7 @@ const TranslationProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (language === 'en-US') {
       setLanguageData(null);
-      setLoading(false);
     } else {
-      setLoading(true);
       axiosInstance
         .get(`/translations/${language}.json`)
         .then(({ data }) => {
@@ -77,8 +74,7 @@ const TranslationProvider = ({ children }: { children: ReactNode }) => {
 
           setLanguageData(result);
         })
-        .catch(() => setLanguage('en-US'))
-        .finally(() => setLoading(false));
+        .catch(() => setLanguage('en-US'));
     }
 
     loadZod(language);
@@ -114,9 +110,7 @@ const TranslationProvider = ({ children }: { children: ReactNode }) => {
   globalTranslationHandle = { language, setLanguage, t, tItem } as never;
 
   return (
-    <TranslationContext.Provider value={{ language, setLanguage, t, tItem }}>
-      {loading ? <Spinner.Centered /> : children}
-    </TranslationContext.Provider>
+    <TranslationContext.Provider value={{ language, setLanguage, t, tItem }}>{children}</TranslationContext.Provider>
   );
 };
 
