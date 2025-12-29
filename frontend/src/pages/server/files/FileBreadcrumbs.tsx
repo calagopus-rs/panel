@@ -17,7 +17,8 @@ export default function FileBreadcrumbs({
   browsingBackup: ServerBackup | null;
   inFileEditor?: boolean;
 }) {
-  const { server, browsingEntries, selectedFileNames, setSelectedFiles, movingFileNames } = useServerStore();
+  const { server, setBrowsingDirectory, browsingEntries, selectedFileNames, setSelectedFiles, movingFileNames } =
+    useServerStore();
 
   const [openModal, setOpenModal] = useState<'search' | null>(null);
 
@@ -53,6 +54,7 @@ export default function FileBreadcrumbs({
             key={item.path}
             to={`/server/${server?.uuidShort}/files?${createSearchParams({ directory: item.path })}`}
             className=' text-blue-300 hover:text-blue-200'
+            onClick={() => setBrowsingDirectory(item.path)}
           >
             {item.name}
           </NavLink>
