@@ -39,7 +39,7 @@ pub async fn auth(
         }
     };
 
-    if let Err(err) = permissions.has_admin_permission("locations.read") {
+    if let Err(err) = permissions.has_admin_permission("backup-configurations.read") {
         return Ok(err.into_response());
     }
 
