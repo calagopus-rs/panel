@@ -56,7 +56,7 @@ mod get {
                 .ok();
         }
 
-        permissions.has_user_permission("users.activity")?;
+        permissions.has_admin_permission("users.activity")?;
 
         let activities = UserActivity::by_user_uuid_with_pagination(
             &state.database,

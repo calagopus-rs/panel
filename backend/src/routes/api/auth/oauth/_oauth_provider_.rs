@@ -6,8 +6,8 @@ use axum::{
     routing::get,
 };
 use oauth2::{
-    AuthUrl, AuthorizationCode, ClientId, ClientSecret, RedirectUrl, TokenResponse, TokenUrl,
-    basic::BasicClient,
+    AuthUrl, AuthorizationCode, ClientId, ClientSecret, HttpRequest, HttpResponse, RedirectUrl,
+    TokenResponse, TokenUrl, basic::BasicClient,
 };
 use rand::distr::SampleString;
 use rustis::commands::StringCommands;
@@ -89,6 +89,21 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
 
             drop(settings);
 
+            let http_client = |req: HttpRequest| {
+                let client = state.client.clone();
+                async move {
+                    let response = client.execute(req.try_into()?).await?;
+                    let response = axum::http::Response::from(response);
+                    let (parts, body) = response.into_parts();
+
+                    let data = axum::body::to_bytes(axum::body::Body::new(body), usize::MAX)
+                        .await
+                        .unwrap_or_default();
+
+                    Ok::<_, reqwest::Error>(HttpResponse::from_parts(parts, data.into()))
+                }
+            };
+
             if let Some(session_id) = cookies.get("session") {
                 if !oauth_provider.user_manageable {
                     return ApiResponse::error("you cannot link with this oauth provider")
@@ -163,7 +178,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
 
                 let token = client
                     .exchange_code(AuthorizationCode::new(params.0.code))
-                    .request_async(&state.client)
+                    .request_async(&http_client)
                     .await?;
 
                 let info: serde_json::Value = state
@@ -212,7 +227,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
             } else {
                 let token = client
                     .exchange_code(AuthorizationCode::new(params.0.code))
-                    .request_async(&state.client)
+                    .request_async(&http_client)
                     .await?;
 
                 let info: serde_json::Value = state

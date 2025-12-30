@@ -105,7 +105,7 @@ mod get {
         permissions: GetPermissionManager,
         user: GetParamUser,
     ) -> ApiResponseResult {
-        permissions.has_user_permission("users.read")?;
+        permissions.has_admin_permission("users.read")?;
 
         ApiResponse::json(Response {
             user: user

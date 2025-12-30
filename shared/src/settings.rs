@@ -6,6 +6,7 @@ use std::{
     collections::HashMap,
     ops::{Deref, DerefMut},
     path::PathBuf,
+    str::FromStr,
     sync::Arc,
 };
 use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
@@ -285,6 +286,9 @@ impl AppSettingsServer {
 
 #[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettings {
+    pub telemetry_uuid: Option<uuid::Uuid>,
+    #[schema(value_type = Option<String>)]
+    pub telemetry_cron_schedule: Option<cron::Schedule>,
     pub oobe_step: Option<compact_str::CompactString>,
 
     pub storage_driver: StorageDriver,
@@ -307,6 +311,18 @@ impl AppSettings {
         let mut keys = Vec::new();
         let mut values = Vec::new();
 
+        keys.push("::telemetry_uuid");
+        values.push(
+            self.telemetry_uuid
+                .as_ref()
+                .map_or_else(|| "".into(), |u| u.to_compact_string()),
+        );
+        keys.push("::telemetry_cron_schedule");
+        values.push(
+            self.telemetry_cron_schedule
+                .as_ref()
+                .map_or_else(|| "".into(), |s| s.to_compact_string()),
+        );
         keys.push("::oobe_step");
         values.push(self.oobe_step.clone().unwrap_or_default());
 
@@ -496,6 +512,12 @@ impl AppSettings {
         database: &crate::database::Database,
     ) -> Self {
         AppSettings {
+            telemetry_uuid: map
+                .remove("::telemetry_uuid")
+                .and_then(|u| uuid::Uuid::from_str(&u).ok()),
+            telemetry_cron_schedule: map
+                .remove("::telemetry_cron_schedule")
+                .and_then(|s| cron::Schedule::from_str(&s).ok()),
             oobe_step: match map.remove("::oobe_step") {
                 Some(step) if step.is_empty() => None,
                 Some(step) => Some(step),

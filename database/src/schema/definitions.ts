@@ -68,10 +68,11 @@ export const usersTable = new DatabaseTable('users')
   .addColumn('password', text().notNull())
   .addColumn('admin', boolean().default(false).notNull())
   .addColumn('totp_enabled', boolean().default(false).notNull())
+  .addColumn('totp_last_used', timestamp())
   .addColumn('totp_secret', char({ length: 32 }))
   .addColumn('language', varchar({ length: 15 }).default('en-US').notNull())
-  .addColumn('toast_position', userToastPositionEnum.intoDrizzleEnum()().default('TOP_RIGHT').notNull())
-  .addColumn('start_on_grouped_servers', boolean().default(true).notNull())
+  .addColumn('toast_position', userToastPositionEnum.intoDrizzleEnum()().default('BOTTOM_RIGHT').notNull())
+  .addColumn('start_on_grouped_servers', boolean().default(false).notNull())
   .addColumn('created', timestamp().defaultNow().notNull())
   .addConfigBuilder((cols) => [
     uniqueIndex('users_external_id_idx').on(cols.external_id),

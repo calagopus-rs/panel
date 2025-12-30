@@ -15,6 +15,16 @@ nestify::nest! {
 }
 
 #[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)]
+pub enum AppContainerType {
+    #[serde(rename = "official")]
+    Official,
+    #[serde(rename = "unknown")]
+    Unknown,
+    #[serde(rename = "none")]
+    None,
+}
+
+#[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)]
 pub enum ArchiveFormat {
     #[serde(rename = "tar")]
     Tar,
@@ -1808,6 +1818,62 @@ pub mod system_logs_file {
         pub type Response200 = String;
 
         pub type Response404 = ApiError;
+
+        pub type Response = Response200;
+    }
+}
+pub mod system_overview {
+    use super::*;
+
+    pub mod get {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub version: compact_str::CompactString,
+                #[schema(inline)]
+                pub container_type: AppContainerType,
+                #[schema(inline)]
+                pub cpu: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Cpu {
+                    #[schema(inline)]
+                    pub name: compact_str::CompactString,
+                    #[schema(inline)]
+                    pub brand: compact_str::CompactString,
+                    #[schema(inline)]
+                    pub vendor_id: compact_str::CompactString,
+                    #[schema(inline)]
+                    pub frequency_mhz: u64,
+                    #[schema(inline)]
+                    pub cpu_count: u64,
+                },
+
+                #[schema(inline)]
+                pub memory: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Memory {
+                    #[schema(inline)]
+                    pub total_bytes: u64,
+                    #[schema(inline)]
+                    pub free_bytes: u64,
+                    #[schema(inline)]
+                    pub used_bytes: u64,
+                },
+
+                #[schema(inline)]
+                pub servers: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Servers {
+                    #[schema(inline)]
+                    pub total: u64,
+                    #[schema(inline)]
+                    pub online: u64,
+                    #[schema(inline)]
+                    pub offline: u64,
+                },
+
+                #[schema(inline)]
+                pub architecture: compact_str::CompactString,
+                #[schema(inline)]
+                pub kernel_version: compact_str::CompactString,
+            }
+        }
 
         pub type Response = Response200;
     }

@@ -158,6 +158,15 @@ mod post {
         )
         .await?;
 
+        sqlx::query!(
+            "UPDATE users
+            SET totp_last_used = NOW()
+            WHERE users.uuid = $1",
+            user.uuid
+        )
+        .execute(state.database.write())
+        .await?;
+
         let settings = state.settings.get().await;
 
         cookies.add(

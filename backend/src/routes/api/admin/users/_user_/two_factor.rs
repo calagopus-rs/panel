@@ -46,7 +46,7 @@ mod delete {
 
         sqlx::query!(
             "UPDATE users
-            SET totp_enabled = false, totp_secret = NULL
+            SET totp_enabled = false, totp_last_used = NULL, totp_secret = NULL
             WHERE users.uuid = $1",
             user.uuid
         )

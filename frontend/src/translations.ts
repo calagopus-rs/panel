@@ -315,6 +315,7 @@ const baseTranslations = defineTranslations({
               title: 'Two-Factor Authentication',
               toast: {
                 disabled: 'Two-factor authentication disabled successfully.',
+                enabled: 'Two-factor authentication enabled successfully. Please copy your recovery codes.',
               },
               modal: {
                 disableTwoFactor: {
@@ -329,7 +330,7 @@ const baseTranslations = defineTranslations({
                   description:
                     "Help protect your account from unauthorized access. You'll be prompted for a verification code each time you sign in.",
                   descriptionQR:
-                    'Scan the QR code above using the two-step authentication app of your choice. Then, enter the 6-digit code generated into the field below.',
+                    'Scan the QR code above using the two-factor authentication app of your choice. Then, enter the 6-digit code generated into the field below.',
                   form: {
                     code: 'Authentication Code',
                   },
@@ -347,6 +348,7 @@ const baseTranslations = defineTranslations({
               twoFactorEnabled: 'Two-Factor Verification is currently enabled.',
               twoFactorDisabled:
                 'You do not currently have two-factor verification enabled on your account. Click the button below to begin configuring it.',
+              twoFactorLastUsed: 'Last used: **{date}**',
             },
             account: {
               title: 'Account Details',

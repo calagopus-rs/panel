@@ -18,4 +18,4 @@ cron = { workspace = true }
 regex = { workspace = true }
 serde_regex = { workspace = true }
 compact_str = { workspace = true }
-nestify = "0.3.3"
+nestify = { workspace = true }

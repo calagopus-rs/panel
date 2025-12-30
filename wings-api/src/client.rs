@@ -759,6 +759,12 @@ impl WingsClient {
         .await
     }
 
+    pub async fn get_system_overview(
+        &self,
+    ) -> Result<super::system_overview::get::Response, ApiHttpError> {
+        request_impl(self, Method::GET, "/api/system/overview", None::<&()>, None).await
+    }
+
     pub async fn get_system_stats(
         &self,
     ) -> Result<super::system_stats::get::Response, ApiHttpError> {

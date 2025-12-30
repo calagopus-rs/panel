@@ -1,5 +1,5 @@
 use include_dir::{Dir, include_dir};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::{
     sync::{Arc, LazyLock},
     time::Instant,
@@ -23,6 +23,7 @@ pub mod prelude;
 pub mod response;
 pub mod settings;
 pub mod storage;
+pub mod telemetry;
 pub mod utils;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -59,7 +60,7 @@ impl ApiError {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
 pub enum AppContainerType {
     Official,

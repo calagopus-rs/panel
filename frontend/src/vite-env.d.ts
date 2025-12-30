@@ -869,6 +869,7 @@ declare global {
     role: Role;
     avatar?: string;
     totpEnabled: boolean;
+    totpLastUsed: Date | null;
     requireTwoFactor: boolean;
     toastPosition: UserToastPosition;
     startOnGroupedServers: boolean;

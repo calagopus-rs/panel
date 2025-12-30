@@ -4,7 +4,6 @@ import { GetPlaceholders, getTranslationMapping, TranslationContext, Translation
 import { z } from 'zod';
 import { $ZodConfig } from 'zod/v4/core';
 import { axiosInstance } from '@/api/axios.ts';
-import Spinner from '@/elements/Spinner.tsx';
 import { languageToZodLocaleMapping } from '@/lib/enums.ts';
 import baseTranslations from '@/translations.ts';
 

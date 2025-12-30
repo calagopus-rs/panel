@@ -1,5 +1,6 @@
 import { Grid, Title } from '@mantine/core';
 import Card from '@/elements/Card.tsx';
+import { formatTimestamp } from '@/lib/time.ts';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import TwoFactorDisableButton from './actions/TwoFactorDisableButton.tsx';
@@ -19,6 +20,13 @@ export default function TwoFactorContainer() {
           {user!.totpEnabled
             ? t('pages.account.account.containers.twoFactor.twoFactorEnabled', {}).md()
             : t('pages.account.account.containers.twoFactor.twoFactorDisabled', {}).md()}
+          {user?.totpLastUsed && (
+            <div className='mt-2 text-sm text-gray-400'>
+              {t('pages.account.account.containers.twoFactor.twoFactorLastUsed', {
+                date: formatTimestamp(user.totpLastUsed),
+              }).md()}
+            </div>
+          )}
         </div>
         <div className='pt-4 flex mt-auto'>
           {user!.totpEnabled ? <TwoFactorDisableButton /> : <TwoFactorSetupButton />}

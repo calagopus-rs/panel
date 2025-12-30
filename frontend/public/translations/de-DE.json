@@ -322,7 +322,8 @@
               "twoFactor": {
                 "title": "Zwei-Faktor-Authentifizierung",
                 "toast": {
-                  "disabled": "Zwei-Faktor-Authentifizierung erfolgreich deaktiviert."
+                  "disabled": "Zwei-Faktor-Authentifizierung erfolgreich deaktiviert.",
+                  "enabled": "Zwei-Faktor-Authentifizierung erfolgreich eingerichtet. Bewahre deine Wiederherstellungscodes sicher auf."
                 },
                 "modal": {
                   "disableTwoFactor": {
@@ -350,7 +351,8 @@
                   "setupTwoFactor": "2FA einrichten"
                 },
                 "twoFactorEnabled": "Zwei-Faktor-Verifizierung ist derzeit aktiviert.",
-                "twoFactorDisabled": "Du hast derzeit keine Zwei-Faktor-Verifizierung für deinen Account aktiviert. Klicke auf den Button unten, um mit der Konfiguration zu beginnen."
+                "twoFactorDisabled": "Du hast derzeit keine Zwei-Faktor-Verifizierung für deinen Account aktiviert. Klicke auf den Button unten, um mit der Konfiguration zu beginnen.",
+                "twoFactorLastUsed": "Zuletzt verwendet: **{date}**"
               },
               "account": {
                 "title": "Account-Details",

@@ -23,7 +23,7 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    if let Err(err) = permissions.has_server_permission("roles.read") {
+    if let Err(err) = permissions.has_admin_permission("roles.read") {
         return Ok(err.into_response());
     }
 

@@ -3,6 +3,7 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
+import getAdminTelemetry from '@/api/admin/getAdminTelemetry.ts';
 import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
@@ -14,6 +15,7 @@ import { adminSettingsApplicationSchema } from '@/lib/schemas/admin/settings.ts'
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useAdminStore } from '@/stores/admin.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
+import TelemetryPreviewModal from './modals/TelemetryPreviewModal.tsx';
 
 export default function ApplicationContainer() {
   const { addToast } = useToast();
@@ -21,6 +23,7 @@ export default function ApplicationContainer() {
   const { languages } = useGlobalStore();
 
   const [loading, setLoading] = useState(false);
+  const [telemetryData, setTelemetryData] = useState<object | null>(null);
 
   const form = useForm<z.infer<typeof adminSettingsApplicationSchema>>({
     initialValues: {
@@ -53,8 +56,27 @@ export default function ApplicationContainer() {
       .finally(() => setLoading(false));
   };
 
+  const doPreviewTelemetry = () => {
+    setLoading(true);
+
+    getAdminTelemetry()
+      .then((data) => {
+        setTelemetryData(data);
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => setLoading(false));
+  };
+
   return (
     <AdminContentContainer title='Application Settings' titleOrder={2}>
+      <TelemetryPreviewModal
+        telemetry={telemetryData}
+        opened={telemetryData !== null}
+        onClose={() => setTelemetryData(null)}
+      />
+
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Stack>
           <Group grow>
@@ -106,6 +128,9 @@ export default function ApplicationContainer() {
         <Group mt='md'>
           <Button type='submit' disabled={!form.isValid()} loading={loading}>
             Save
+          </Button>
+          <Button variant='outline' loading={loading} onClick={doPreviewTelemetry}>
+            Telemetry Preview
           </Button>
         </Group>
       </form>

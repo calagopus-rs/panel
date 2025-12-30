@@ -8,6 +8,7 @@ use axum::{
     routing::get,
 };
 use colored::Colorize;
+use rand::Rng;
 use sentry_tower::SentryHttpLayer;
 use sha2::Digest;
 use shared::{
@@ -312,6 +313,80 @@ async fn main() {
         );
     }
 
+    background_task_builder
+        .add_task(
+            "collect_telemetry",
+            Box::new(|state| {
+                Box::pin(async move {
+                    fn generate_randomized_cron_schedule() -> cron::Schedule {
+                        let mut rng = rand::rng();
+                        let seconds: u32 = rng.random_range(0..60);
+                        let minutes: u32 = rng.random_range(0..60);
+                        let hours: u32 = rng.random_range(0..24);
+
+                        format!("{} {} {} * * *", seconds, minutes, hours)
+                            .parse()
+                            .unwrap()
+                    }
+
+                    let settings = state.settings.get().await;
+                    if !settings.app.telemetry_enabled {
+                        return Ok(());
+                    }
+                    let cron_schedule = settings
+                        .telemetry_cron_schedule
+                        .clone()
+                        .unwrap_or_else(generate_randomized_cron_schedule);
+                    if settings.telemetry_cron_schedule.is_none() {
+                        drop(settings);
+                        let mut new_settings = state.settings.get_mut().await;
+                        new_settings.telemetry_cron_schedule = Some(cron_schedule.clone());
+                        new_settings.save().await?;
+                    } else {
+                        drop(settings);
+                    }
+
+                    let schedule_iter = cron_schedule.upcoming(chrono::Utc);
+
+                    for target_datetime in schedule_iter {
+                        let target_timestamp = target_datetime.timestamp();
+                        let now_timestamp = chrono::Utc::now().timestamp();
+                        let sleep_duration = target_timestamp - now_timestamp;
+                        if sleep_duration <= 0 {
+                            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                            continue;
+                        }
+
+                        tokio::time::sleep(std::time::Duration::from_secs(sleep_duration as u64))
+                            .await;
+
+                        let telemetry_data =
+                            match shared::telemetry::TelemetryData::collect(&state).await {
+                                Ok(data) => data,
+                                Err(err) => {
+                                    tracing::error!("failed to collect telemetry data: {:#?}", err);
+                                    continue;
+                                }
+                            };
+
+                        if let Err(err) = state
+                            .client
+                            .post("https://calagopus.com/api/telemetry")
+                            .json(&telemetry_data)
+                            .send()
+                            .await
+                        {
+                            tracing::error!("failed to send telemetry data: {:#?}", err);
+                        } else {
+                            tracing::info!("successfully sent telemetry data");
+                        }
+                    }
+
+                    Ok(())
+                })
+            }),
+        )
+        .await;
     background_task_builder
         .add_task(
             "delete_expired_sessions",

@@ -3,7 +3,7 @@ resolver = "3"
 members = ["backend", "rule-validator", "wings-api", "shared", "backend-extensions/*"]
 default-members = ["backend"]
 package.license = "MIT"
-package.version = "0.17.6"
+package.version = "0.17.7"
 package.edition = "2024"
 
 [workspace.dependencies]
@@ -30,7 +30,7 @@ validator = { version = "0.20.0", features = ["derive"] }
 serde = { version = "1.0.218", features = ["derive", "rc"] }
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
 serde_yml = "0.0.12"
-reqwest = { version = "0.12.12", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.13.0", features = ["json", "query"] }
 chrono = { version = "0.4.40", features = ["serde"] }
 uuid = { version = "1.17.0", features = ["v4", "serde"] }
 indexmap = { version = "2.7.1", features = ["serde"] }
@@ -52,6 +52,7 @@ oauth2 = "5.0.0"
 semver = { version = "1.0.27", features = ["serde"] }
 tempfile = "3.23.0"
 compact_str = { git = "https://github.com/0x7d8/compact_str.git", version = "0.9.0", features = ["serde", "utoipa", "sqlx", "sqlx-postgres", "sqlx-mysql"] }
+nestify = "0.3.3"
 
 # dev (for development)
 [profile.dev.package."*"]

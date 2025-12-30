@@ -67,7 +67,7 @@ export default function TwoFactorSetupButton() {
     enableTwoFactor(form.values)
       .then(({ recoveryCodes }) => {
         setRecoveryCodes(recoveryCodes);
-        addToast('Two-factor authentication enabled. Please copy your recovery codes.', 'warning');
+        addToast(t('pages.account.account.containers.twoFactor.toast.enabled', {}), 'warning');
         stageStack.open('recovery');
       })
       .catch((msg) => {

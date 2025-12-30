@@ -189,6 +189,7 @@ pub struct User {
 
     pub admin: bool,
     pub totp_enabled: bool,
+    pub totp_last_used: Option<chrono::NaiveDateTime>,
     pub totp_secret: Option<String>,
 
     pub language: compact_str::CompactString,
@@ -232,6 +233,10 @@ impl BaseModel for User {
             (
                 "users.totp_enabled",
                 compact_str::format_compact!("{prefix}totp_enabled"),
+            ),
+            (
+                "users.totp_last_used",
+                compact_str::format_compact!("{prefix}totp_last_used"),
             ),
             (
                 "users.totp_secret",
@@ -286,6 +291,8 @@ impl BaseModel for User {
             admin: row.try_get(compact_str::format_compact!("{prefix}admin").as_str())?,
             totp_enabled: row
                 .try_get(compact_str::format_compact!("{prefix}totp_enabled").as_str())?,
+            totp_last_used: row
+                .try_get(compact_str::format_compact!("{prefix}totp_last_used").as_str())?,
             totp_secret: row
                 .try_get(compact_str::format_compact!("{prefix}totp_secret").as_str())?,
             language: row.try_get(compact_str::format_compact!("{prefix}language").as_str())?,
@@ -757,6 +764,7 @@ impl User {
             name_last: self.name_last,
             admin: self.admin,
             totp_enabled: self.totp_enabled,
+            totp_last_used: self.totp_last_used.map(|dt| dt.and_utc()),
             require_two_factor,
             language: self.language,
             toast_position: self.toast_position,
@@ -856,6 +864,7 @@ pub struct ApiFullUser {
 
     pub admin: bool,
     pub totp_enabled: bool,
+    pub totp_last_used: Option<chrono::DateTime<chrono::Utc>>,
     pub require_two_factor: bool,
 
     pub language: compact_str::CompactString,

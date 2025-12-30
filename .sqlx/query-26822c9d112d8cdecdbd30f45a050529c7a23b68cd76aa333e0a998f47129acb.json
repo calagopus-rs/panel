@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT server_backups.disk as \"disk: crate::models::server_backup::BackupDisk\", COUNT(*) as count\n            FROM server_backups\n            GROUP BY server_backups.disk",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "disk: crate::models::server_backup::BackupDisk",
+        "type_info": {
+          "Custom": {
+            "name": "backup_disk",
+            "kind": {
+              "Enum": [
+                "LOCAL",
+                "S3",
+                "DDUP_BAK",
+                "BTRFS",
+                "ZFS",
+                "RESTIC"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "26822c9d112d8cdecdbd30f45a050529c7a23b68cd76aa333e0a998f47129acb"
+}

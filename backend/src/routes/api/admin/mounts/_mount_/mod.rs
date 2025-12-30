@@ -25,7 +25,7 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    if let Err(err) = permissions.has_server_permission("mounts.read") {
+    if let Err(err) = permissions.has_admin_permission("mounts.read") {
         return Ok(err.into_response());
     }
 
