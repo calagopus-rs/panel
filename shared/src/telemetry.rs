@@ -110,6 +110,7 @@ impl TelemetryData {
         let backup_disks = sqlx::query!(
             r#"SELECT server_backups.disk as "disk: crate::models::server_backup::BackupDisk", COUNT(*) as count
             FROM server_backups
+            WHERE server_backups.completed IS NOT NULL AND server_backups.deleted IS NULL
             GROUP BY server_backups.disk"#
         )
         .fetch_all(state.database.read())

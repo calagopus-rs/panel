@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT server_backups.disk as \"disk: crate::models::server_backup::BackupDisk\", COUNT(*) as count\n            FROM server_backups\n            GROUP BY server_backups.disk",
+  "query": "SELECT server_backups.disk as \"disk: crate::models::server_backup::BackupDisk\", COUNT(*) as count\n            FROM server_backups\n            WHERE server_backups.completed IS NOT NULL AND server_backups.deleted IS NULL\n            GROUP BY server_backups.disk",
   "describe": {
     "columns": [
       {
@@ -36,5 +36,5 @@
       null
     ]
   },
-  "hash": "26822c9d112d8cdecdbd30f45a050529c7a23b68cd76aa333e0a998f47129acb"
+  "hash": "badf80b08ffd04cf3b95b939e8c0ba6989551e5a79192ac6f7b6a9fd5df1a312"
 }
