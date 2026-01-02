@@ -221,6 +221,7 @@ mod patch {
         separate_port: Option<bool>,
 
         features: Option<Vec<compact_str::CompactString>>,
+        #[validate(custom(function = "shared::models::nest_egg::validate_docker_images"))]
         docker_images: Option<IndexMap<compact_str::CompactString, compact_str::CompactString>>,
         file_denylist: Option<Vec<compact_str::CompactString>>,
     }

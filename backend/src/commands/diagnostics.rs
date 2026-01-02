@@ -62,7 +62,11 @@ impl shared::extensions::commands::CliCommand<DiagnosticsArgs> for DiagnosticsCo
                     "internal webserver",
                     &format!("{} : {}", env.bind, env.port),
                 );
-                write_line(&mut output, "logs directory", &env.app_log_directory);
+                write_line(
+                    &mut output,
+                    "logs directory",
+                    env.app_log_directory.as_deref().unwrap_or("not set"),
+                );
                 writeln!(output).unwrap();
                 write_line(&mut output, "redis mode", &env.redis_mode.to_string());
                 write_line(
@@ -89,55 +93,63 @@ impl shared::extensions::commands::CliCommand<DiagnosticsArgs> for DiagnosticsCo
                 write_line(&mut output, "debug mode", &env.app_debug.to_string());
 
                 write_header(&mut output, "latest panel-rs logs");
-                match File::open(Path::new(&env.app_log_directory).join("panel.log")).await {
-                    Ok(file) => {
-                        let mut reader = tokio::io::BufReader::new(file);
-                        let mut all_lines = VecDeque::new();
-                        let mut line = String::new();
-                        all_lines.reserve_exact(args.log_lines);
+                if let Some(app_log_directory) = &env.app_log_directory {
+                    match File::open(Path::new(&app_log_directory).join("panel.log")).await {
+                        Ok(file) => {
+                            let mut reader = tokio::io::BufReader::new(file);
+                            let mut all_lines = VecDeque::new();
+                            let mut line = String::new();
+                            all_lines.reserve_exact(args.log_lines);
 
-                        while match reader.read_line(&mut line).await {
-                            Ok(n) => n,
-                            Err(err) => {
-                                eprintln!("{}: {err}", "failed to read wings log file".red());
-                                std::process::exit(1);
-                            }
-                        } > 0
-                        {
-                            if !line.trim().is_empty() {
-                                if all_lines.len() == args.log_lines {
-                                    all_lines.pop_front();
+                            while match reader.read_line(&mut line).await {
+                                Ok(n) => n,
+                                Err(err) => {
+                                    eprintln!("{}: {err}", "failed to read wings log file".red());
+                                    std::process::exit(1);
                                 }
-                                all_lines.push_back(line.clone());
-                            }
-                            line.clear();
-                        }
-
-                        for line in all_lines {
-                            let mut result_line = String::new();
-                            let mut chars = line.chars().peekable();
-
-                            while let Some(c) = chars.next() {
-                                if c == '\u{1b}' {
-                                    while let Some(&next) = chars.peek() {
-                                        chars.next();
-
-                                        if next.is_ascii_alphabetic() {
-                                            break;
-                                        }
+                            } > 0
+                            {
+                                if !line.trim().is_empty() {
+                                    if all_lines.len() == args.log_lines {
+                                        all_lines.pop_front();
                                     }
-                                } else {
-                                    result_line.push(c);
+                                    all_lines.push_back(line.clone());
                                 }
+                                line.clear();
                             }
 
-                            write!(output, "{result_line}").unwrap();
+                            for line in all_lines {
+                                let mut result_line = String::new();
+                                let mut chars = line.chars().peekable();
+
+                                while let Some(c) = chars.next() {
+                                    if c == '\u{1b}' {
+                                        while let Some(&next) = chars.peek() {
+                                            chars.next();
+
+                                            if next.is_ascii_alphabetic() {
+                                                break;
+                                            }
+                                        }
+                                    } else {
+                                        result_line.push(c);
+                                    }
+                                }
+
+                                write!(output, "{result_line}").unwrap();
+                            }
+                        }
+                        Err(err) => {
+                            eprintln!("{}: {err}", "failed to read wings log file".red());
+                            std::process::exit(1);
                         }
                     }
-                    Err(err) => {
-                        eprintln!("{}: {err}", "failed to read wings log file".red());
-                        std::process::exit(1);
-                    }
+                } else {
+                    writeln!(
+                        output,
+                        "logs directory is not set, cannot read panel-rs logs"
+                    )
+                    .unwrap();
                 }
 
                 println!("{output}");

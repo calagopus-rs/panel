@@ -40,14 +40,19 @@ pub struct Env {
     pub app_debug: bool,
     pub app_use_decryption_cache: bool,
     pub app_use_internal_cache: bool,
-    pub app_log_directory: String,
+    pub app_log_directory: Option<String>,
     pub app_encryption_key: String,
     pub server_name: Option<String>,
 }
 
 impl Env {
-    pub fn parse() -> Result<(Arc<Self>, tracing_appender::non_blocking::WorkerGuard), anyhow::Error>
-    {
+    pub fn parse() -> Result<
+        (
+            Arc<Self>,
+            Option<tracing_appender::non_blocking::WorkerGuard>,
+        ),
+        anyhow::Error,
+    > {
         dotenv().ok();
 
         let env = Self {
@@ -126,9 +131,8 @@ impl Env {
                 .parse()
                 .context("Invalid APP_USE_INTERNAL_CACHE value")?,
             app_log_directory: std::env::var("APP_LOG_DIRECTORY")
-                .unwrap_or("logs".to_string())
-                .trim_matches('"')
-                .to_string(),
+                .ok()
+                .map(|s| s.trim_matches('"').to_string()),
             app_encryption_key: std::env::var("APP_ENCRYPTION_KEY")
                 .expect("APP_ENCRYPTION_KEY is required")
                 .trim_matches('"')
@@ -145,46 +149,68 @@ impl Env {
             std::process::exit(1);
         }
 
-        if !std::path::Path::new(&env.app_log_directory).exists() {
-            std::fs::create_dir_all(&env.app_log_directory)
-                .context("failed to create log directory")?;
+        let (appender, guard) = if let Some(app_log_directory) = &env.app_log_directory {
+            if !std::path::Path::new(app_log_directory).exists() {
+                std::fs::create_dir_all(app_log_directory)
+                    .context("failed to create log directory")?;
+            }
+
+            let latest_log_path = std::path::Path::new(&app_log_directory).join("panel.log");
+            let latest_file = std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&latest_log_path)
+                .context("failed to open latest log file")?;
+
+            let rolling_appender = tracing_appender::rolling::Builder::new()
+                .filename_prefix("panel")
+                .filename_suffix("log")
+                .max_log_files(30)
+                .rotation(tracing_appender::rolling::Rotation::DAILY)
+                .build(app_log_directory)
+                .context("failed to create rolling log file appender")?;
+
+            let (appender, guard) = tracing_appender::non_blocking::NonBlockingBuilder::default()
+                .buffered_lines_limit(50)
+                .finish(latest_file.and(rolling_appender));
+
+            (Some(appender), Some(guard))
+        } else {
+            (None, None)
+        };
+        if let Some(file_appender) = appender {
+            tracing::subscriber::set_global_default(
+                tracing_subscriber::fmt()
+                    .with_timer(tracing_subscriber::fmt::time::ChronoLocal::rfc_3339())
+                    .with_writer(std::io::stdout.and(file_appender))
+                    .with_target(false)
+                    .with_level(true)
+                    .with_file(true)
+                    .with_line_number(true)
+                    .with_max_level(if env.app_debug {
+                        tracing::Level::DEBUG
+                    } else {
+                        tracing::Level::INFO
+                    })
+                    .finish(),
+            )?;
+        } else {
+            tracing::subscriber::set_global_default(
+                tracing_subscriber::fmt()
+                    .with_timer(tracing_subscriber::fmt::time::ChronoLocal::rfc_3339())
+                    .with_target(false)
+                    .with_level(true)
+                    .with_file(true)
+                    .with_line_number(true)
+                    .with_max_level(if env.app_debug {
+                        tracing::Level::DEBUG
+                    } else {
+                        tracing::Level::INFO
+                    })
+                    .finish(),
+            )?;
         }
 
-        let latest_log_path = std::path::Path::new(&env.app_log_directory).join("panel.log");
-        let latest_file = std::fs::OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&latest_log_path)
-            .context("failed to open latest log file")?;
-
-        let rolling_appender = tracing_appender::rolling::Builder::new()
-            .filename_prefix("panel")
-            .filename_suffix("log")
-            .max_log_files(30)
-            .rotation(tracing_appender::rolling::Rotation::DAILY)
-            .build(&env.app_log_directory)
-            .context("failed to create rolling log file appender")?;
-
-        let (file_appender, _guard) = tracing_appender::non_blocking::NonBlockingBuilder::default()
-            .buffered_lines_limit(50)
-            .finish(latest_file.and(rolling_appender));
-
-        tracing::subscriber::set_global_default(
-            tracing_subscriber::fmt()
-                .with_timer(tracing_subscriber::fmt::time::ChronoLocal::rfc_3339())
-                .with_writer(std::io::stdout.and(file_appender))
-                .with_target(false)
-                .with_level(true)
-                .with_file(true)
-                .with_line_number(true)
-                .with_max_level(if env.app_debug {
-                    tracing::Level::DEBUG
-                } else {
-                    tracing::Level::INFO
-                })
-                .finish(),
-        )?;
-
-        Ok((Arc::new(env), _guard))
+        Ok((Arc::new(env), guard))
     }
 }

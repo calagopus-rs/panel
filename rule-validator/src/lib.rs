@@ -3,7 +3,6 @@ use validator::ValidationError;
 
 mod rules;
 
-#[inline]
 pub fn validate_rules(rules: &[compact_str::CompactString]) -> Result<(), ValidationError> {
     for rule in rules {
         if let Err(err) = rules::parse_validation_rule(rule) {

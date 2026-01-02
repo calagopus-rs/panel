@@ -3,11 +3,25 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, HashSet},
     sync::{Arc, LazyLock},
 };
 use utoipa::ToSchema;
-use validator::Validate;
+use validator::{Validate, ValidationError};
+
+pub fn validate_docker_images(
+    docker_images: &IndexMap<compact_str::CompactString, compact_str::CompactString>,
+) -> Result<(), ValidationError> {
+    let mut seen_images = HashSet::new();
+    for image in docker_images.values() {
+        if !seen_images.insert(image) {
+            return Err(ValidationError::new("duplicate_docker_image")
+                .with_message(format!("duplicate docker image: {}", image).into()));
+        }
+    }
+
+    Ok(())
+}
 
 fn true_fn() -> bool {
     true
@@ -190,6 +204,7 @@ pub struct ExportedNestEgg {
         deserialize_with = "crate::deserialize::deserialize_defaultable"
     )]
     pub features: Vec<compact_str::CompactString>,
+    #[validate(custom(function = "validate_docker_images"))]
     pub docker_images: IndexMap<compact_str::CompactString, compact_str::CompactString>,
     #[serde(
         default,

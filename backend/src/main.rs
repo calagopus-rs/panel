@@ -172,7 +172,7 @@ async fn main() {
                 "{: >21} |_|  |___/",
                 format!("{} (git-{})", shared::VERSION, shared::GIT_COMMIT)
             );
-            tracing::info!("github.com/calagopus-rs/panel\n");
+            tracing::info!("github.com/calagopus/panel\n");
         }
     }
 
@@ -227,7 +227,7 @@ async fn main() {
         version: format!("{}:{}", shared::VERSION, shared::GIT_COMMIT),
 
         client: reqwest::ClientBuilder::new()
-            .user_agent(format!("github.com/calagopus-rs/panel {}", shared::VERSION))
+            .user_agent(format!("github.com/calagopus/panel {}", shared::VERSION))
             .build()
             .unwrap(),
 
@@ -642,6 +642,7 @@ async fn main() {
 
     drop(settings);
 
+    let openapi = Arc::new(openapi);
     let router = router.route("/openapi.json", get(|| async move { axum::Json(openapi) }));
 
     let http_server = async {

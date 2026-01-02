@@ -126,6 +126,7 @@ mod post {
         separate_port: bool,
 
         features: Vec<compact_str::CompactString>,
+        #[validate(custom(function = "shared::models::nest_egg::validate_docker_images"))]
         docker_images: IndexMap<compact_str::CompactString, compact_str::CompactString>,
         file_denylist: Vec<compact_str::CompactString>,
     }

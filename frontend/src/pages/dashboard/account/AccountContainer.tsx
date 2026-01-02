@@ -31,7 +31,7 @@ export default function AccountContainer({ blurred }: AccountCardProps) {
       nameFirst: '',
       nameLast: '',
       language: '',
-      toastPosition: 'top_left',
+      toastPosition: 'bottom_right',
       startOnGroupedServers: true,
     },
     validateInputOnBlur: true,

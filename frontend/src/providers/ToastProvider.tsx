@@ -73,7 +73,7 @@ const getToastPositionInitial = (position: UserToastPosition) => {
 };
 
 export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [toastPosition, setToastPosition] = useState<UserToastPosition>('top_right');
+  const [toastPosition, setToastPosition] = useState<UserToastPosition>('bottom_right');
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const addToast = useCallback((message: string, type: ToastType = 'success') => {
