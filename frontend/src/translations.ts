@@ -585,6 +585,8 @@ const baseTranslations = defineTranslations({
             inbound: 'Inbound',
             outbound: 'Outbound',
           },
+          socketConnected: 'Connected ({ping}ms ping)',
+          socketDisconnected: 'Disconnected',
         },
         files: {
           title: 'Files',

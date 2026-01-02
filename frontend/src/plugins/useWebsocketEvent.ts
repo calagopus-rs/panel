@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useServerStore } from '@/stores/server.ts';
 
 export enum SocketEvent {
+  PONG = 'pong',
   DAEMON_MESSAGE = 'daemon message',
   DAEMON_ERROR = 'daemon error',
   INSTALL_STARTED = 'install started',
@@ -33,6 +34,7 @@ export enum SocketRequest {
   SEND_LOGS = 'send logs',
   SEND_STATS = 'send stats',
   SET_STATE = 'set state',
+  PING = 'ping',
 }
 
 const useWebsocketEvent = (event: SocketEvent, callback: (...data: string[]) => void) => {
