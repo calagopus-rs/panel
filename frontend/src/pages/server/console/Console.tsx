@@ -84,6 +84,7 @@ export default function Terminal() {
   const initialScrollTimer = useRef<NodeJS.Timeout | null>(null);
 
   const HISTORY_STORAGE_KEY = `terminal_command_history_${server.uuid}`;
+  const CONSOLE_FONT_SIZE_KEY = 'terminal_console_font_size';
 
   useEffect(() => {
     let pingInterval: NodeJS.Timeout;
@@ -130,6 +131,20 @@ export default function Terminal() {
   useEffect(() => {
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
   }, [history, HISTORY_STORAGE_KEY]);
+
+  useEffect(() => {
+    const savedFontSize = localStorage.getItem(CONSOLE_FONT_SIZE_KEY);
+    if (savedFontSize) {
+      const size = parseInt(savedFontSize, 10);
+      if (!isNaN(size)) {
+        setConsoleFontSize(size);
+      }
+    }
+  }, [CONSOLE_FONT_SIZE_KEY]);
+
+  useEffect(() => {
+    localStorage.setItem(CONSOLE_FONT_SIZE_KEY, consoleFontSize.toString());
+  }, [consoleFontSize, CONSOLE_FONT_SIZE_KEY]);
 
   const checkIfAtBottom = useCallback(() => {
     if (!containerRef.current) return true;

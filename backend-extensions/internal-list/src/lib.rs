@@ -4,5 +4,6 @@
 use shared::extensions::{ConstructedExtension, distr::MetadataToml};
 
 pub fn list() -> Vec<ConstructedExtension> {
-    vec![]
+    vec![
+    ]
 }
