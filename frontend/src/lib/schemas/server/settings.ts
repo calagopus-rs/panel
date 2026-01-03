@@ -9,6 +9,10 @@ export const serverSettingsAutokillSchema = z.object({
   seconds: z.number().min(1).max(3600),
 });
 
+export const serverSettingsAutostartSchema = z.object({
+  behavior: z.enum(['always', 'unless_stopped', 'never']),
+});
+
 export const serverSettingsRenameSchema = z.object({
   name: z.string().min(3).max(255),
   description: z.string().max(1024),

@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import Badge from '@/elements/Badge.tsx';
 import Card from '@/elements/Card.tsx';
 import NumberInput from '@/elements/input/NumberInput.tsx';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
 import Select from '@/elements/input/Select.tsx';
 import Switch from '@/elements/input/Switch.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
@@ -82,6 +83,15 @@ export default function VariableContainer({
             placeholder={variable.defaultValue ?? ''}
             value={value}
             onChange={(value) => setValue(String(value))}
+            disabled={loading || (!variable.isEditable && !overrideReadonly)}
+          />
+        ) : variable.isSecret ? (
+          <PasswordInput
+            withAsterisk={variable.rules.includes('required')}
+            id={variable.envVariable}
+            placeholder={variable.defaultValue ?? ''}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
             disabled={loading || (!variable.isEditable && !overrideReadonly)}
           />
         ) : (

@@ -32,6 +32,8 @@ pub struct ExportedNestEggVariable {
 
     pub user_viewable: bool,
     pub user_editable: bool,
+    #[serde(default)]
+    pub secret: bool,
     #[serde(
         default,
         deserialize_with = "crate::deserialize::deserialize_nest_egg_variable_rules"
@@ -51,6 +53,7 @@ pub struct NestEggVariable {
     pub default_value: Option<String>,
     pub user_viewable: bool,
     pub user_editable: bool,
+    pub secret: bool,
     pub rules: Vec<compact_str::CompactString>,
 
     pub created: chrono::NaiveDateTime,
@@ -97,6 +100,10 @@ impl BaseModel for NestEggVariable {
                 compact_str::format_compact!("{prefix}user_editable"),
             ),
             (
+                "nest_egg_variables.secret",
+                compact_str::format_compact!("{prefix}secret"),
+            ),
+            (
                 "nest_egg_variables.rules",
                 compact_str::format_compact!("{prefix}rules"),
             ),
@@ -125,6 +132,7 @@ impl BaseModel for NestEggVariable {
                 .try_get(compact_str::format_compact!("{prefix}user_viewable").as_str())?,
             user_editable: row
                 .try_get(compact_str::format_compact!("{prefix}user_editable").as_str())?,
+            secret: row.try_get(compact_str::format_compact!("{prefix}secret").as_str())?,
             rules: row.try_get(compact_str::format_compact!("{prefix}rules").as_str())?,
             created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
@@ -143,15 +151,16 @@ impl NestEggVariable {
         default_value: Option<&str>,
         user_viewable: bool,
         user_editable: bool,
+        secret: bool,
         rules: &[compact_str::CompactString],
     ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO nest_egg_variables (
                 egg_uuid, name, description, order_, env_variable,
-                default_value, user_viewable, user_editable, rules
+                default_value, user_viewable, user_editable, secret, rules
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING {}
             "#,
             Self::columns_sql(None)
@@ -164,6 +173,7 @@ impl NestEggVariable {
         .bind(default_value)
         .bind(user_viewable)
         .bind(user_editable)
+        .bind(secret)
         .bind(rules)
         .fetch_one(database.write())
         .await?;
@@ -224,6 +234,7 @@ impl NestEggVariable {
             default_value: self.default_value,
             user_viewable: self.user_viewable,
             user_editable: self.user_editable,
+            secret: self.secret,
             rules: self.rules,
         }
     }
@@ -239,6 +250,7 @@ impl NestEggVariable {
             default_value: self.default_value,
             user_viewable: self.user_viewable,
             user_editable: self.user_editable,
+            is_secret: self.secret,
             rules: self.rules,
             created: self.created.and_utc(),
         }
@@ -295,6 +307,7 @@ pub struct AdminApiNestEggVariable {
     pub default_value: Option<String>,
     pub user_viewable: bool,
     pub user_editable: bool,
+    pub is_secret: bool,
     pub rules: Vec<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,

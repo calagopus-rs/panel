@@ -196,6 +196,16 @@ nestify::nest! {
     }
 }
 
+#[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)]
+pub enum ServerAutoStartBehavior {
+    #[serde(rename = "always")]
+    Always,
+    #[serde(rename = "unless_stopped")]
+    UnlessStopped,
+    #[serde(rename = "never")]
+    Never,
+}
+
 nestify::nest! {
     #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfiguration {
         #[schema(inline)]
@@ -291,6 +301,8 @@ nestify::nest! {
             pub seconds: u64,
         },
 
+        #[schema(inline)]
+        pub auto_start_behavior: ServerAutoStartBehavior,
     }
 }
 
@@ -1428,6 +1440,8 @@ pub mod system_config {
                         pub key: compact_str::CompactString,
                     },
 
+                    #[schema(inline)]
+                    pub redirects: IndexMap<compact_str::CompactString, compact_str::CompactString>,
                     #[schema(inline)]
                     pub disable_openapi_docs: bool,
                     #[schema(inline)]

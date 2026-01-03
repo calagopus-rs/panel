@@ -86,6 +86,7 @@ mod post {
 
         user_viewable: bool,
         user_editable: bool,
+        secret: bool,
         #[validate(custom(function = "rule_validator::validate_rules"))]
         rules: Vec<compact_str::CompactString>,
     }
@@ -137,6 +138,7 @@ mod post {
             data.default_value.as_deref(),
             data.user_viewable,
             data.user_editable,
+            data.secret,
             &data.rules,
         )
         .await

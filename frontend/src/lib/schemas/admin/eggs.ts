@@ -55,5 +55,6 @@ export const adminEggVariableSchema = z.object({
   defaultValue: z.string().max(1024).nullable(),
   userViewable: z.boolean(),
   userEditable: z.boolean(),
+  secret: z.boolean(),
   rules: z.array(z.string()),
 });

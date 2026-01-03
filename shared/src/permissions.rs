@@ -662,6 +662,10 @@ pub(crate) static BASE_SERVER_PERMISSIONS: LazyLock<IndexMap<&'static str, Permi
                             "auto-kill",
                             "Allows to change the auto-kill settings for this server.",
                         ),
+                        (
+                            "auto-start",
+                            "Allows to change the auto-start settings for this server.",
+                        ),
                         ("install", "Allows triggering a reinstall of this server."),
                         (
                             "cancel-install",

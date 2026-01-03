@@ -88,6 +88,11 @@
             "running": "Running",
             "starting": "Starting",
             "stopping": "Stopping"
+          },
+          "serverAutoStartBehavior": {
+            "always": "Always",
+            "unlessStopped": "Unless Stopped",
+            "never": "Never"
           }
         },
         "unlimited": "Unlimited",
@@ -588,7 +593,9 @@
               "network": "Network",
               "inbound": "Inbound",
               "outbound": "Outbound"
-            }
+            },
+            "socketConnected": "Connected ({ping}ms ping)",
+            "socketDisconnected": "Disconnected"
           },
           "files": {
             "title": "Files"
@@ -825,6 +832,15 @@
               },
               "toast": {
                 "updated": "Server auto-kill updated."
+              }
+            },
+            "autostart": {
+              "title": "Auto-Start",
+              "form": {
+                "behavior": "Behavior"
+              },
+              "toast": {
+                "updated": "Server auto-start behavior updated."
               }
             },
             "reinstall": {

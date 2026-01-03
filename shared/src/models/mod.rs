@@ -1,4 +1,5 @@
 use crate::database::DatabaseError;
+use compact_str::CompactStringExt;
 use futures_util::{StreamExt, TryStreamExt};
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use sqlx::{Row, postgres::PgRow};
@@ -152,12 +153,11 @@ pub trait BaseModel: Serialize + DeserializeOwned {
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString>;
 
     #[inline]
-    fn columns_sql(prefix: Option<&str>) -> String {
+    fn columns_sql(prefix: Option<&str>) -> compact_str::CompactString {
         Self::columns(prefix)
             .iter()
-            .map(|(key, value)| format!("{key} as {value}"))
-            .collect::<Vec<String>>()
-            .join(", ")
+            .map(|(key, value)| compact_str::format_compact!("{key} as {value}"))
+            .join_compact(", ")
     }
 
     fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError>;
@@ -285,12 +285,16 @@ pub trait ByUuid: BaseModel {
         database: &crate::database::Database,
         uuid: uuid::Uuid,
     ) -> Result<Option<Self>, anyhow::Error> {
-        database
-            .cache
-            .cached(&format!("{}::{uuid}", Self::NAME), 10, || {
-                Self::by_uuid_optional(database, uuid)
-            })
-            .await
+        match Self::by_uuid_cached(database, uuid).await {
+            Ok(res) => Ok(Some(res)),
+            Err(err) => {
+                if let Some(sqlx::Error::RowNotFound) = err.downcast_ref::<sqlx::Error>() {
+                    Ok(None)
+                } else {
+                    Err(err)
+                }
+            }
+        }
     }
 
     #[inline]

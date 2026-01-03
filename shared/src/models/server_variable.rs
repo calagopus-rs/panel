@@ -119,6 +119,7 @@ impl ServerVariable {
             default_value: self.variable.default_value,
             value: self.value,
             is_editable: self.variable.user_editable,
+            is_secret: self.variable.secret,
             rules: self.variable.rules,
             created: self.created.and_utc(),
         }
@@ -135,6 +136,7 @@ pub struct ApiServerVariable {
     pub default_value: Option<String>,
     pub value: String,
     pub is_editable: bool,
+    pub is_secret: bool,
     pub rules: Vec<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,

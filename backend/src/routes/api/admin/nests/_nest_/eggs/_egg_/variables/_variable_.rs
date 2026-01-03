@@ -113,6 +113,7 @@ mod patch {
 
         user_viewable: Option<bool>,
         user_editable: Option<bool>,
+        secret: Option<bool>,
         #[validate(custom(function = "rule_validator::validate_rules"))]
         rules: Option<Vec<compact_str::CompactString>>,
     }
@@ -198,6 +199,9 @@ mod patch {
         if let Some(user_editable) = data.user_editable {
             egg_variable.user_editable = user_editable;
         }
+        if let Some(secret) = data.secret {
+            egg_variable.secret = secret;
+        }
         if let Some(rules) = data.rules {
             egg_variable.rules = rules;
         }
@@ -206,8 +210,8 @@ mod patch {
             "UPDATE nest_egg_variables
             SET
                 name = $1, description = $2, order_ = $3, env_variable = $4,
-                default_value = $5, user_viewable = $6, user_editable = $7, rules = $8
-            WHERE nest_egg_variables.uuid = $9",
+                default_value = $5, user_viewable = $6, user_editable = $7, secret = $8, rules = $9
+            WHERE nest_egg_variables.uuid = $10",
             &egg_variable.name,
             egg_variable.description.as_deref(),
             egg_variable.order,
@@ -215,6 +219,7 @@ mod patch {
             egg_variable.default_value,
             egg_variable.user_viewable,
             egg_variable.user_editable,
+            egg_variable.secret,
             &egg_variable.rules as &[compact_str::CompactString],
             egg_variable.uuid,
         )

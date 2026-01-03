@@ -43,6 +43,7 @@ export default function EggVariableContainer({
       defaultValue: null,
       userViewable: true,
       userEditable: false,
+      secret: false,
       rules: [],
     },
     validateInputOnBlur: true,
@@ -59,6 +60,7 @@ export default function EggVariableContainer({
         defaultValue: contextVariable.defaultValue,
         userViewable: contextVariable.userViewable,
         userEditable: contextVariable.userEditable,
+        secret: contextVariable.isSecret,
         rules: contextVariable.rules,
       });
     }
@@ -156,10 +158,20 @@ export default function EggVariableContainer({
             </Group>
 
             <Group grow>
-              <Switch label='User Viewable' name='user_viewable' {...form.getInputProps('userViewable')} />
+              <Switch
+                label='User Viewable'
+                name='user_viewable'
+                {...form.getInputProps('userViewable', { type: 'checkbox' })}
+              />
 
-              <Switch label='User Editable' name='user_editable' {...form.getInputProps('userEditable')} />
+              <Switch
+                label='User Editable'
+                name='user_editable'
+                {...form.getInputProps('userEditable', { type: 'checkbox' })}
+              />
             </Group>
+
+            <Switch label='Secret' name='secret' {...form.getInputProps('secret', { type: 'checkbox' })} />
 
             <TagsInput label='Rules' {...form.getInputProps('rules')} />
           </Stack>

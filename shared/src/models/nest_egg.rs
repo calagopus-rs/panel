@@ -487,6 +487,7 @@ impl NestEgg {
                 variable.default_value.as_deref(),
                 variable.user_viewable,
                 variable.user_editable,
+                variable.secret,
                 &variable.rules,
             )
             .await

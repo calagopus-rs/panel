@@ -94,11 +94,19 @@ export default function Terminal() {
         const start = Date.now();
         socketInstance.send(SocketRequest.PING);
 
+        let timeout: NodeJS.Timeout | null = null;
         const handlePong = () => {
           const latency = Date.now() - start;
           setWebsocketPing(latency);
           socketInstance.removeListener(SocketEvent.PONG, handlePong);
+          if (timeout) {
+            clearTimeout(timeout);
+          }
         };
+
+        timeout = setTimeout(() => {
+          socketInstance.removeListener(SocketEvent.PONG, handlePong);
+        }, 10000);
 
         socketInstance.addListener(SocketEvent.PONG, handlePong);
       };
@@ -330,7 +338,7 @@ export default function Terminal() {
               socketConnected ? 'bg-green-500' : 'bg-red-500',
             )}
           />
-          {socketConnected
+          {socketConnected && socketInstance
             ? t('pages.server.console.socketConnected', { ping: websocketPing })
             : t('pages.server.console.socketDisconnected', {})}
         </div>

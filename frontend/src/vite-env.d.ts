@@ -182,6 +182,7 @@ declare global {
     defaultValue: string | null;
     userViewable: boolean;
     userEditable: boolean;
+    isSecret: boolean;
     rules: string[];
     created: Date;
   }
@@ -252,6 +253,7 @@ declare global {
       enabled: boolean;
       seconds: number;
     };
+    autoStartBehavior: ServerAutostartBehavior;
     timezone: string;
     created: Date;
   }
@@ -334,6 +336,7 @@ declare global {
       enabled: boolean;
       seconds: number;
     };
+    autoStartBehavior: ServerAutostartBehavior;
     timezone: string | null;
     created: Date;
   }
@@ -464,6 +467,7 @@ declare global {
     defaultValue: string | null;
     value: string;
     isEditable: boolean;
+    isSecret: boolean;
     rules: string[];
     created: Date;
   }
@@ -1162,6 +1166,8 @@ declare global {
   type ServerBackupStatus = 'starting' | 'finished' | 'failed';
 
   type ServerStatus = 'installing' | 'install_failed' | 'restoring_backup';
+
+  type ServerAutoStartBehavior = 'always' | 'unless_stopped' | 'never';
 
   interface PermissionMap {
     [category: string]: {

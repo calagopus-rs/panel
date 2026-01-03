@@ -53,6 +53,29 @@ pub enum ServerStatus {
     RestoringBackup,
 }
 
+#[derive(ToSchema, Serialize, Deserialize, Type, PartialEq, Eq, Hash, Clone, Copy)]
+#[serde(rename_all = "snake_case")]
+#[schema(rename_all = "snake_case")]
+#[sqlx(
+    type_name = "server_auto_start_behavior",
+    rename_all = "SCREAMING_SNAKE_CASE"
+)]
+pub enum ServerAutoStartBehavior {
+    Always,
+    UnlessStopped,
+    Never,
+}
+
+impl From<ServerAutoStartBehavior> for wings_api::ServerAutoStartBehavior {
+    fn from(value: ServerAutoStartBehavior) -> Self {
+        match value {
+            ServerAutoStartBehavior::Always => Self::Always,
+            ServerAutoStartBehavior::UnlessStopped => Self::UnlessStopped,
+            ServerAutoStartBehavior::Never => Self::Never,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Server {
     pub uuid: uuid::Uuid,
@@ -83,6 +106,7 @@ pub struct Server {
     pub startup: compact_str::CompactString,
     pub image: compact_str::CompactString,
     pub auto_kill: wings_api::ServerConfigurationAutoKill,
+    pub auto_start_behavior: ServerAutoStartBehavior,
     pub timezone: Option<compact_str::CompactString>,
 
     pub allocation_limit: i32,
@@ -170,6 +194,10 @@ impl BaseModel for Server {
             (
                 "servers.auto_kill",
                 compact_str::format_compact!("{prefix}auto_kill"),
+            ),
+            (
+                "servers.auto_start_behavior",
+                compact_str::format_compact!("{prefix}auto_start_behavior"),
             ),
             (
                 "servers.timezone",
@@ -266,6 +294,8 @@ impl BaseModel for Server {
             auto_kill: serde_json::from_value(row.try_get::<serde_json::Value, _>(
                 compact_str::format_compact!("{prefix}auto_kill").as_str(),
             )?)?,
+            auto_start_behavior: row
+                .try_get(compact_str::format_compact!("{prefix}auto_start_behavior").as_str())?,
             timezone: row.try_get(compact_str::format_compact!("{prefix}timezone").as_str())?,
             allocation_limit: row
                 .try_get(compact_str::format_compact!("{prefix}allocation_limit").as_str())?,
@@ -1340,6 +1370,7 @@ impl Server {
                     },
                 },
                 auto_kill: self.auto_kill,
+                auto_start_behavior: self.auto_start_behavior.into(),
             },
             process_configuration: super::nest_egg::ProcessConfiguration {
                 startup: self.egg.config_startup,
@@ -1414,6 +1445,7 @@ impl Server {
             startup: self.startup,
             image: self.image,
             auto_kill: self.auto_kill,
+            auto_start_behavior: self.auto_start_behavior,
             timezone: self.timezone,
             created: self.created.and_utc(),
         })
@@ -1471,6 +1503,7 @@ impl Server {
             startup: self.startup,
             image: self.image,
             auto_kill: self.auto_kill,
+            auto_start_behavior: self.auto_start_behavior,
             timezone: self.timezone,
             created: self.created.and_utc(),
         })
@@ -1652,6 +1685,7 @@ pub struct AdminApiServer {
     pub image: compact_str::CompactString,
     #[schema(inline)]
     pub auto_kill: wings_api::ServerConfigurationAutoKill,
+    pub auto_start_behavior: ServerAutoStartBehavior,
     pub timezone: Option<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,
@@ -1690,6 +1724,7 @@ pub struct ApiServer {
     pub image: compact_str::CompactString,
     #[schema(inline)]
     pub auto_kill: wings_api::ServerConfigurationAutoKill,
+    pub auto_start_behavior: ServerAutoStartBehavior,
     pub timezone: Option<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,

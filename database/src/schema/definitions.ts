@@ -20,6 +20,11 @@ import {
 
 export const databaseTypeEnum = new DatabaseEnum('database_type', ['MYSQL', 'POSTGRES']);
 export const serverStatusEnum = new DatabaseEnum('server_status', ['INSTALLING', 'INSTALL_FAILED', 'RESTORING_BACKUP']);
+export const serverAutoStartBehaviorEnum = new DatabaseEnum('server_auto_start_behavior', [
+  'ALWAYS',
+  'UNLESS_STOPPED',
+  'NEVER',
+]);
 export const backupDiskEnum = new DatabaseEnum('backup_disk', ['LOCAL', 'S3', 'DDUP_BAK', 'BTRFS', 'ZFS', 'RESTIC']);
 export const userToastPositionEnum = new DatabaseEnum('user_toast_position', [
   'TOP_LEFT',
@@ -516,6 +521,7 @@ export const nestEggVariablesTable = new DatabaseTable('nest_egg_variables')
   .addColumn('default_value', text())
   .addColumn('user_viewable', boolean().default(true).notNull())
   .addColumn('user_editable', boolean().default(false).notNull())
+  .addColumn('secret', boolean().default(false).notNull())
   .addColumn('rules', text().array().notNull())
   .addColumn('created', timestamp().defaultNow().notNull())
   .addConfigBuilder((cols) => [
@@ -592,6 +598,7 @@ export const serversTable = new DatabaseTable('servers')
   .addColumn('startup', text().notNull())
   .addColumn('image', varchar({ length: 255 }).notNull())
   .addColumn('auto_kill', jsonb().default({ enabled: false, seconds: 30 }).notNull())
+  .addColumn('auto_start_behavior', serverAutoStartBehaviorEnum.intoDrizzleEnum()().default('UNLESS_STOPPED').notNull())
   .addColumn('timezone', varchar({ length: 255 }))
   .addColumn('allocation_limit', integer().default(0).notNull())
   .addColumn('database_limit', integer().default(0).notNull())

@@ -78,6 +78,11 @@ const baseTranslations = defineTranslations({
           starting: 'Starting',
           stopping: 'Stopping',
         },
+        serverAutoStartBehavior: {
+          always: 'Always',
+          unlessStopped: 'Unless Stopped',
+          never: 'Never',
+        },
       },
       unlimited: 'Unlimited',
       na: 'N/A',
@@ -826,6 +831,15 @@ const baseTranslations = defineTranslations({
             },
             toast: {
               updated: 'Server auto-kill updated.',
+            },
+          },
+          autostart: {
+            title: 'Auto-Start',
+            form: {
+              behavior: 'Behavior',
+            },
+            toast: {
+              updated: 'Server auto-start behavior updated.',
             },
           },
           reinstall: {
