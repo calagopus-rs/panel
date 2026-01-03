@@ -104,7 +104,7 @@ export default function VariableContainer({
             disabled={loading || (!variable.isEditable && !overrideReadonly)}
           />
         )}
-        <p className='text-gray-400 text-sm mt-4'>{variable.description}</p>
+        <p className='text-gray-400 text-sm mt-4'>{variable.description?.md()}</p>
       </div>
     </Card>
   );

@@ -42,7 +42,7 @@ export function formatTimestamp(timestamp: string | number | Date) {
   }
 
   const format = (value: number, unit: string) =>
-    `${isFuture ? 'in' : ''} ${value} ${unit}${value !== 1 ? 's' : ''}${isFuture ? '' : ' ago'}`;
+    `${isFuture ? 'in ' : ''}${value} ${unit}${value !== 1 ? 's' : ''}${isFuture ? '' : ' ago'}`;
 
   if (diffSeconds < 60) return isFuture ? 'in a few seconds' : 'a few seconds ago';
   if (diffMinutes < 60) return format(diffMinutes, 'minute');

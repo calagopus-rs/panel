@@ -138,7 +138,12 @@ export default function EggVariableContainer({
           <Stack>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
 
-            <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} />
+            <TextArea
+              label='Description'
+              placeholder='Description'
+              description='Supports Markdown formatting.'
+              {...form.getInputProps('description')}
+            />
 
             <Group grow>
               <TextInput
@@ -146,15 +151,10 @@ export default function EggVariableContainer({
                 label='Environment Variable'
                 placeholder='Environment Variable'
                 {...form.getInputProps('envVariable')}
-                onChange={(e) => form.setFieldValue('envVariable', e.target.value.toUpperCase())}
+                onChange={(e) => form.setFieldValue('envVariable', e.target.value.toUpperCase().replace(/-| /g, '_'))}
               />
 
-              <TextInput
-                withAsterisk
-                label='Default Value'
-                placeholder='server.jar'
-                {...form.getInputProps('defaultValue')}
-              />
+              <TextInput label='Default Value' placeholder='server.jar' {...form.getInputProps('defaultValue')} />
             </Group>
 
             <Group grow>
@@ -173,7 +173,12 @@ export default function EggVariableContainer({
 
             <Switch label='Secret' name='secret' {...form.getInputProps('secret', { type: 'checkbox' })} />
 
-            <TagsInput label='Rules' {...form.getInputProps('rules')} />
+            <TagsInput
+              label='Rules'
+              placeholder='Rules'
+              description='Inspired by https://laravel.com/docs/12.x/validation#available-validation-rules'
+              {...form.getInputProps('rules')}
+            />
           </Stack>
 
           <Group pt='md' mt='auto'>

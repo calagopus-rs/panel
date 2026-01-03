@@ -54,6 +54,7 @@ export default function AdminEggVariables({
       defaultValue: null,
       userViewable: true,
       userEditable: false,
+      isSecret: false,
       rules: [],
       created: new Date(),
     });

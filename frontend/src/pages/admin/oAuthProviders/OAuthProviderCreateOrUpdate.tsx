@@ -165,14 +165,14 @@ export default function OAuthProviderCreateOrUpdate({
             <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
           </Group>
 
-          {contextOAuthProvider && (
-            <Card className='flex flex-row! items-center justify-between'>
-              <Title order={4}>Redirect URL</Title>
-              <Code>
-                {settings.app.url}/api/auth/oauth/{contextOAuthProvider.uuid}
-              </Code>
-            </Card>
-          )}
+          <Card className='flex flex-row! items-center justify-between'>
+            <Title order={4}>Redirect URL</Title>
+            <Code>
+              {contextOAuthProvider
+                ? `${settings.app.url}/api/auth/oauth/${contextOAuthProvider.uuid}`
+                : 'Available after creation'}
+            </Code>
+          </Card>
 
           <Group grow>
             <TextInput withAsterisk label='Client Id' placeholder='Client Id' {...form.getInputProps('clientId')} />
@@ -203,6 +203,7 @@ export default function OAuthProviderCreateOrUpdate({
           <Group grow>
             <TagsInput
               label='Scopes'
+              placeholder='Scopes'
               description='The OAuth2 Scopes to request, make sure to include scopes for email/profile info when needed'
               {...form.getInputProps('scopes')}
             />

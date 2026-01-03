@@ -26,7 +26,7 @@ export default function Container({ children, isNormal }: LayoutProps) {
         <span className='flex flex-row justify-end gap-2'>
           <Tooltip label={settings.version}>
             <a
-              href='https://github.com/calagopus-rs/panel'
+              href='https://github.com/calagopus/panel'
               target='_blank'
               rel='noopener noreferrer'
               className='underline'
@@ -34,7 +34,7 @@ export default function Container({ children, isNormal }: LayoutProps) {
               Calagopus
             </a>
           </Tooltip>
-          {new Date().getFullYear() === 2025 ? `© 2025` : `© 2025 - ${new Date().getFullYear()}`}
+          © 2025 - {new Date().getFullYear()}
         </span>
       </div>
     </div>
