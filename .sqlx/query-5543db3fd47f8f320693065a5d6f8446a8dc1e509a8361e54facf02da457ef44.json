@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE nest_egg_variables\n            SET\n                name = $1, description = $2, order_ = $3, env_variable = $4,\n                default_value = $5, user_viewable = $6, user_editable = $7, secret = $8, rules = $9\n            WHERE nest_egg_variables.uuid = $10",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Text",
+        "Int2",
+        "Varchar",
+        "Text",
+        "Bool",
+        "Bool",
+        "Bool",
+        "TextArray",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5543db3fd47f8f320693065a5d6f8446a8dc1e509a8361e54facf02da457ef44"
+}
