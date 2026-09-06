@@ -158,8 +158,8 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: z.in
         title={t('pages.admin.users.tabs.general.page.modal.grantAdmin.title', {})}
         confirm={t(contextUser ? 'common.button.save' : 'common.button.create', {})}
         onConfirmed={() => {
-          setOpenModal(null);
           doCreateOrUpdate(confirmStay, queryKeys.admin.users.all());
+          setOpenModal(null);
         }}
       >
         {t('pages.admin.users.tabs.general.page.modal.grantAdmin.content', {
