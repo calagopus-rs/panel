@@ -39,26 +39,17 @@ function StreamChart({ data, domain, ticks, yMax, series, format, highlighted }:
     const from = previousEnd.current;
     previousEnd.current = end;
 
-    const surface = scroller.current?.querySelector<SVGSVGElement>('.recharts-surface');
-    const resting = `inset(-100% ${edgePixels}px -100% ${edgePixels}px)`;
-    if (surface) {
-      surface.style.clipPath = resting;
-    }
-
-    const duration = from === null ? 0 : end - from;
-    if (duration <= 0 || duration > EDGE || size.width === 0) {
+    const step = from === null ? 0 : end - from;
+    if (step <= 0 || step > CHART_WINDOW || size.width === 0) {
       return;
     }
 
-    const offset = (size.width * duration) / CHART_WINDOW;
-    const timing = { duration, easing: 'linear', fill: 'forwards' } as const;
+    const travel = Math.min(step, EDGE);
+    const offset = (size.width * travel) / CHART_WINDOW;
+    const timing = { duration: travel, easing: 'linear', fill: 'forwards' } as const;
 
     scroller.current?.animate([{ transform: `translateX(${offset}px)` }, { transform: 'none' }], timing);
-    surface?.animate(
-      [{ clipPath: `inset(-100% ${edgePixels + offset}px -100% ${edgePixels - offset}px)` }, { clipPath: resting }],
-      timing,
-    );
-  }, [end, size.width, edgePixels]);
+  }, [end, size.width]);
 
   const chartSeries = useMemo(
     () =>
@@ -110,50 +101,52 @@ function StreamChart({ data, domain, ticks, yMax, series, format, highlighted }:
           />
         ))}
 
-        <div
-          ref={scroller}
-          className='absolute inset-y-0 will-change-transform'
-          style={{ left: -edgePixels, width: size.width + edgePixels * 2 }}
-        >
-          {size.width > 0 && (
-            <AreaChart
-              h={size.height}
-              data={data}
-              dataKey='t'
-              series={chartSeries}
-              curveType='monotone'
-              withGradient
-              fillOpacity={0.25}
-              strokeWidth={2}
-              withDots={false}
-              withXAxis={false}
-              withYAxis={false}
-              withTooltip
-              tooltipAnimationDuration={0}
-              tooltipProps={{
-                isAnimationActive: false,
-                wrapperStyle: { zIndex: 1 },
-                content: ({ label, payload }) => (
-                  <ChartTooltip
-                    label={typeof label === 'number' ? formatOffset(label, end) : label}
-                    payload={payload}
-                    series={chartSeries}
-                    valueFormatter={format}
-                  />
-                ),
-              }}
-              gridAxis='none'
-              connectNulls={false}
-              xAxisProps={{ type: 'number', domain: [start - EDGE, end + EDGE], allowDataOverflow: true, hide: true }}
-              yAxisProps={{ domain: [0, yMax], allowDataOverflow: true, hide: true }}
-              areaProps={(entry) => ({
-                isAnimationActive: false,
-                fillOpacity: highlighted && highlighted !== entry.name ? 0 : 1,
-                strokeOpacity: highlighted && highlighted !== entry.name ? 0.3 : 1,
-              })}
-              areaChartProps={{ margin: { top: PLOT_INSET, right: 0, bottom: PLOT_INSET, left: 0 } }}
-            />
-          )}
+        <div className='absolute inset-0' style={{ clipPath: 'inset(-100% 0px -100% 0px)' }}>
+          <div
+            ref={scroller}
+            className='absolute inset-y-0 will-change-transform'
+            style={{ left: -edgePixels, width: size.width + edgePixels * 2 }}
+          >
+            {size.width > 0 && (
+              <AreaChart
+                h={size.height}
+                data={data}
+                dataKey='t'
+                series={chartSeries}
+                curveType='monotone'
+                withGradient
+                fillOpacity={0.25}
+                strokeWidth={2}
+                withDots={false}
+                withXAxis={false}
+                withYAxis={false}
+                withTooltip
+                tooltipAnimationDuration={0}
+                tooltipProps={{
+                  isAnimationActive: false,
+                  wrapperStyle: { zIndex: 1 },
+                  content: ({ label, payload }) => (
+                    <ChartTooltip
+                      label={typeof label === 'number' ? formatOffset(label, end) : label}
+                      payload={payload}
+                      series={chartSeries}
+                      valueFormatter={format}
+                    />
+                  ),
+                }}
+                gridAxis='none'
+                connectNulls={false}
+                xAxisProps={{ type: 'number', domain: [start - EDGE, end + EDGE], allowDataOverflow: true, hide: true }}
+                yAxisProps={{ domain: [0, yMax], allowDataOverflow: true, hide: true }}
+                areaProps={(entry) => ({
+                  isAnimationActive: false,
+                  fillOpacity: highlighted && highlighted !== entry.name ? 0 : 1,
+                  strokeOpacity: highlighted && highlighted !== entry.name ? 0.3 : 1,
+                })}
+                areaChartProps={{ margin: { top: PLOT_INSET, right: 0, bottom: PLOT_INSET, left: 0 } }}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
