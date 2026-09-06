@@ -1,9 +1,13 @@
 import { type OnMount } from '@monaco-editor/react';
-import { type EditorChangeEvent } from '@pierre/diffs/edit';
 import { MonacoBinding } from 'y-monaco';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
-import { type PierreEditorHandle } from '@/elements/editors/PierreEditor.tsx';
+import {
+  type PierreCaret,
+  type PierreEditorHandle,
+  type PierreFileChangeEvent,
+  type PierreLocalSelection,
+} from '@/elements/editors/PierreEditor.tsx';
 
 type MonacoEditor = Parameters<OnMount>[0];
 type MonacoModel = NonNullable<ReturnType<MonacoEditor['getModel']>>;
@@ -87,16 +91,95 @@ export function offsetToPosition(text: string, offset: number): { line: number; 
   return { line, character: offset - lineStart };
 }
 
-// Pierre has no equivalent of y-monaco's MonacoBinding, so remote Y.Text deltas are
-// translated into Pierre TextEdits by hand. There is no styled cursor overlay here
-// (Pierre does not support remote cursor decorations like Monaco does), just content sync.
+export interface RemoteAwarenessSelection {
+  anchor: Y.RelativePosition;
+  head: Y.RelativePosition;
+}
+
+export interface ResolvedRemoteCursor {
+  clientId: number;
+  anchor: number;
+  head: number;
+  name: string;
+  color: string;
+}
+
+export function resolveRemoteCursors(awareness: Awareness, doc: Y.Doc, ytext: Y.Text): ResolvedRemoteCursor[] {
+  const cursors: ResolvedRemoteCursor[] = [];
+
+  awareness.getStates().forEach((state, clientId) => {
+    if (clientId === awareness.clientID) return;
+
+    const selection = state.selection as Partial<RemoteAwarenessSelection> | null | undefined;
+    if (!selection?.anchor || !selection?.head) return;
+
+    try {
+      const anchorAbs = Y.createAbsolutePositionFromRelativePosition(selection.anchor, doc);
+      const headAbs = Y.createAbsolutePositionFromRelativePosition(selection.head, doc);
+      if (!anchorAbs || !headAbs || anchorAbs.type !== ytext || headAbs.type !== ytext) return;
+
+      const user = state.user as { name?: string; color?: string } | undefined;
+      cursors.push({
+        clientId,
+        anchor: anchorAbs.index,
+        head: headAbs.index,
+        name: user?.name ?? 'unknown',
+        color: user?.color ?? cursorColor(clientId),
+      });
+    } catch {
+      // A peer published a selection this document can't resolve; skip it.
+    }
+  });
+
+  return cursors;
+}
+
+export function publishAwarenessSelection(
+  awareness: Awareness,
+  ytext: Y.Text,
+  selection: { anchorOffset: number; headOffset: number } | null,
+): void {
+  if (!selection) {
+    awareness.setLocalStateField('selection', null);
+    return;
+  }
+
+  awareness.setLocalStateField('selection', {
+    anchor: Y.createRelativePositionFromTypeIndex(ytext, selection.anchorOffset),
+    head: Y.createRelativePositionFromTypeIndex(ytext, selection.headOffset),
+  });
+}
+
 export function bindPierreEditor(
   pierreEditor: PierreEditorHandle,
   ytext: Y.Text,
   doc: Y.Doc,
-  changeHandlerRef: { current: ((event: EditorChangeEvent<undefined>) => void) | null },
+  changeHandlerRef: { current: ((event: PierreFileChangeEvent) => void) | null },
+  selectionHandlerRef: { current: ((selection: PierreLocalSelection | null) => void) | null },
+  awareness?: Awareness | null,
 ): { destroy: () => void } {
   let applyingRemote = false;
+
+  const renderRemoteCarets = () => {
+    if (!awareness) return;
+
+    const text = pierreEditor.getValue();
+    pierreEditor.setCarets(
+      resolveRemoteCursors(awareness, doc, ytext).map<PierreCaret>((cursor) => ({
+        anchor: offsetToPosition(text, cursor.anchor),
+        focus: offsetToPosition(text, cursor.head),
+        metadata: { name: cursor.name, color: cursor.color },
+      })),
+    );
+  };
+
+  if (awareness) {
+    awareness.on('change', renderRemoteCarets);
+  }
+
+  selectionHandlerRef.current = (selection) => {
+    if (awareness) publishAwarenessSelection(awareness, ytext, selection);
+  };
 
   const initial = ytext.toString();
   if (pierreEditor.getValue() !== initial) {
@@ -129,6 +212,8 @@ export function bindPierreEditor(
     } finally {
       applyingRemote = false;
     }
+
+    renderRemoteCarets();
   };
   ytext.observe(observer);
 
@@ -143,7 +228,11 @@ export function bindPierreEditor(
           ytext.insert(change.start, change.text);
         });
     }, 'pierre-local');
+
+    renderRemoteCarets();
   };
+
+  if (awareness) renderRemoteCarets();
 
   let destroyed = false;
   return {
@@ -151,7 +240,10 @@ export function bindPierreEditor(
       if (destroyed) return;
       destroyed = true;
       ytext.unobserve(observer);
+      awareness?.off('change', renderRemoteCarets);
       changeHandlerRef.current = null;
+      selectionHandlerRef.current = null;
+      pierreEditor.setCarets([]);
     },
   };
 }

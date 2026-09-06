@@ -8,14 +8,39 @@ import {
   type FileOptions,
   parseDiffFromFile,
 } from '@pierre/diffs';
-import { Editor, type EditorChangeEvent, type EditorOptions, type TextEdit } from '@pierre/diffs/edit';
+import {
+  Editor,
+  type EditorCaret,
+  type EditorChangeEvent,
+  type EditorFactory,
+  type EditorOptions,
+  type TextEdit,
+} from '@pierre/diffs/edit';
 import { EditProvider, File, FileDiff, Virtualizer } from '@pierre/diffs/react';
 import { type CSSProperties, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+
+export interface PierreCaretMetadata {
+  name: string;
+  color: string;
+}
+
+export type PierreCaret = EditorCaret<PierreCaretMetadata>;
+
+export type PierreFileChangeEvent = EditorChangeEvent<'file', undefined, PierreCaretMetadata>;
+
+export interface PierreLocalSelection {
+  anchorOffset: number;
+  headOffset: number;
+}
+
+type PierreFileEditor = Editor<'file', undefined, PierreCaretMetadata>;
+type PierreFileEditorOptions = EditorOptions<'file', undefined, PierreCaretMetadata>;
 
 export interface PierreEditorHandle {
   getValue: () => string;
   setValue: (value: string) => void;
   applyEdits: (edits: TextEdit[], updateHistory?: boolean) => void;
+  setCarets: (carets: PierreCaret[]) => void;
   focus: () => void;
 }
 
@@ -31,7 +56,9 @@ export interface PierreEditorProps extends CommonPierreProps {
   defaultValue: string;
   readOnly?: boolean;
   onChange?: (value: string) => void;
-  onChangeEvent?: (event: EditorChangeEvent<undefined>) => void;
+  onChangeEvent?: (event: PierreFileChangeEvent) => void;
+  /** Fires while the editor is focused whenever the local selection moves; `null` when it clears. */
+  onSelectionChange?: (selection: PierreLocalSelection | null) => void;
   onMount?: (handle: PierreEditorHandle) => void;
 }
 
@@ -44,14 +71,40 @@ export interface PierreDiffEditorProps extends CommonPierreProps {
   onMount?: (handle: PierreEditorHandle) => void;
 }
 
-const createEditor = (opts: EditorOptions<undefined>) => new Editor(opts);
+const createEditor: EditorFactory<undefined, PierreCaretMetadata> = (editorType, options, editStateKey) =>
+  new Editor(editorType, options, editStateKey);
+
+const renderRemoteCaret = ({ metadata }: PierreCaret): HTMLElement => {
+  const caret = document.createElement('span');
+  caret.setAttribute('aria-hidden', 'true');
+  caret.style.cssText = `position:relative;display:block;width:2px;height:var(--diffs-line-height,1.2em);background-color:${metadata.color};pointer-events:none;`;
+
+  const label = document.createElement('span');
+  label.textContent = metadata.name;
+  label.style.cssText = `position:absolute;left:0;bottom:100%;padding:0 3px;border-radius:3px 3px 3px 0;background-color:${metadata.color};color:#fff;font:500 10px/1.4 ui-sans-serif,system-ui,sans-serif;white-space:nowrap;`;
+
+  caret.append(label);
+  return caret;
+};
+
+const positionToOffset = (text: string, position: { line: number; character: number }): number => {
+  let offset = 0;
+  let line = 0;
+  for (let i = 0; i < text.length && line < position.line; i++) {
+    if (text.charCodeAt(i) === 10) {
+      line++;
+      offset = i + 1;
+    }
+  }
+  return offset + position.character;
+};
 
 const toFile = (path: string, contents: string, cacheKey?: string): FileContents => {
   const name = path.trim() || 'untitled';
   return { name, contents, cacheKey: cacheKey ?? name };
 };
 
-const replaceBuffer = (editor: Editor<undefined>, text: string): void => {
+const replaceBuffer = (editor: PierreFileEditor, text: string): void => {
   const current = editor.getText();
   if (current === text) return;
   const lines = current.split('\n');
@@ -123,6 +176,7 @@ export const PierreEditor = memo(
       width,
       onChange,
       onChangeEvent,
+      onSelectionChange,
       onMount,
     },
     ref,
@@ -132,13 +186,14 @@ export const PierreEditor = memo(
     const style = usePierreStyle(height, width, fontSize, isDark);
     const baseOptions = useBaseOptions(colorScheme, wordWrap);
 
-    const callbacks = useRef({ onMount, onChange, onChangeEvent });
+    const callbacks = useRef({ onMount, onChange, onChangeEvent, onSelectionChange });
 
     useEffect(() => {
-      callbacks.current = { onMount, onChange, onChangeEvent };
+      callbacks.current = { onMount, onChange, onChangeEvent, onSelectionChange };
     });
 
-    const instanceRef = useRef<Editor<undefined> | null>(null);
+    const instanceRef = useRef<PierreFileEditor | null>(null);
+    const focusedRef = useRef(false);
     const defaultValueRef = useRef(defaultValue);
 
     const file = useMemo(() => toFile(path, defaultValue), [path, defaultValue]);
@@ -151,6 +206,9 @@ export const PierreEditor = memo(
         },
         applyEdits: (edits, updateHistory) => {
           instanceRef.current?.applyEdits(edits, updateHistory);
+        },
+        setCarets: (carets) => {
+          instanceRef.current?.setCarets(carets);
         },
         focus: () => instanceRef.current?.focus(),
       }),
@@ -165,35 +223,77 @@ export const PierreEditor = memo(
       if (editor) replaceBuffer(editor, defaultValue);
     }, [defaultValue, path]);
 
-    const editorOptions = useMemo<EditorOptions<undefined>>(
+    useEffect(() => {
+      if (readOnly) return;
+
+      let lastKey: string | null = null;
+
+      const publishSelection = () => {
+        const editor = instanceRef.current;
+        const notify = callbacks.current.onSelectionChange;
+        if (!editor || !notify || !focusedRef.current) return;
+
+        const selection = editor.getViewState().selections?.at(-1);
+        if (!selection) {
+          if (lastKey === null) return;
+          lastKey = null;
+          notify(null);
+          return;
+        }
+
+        const text = editor.getText();
+        const backward = selection.direction === -1;
+        const anchor = backward ? selection.end : selection.start;
+        const head = backward ? selection.start : selection.end;
+        const anchorOffset = positionToOffset(text, anchor);
+        const headOffset = positionToOffset(text, head);
+
+        const key = `${anchorOffset}:${headOffset}`;
+        if (key === lastKey) return;
+        lastKey = key;
+        notify({ anchorOffset, headOffset });
+      };
+
+      document.addEventListener('selectionchange', publishSelection);
+      return () => document.removeEventListener('selectionchange', publishSelection);
+    }, [readOnly]);
+
+    const editorOptions = useMemo<PierreFileEditorOptions>(
       () => ({
-        persistState: true,
         matchBrackets: true,
         autoSurround: 'default',
         roundedSelection: true,
         historyMaxEntries: 1000,
+        renderCaret: renderRemoteCaret,
         onAttach: (editor) => {
           instanceRef.current = editor;
           replaceBuffer(editor, defaultValueRef.current);
           callbacks.current.onMount?.(handle);
         },
-        onChange: (f, _lineAnnotations, event) => {
-          callbacks.current.onChange?.(f.contents);
+        onChange: (event) => {
+          callbacks.current.onChange?.(event.file.contents);
           callbacks.current.onChangeEvent?.(event);
+        },
+        onFocus: () => {
+          focusedRef.current = true;
+        },
+        onBlur: () => {
+          focusedRef.current = false;
         },
       }),
       [handle],
     );
 
     return (
-      <EditProvider key={colorScheme} createEditor={createEditor}>
+      <EditProvider<undefined, PierreCaretMetadata> key={colorScheme} createEditor={createEditor}>
         <Virtualizer style={style}>
-          <File
+          <File<undefined, PierreCaretMetadata>
             key={colorScheme}
             file={file}
-            options={baseOptions as FileOptions<undefined>}
+            options={baseOptions as FileOptions<undefined, PierreCaretMetadata>}
             edit={!readOnly}
             editorOptions={editorOptions}
+            editStateKey={file.cacheKey}
             style={style}
           />
         </Virtualizer>
@@ -238,6 +338,7 @@ export const PierreDiffEditor = memo(
           modifiedRef.current = val;
         },
         applyEdits: () => undefined,
+        setCarets: () => undefined,
         focus: () => undefined,
       }),
       [],
@@ -257,7 +358,7 @@ export const PierreDiffEditor = memo(
       [modifiedPath, modifiedValue],
     );
 
-    const diffOptions = useMemo<FileDiffOptions<undefined>>(
+    const diffOptions = useMemo<FileDiffOptions<undefined, undefined>>(
       () => ({
         ...baseOptions,
         diffStyle: isMobile ? 'unified' : 'split',
@@ -272,7 +373,12 @@ export const PierreDiffEditor = memo(
     return (
       <Virtualizer style={style}>
         {originalValue === modifiedValue ? (
-          <File key={colorScheme} file={newFile} options={baseOptions as FileOptions<undefined>} style={style} />
+          <File
+            key={colorScheme}
+            file={newFile}
+            options={baseOptions as FileOptions<undefined, undefined>}
+            style={style}
+          />
         ) : (
           <FileDiff key={colorScheme} fileDiff={fileDiff} options={diffOptions} style={style} />
         )}

@@ -650,6 +650,7 @@ function FileEditorComponent() {
               context={editorContext}
               handleContentChange={handleContentChange}
               handlePierreChangeEvent={collab.handlePierreChangeEvent}
+              handlePierreSelectionChange={collab.handlePierreSelectionChange}
               attachPierreEditor={collab.attachPierreEditor}
               attachEditor={collab.attachEditor}
               editorRef={editorRef}
