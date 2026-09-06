@@ -97,20 +97,35 @@ export function resolvePorts(ports: string[]): ResolvedPorts {
   for (const range of ports) {
     if (isValidPort(range)) {
       resolved.add(Number(range));
-    } else if (range.includes('-')) {
-      const [start, end] = range.split('-');
+      continue;
+    }
 
-      if (isValidPort(start) && isValidPort(end)) {
-        for (let i = Number(start); i <= Number(end); i++) {
-          resolved.add(i);
-        }
-      }
-    } else {
+    const [start, end, ...rest] = range.split('-');
+    if (rest.length > 0 || !isValidPort(start) || !isValidPort(end) || Number(start) > Number(end)) {
       toRemove.push(range);
+      continue;
+    }
+
+    for (let i = Number(start); i <= Number(end); i++) {
+      resolved.add(i);
     }
   }
 
   return { resolved: Array.from(resolved), toRemove };
+}
+
+export function formatPortRanges(ports: number[]): string[] {
+  const sorted = Array.from(new Set(ports)).sort((a, b) => a - b);
+  const ranges: string[] = [];
+
+  for (let i = 0; i < sorted.length; i++) {
+    const start = sorted[i];
+    while (i + 1 < sorted.length && sorted[i + 1] === sorted[i] + 1) i++;
+
+    ranges.push(start === sorted[i] ? String(start) : `${start}-${sorted[i]}`);
+  }
+
+  return ranges;
 }
 
 function ipv6Bytes(address: string): number[] {

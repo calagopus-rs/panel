@@ -1,21 +1,31 @@
-import { ModalProps } from '@mantine/core';
+import { Input, ModalProps } from '@mantine/core';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import Button from '@/elements/buttons/Button.tsx';
+import Badge from '@/elements/data-display/Badge.tsx';
+import Card from '@/elements/data-display/Card.tsx';
 import MultiSelect from '@/elements/input/MultiSelect.tsx';
 import Select from '@/elements/input/Select.tsx';
 import ServerFileInput from '@/elements/input/ServerFileInput.tsx';
 import TagsInput from '@/elements/input/TagsInput.tsx';
+import Group from '@/elements/layout/Group.tsx';
 import Stack from '@/elements/layout/Stack.tsx';
 import FormModal from '@/elements/modals/FormModal.tsx';
 import { ModalFooter } from '@/elements/modals/Modal.tsx';
-import { networkProtocolLabelMapping, serverFirewallRuleActionLabelMapping } from '@/lib/enums.ts';
-import { resolvePorts } from '@/lib/network/ip.ts';
-import { serverFirewallRuleSchema } from '@/lib/schemas/server/firewall.ts';
+import Text from '@/elements/typography/Text.tsx';
+import {
+  networkProtocolLabelMapping,
+  serverFirewallRuleActionColorMapping,
+  serverFirewallRuleActionLabelMapping,
+} from '@/lib/enums.ts';
+import { formatPortRanges, isNetwork, resolvePorts } from '@/lib/network/ip.ts';
+import { serverFirewallRuleMaxPorts, serverFirewallRuleSchema } from '@/lib/schemas/server/firewall.ts';
 import { useModalForm } from '@/plugins/form/useModalForm.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
 import { useServerStore } from '@/stores/server.ts';
+import { ruleSummary } from '../ruleSummary.ts';
 
 type Rule = z.infer<typeof serverFirewallRuleSchema>;
 
@@ -32,9 +42,16 @@ const defaultValues: Rule = {
   sourceFile: null,
 };
 
+function splitEntries(entries: string[]): string[] {
+  return Array.from(new Set(entries.flatMap((entry) => entry.split(/[,\s]+/)).filter(Boolean)));
+}
+
 export default function FirewallRuleModal({ rule, onSave, ...props }: Props) {
   const { t } = useTranslations();
   const serverUuid = useServerStore((state) => state.server.uuid);
+  const maxSources = useGlobalStore((state) => state.settings.server.maxFirewallRuleSourceCount);
+
+  const [portEntries, setPortEntries] = useState<string[]>([]);
 
   const { form, handleClose, handleSubmit, loading, isDirty } = useModalForm<Rule>({
     initialValues: defaultValues,
@@ -43,17 +60,38 @@ export default function FirewallRuleModal({ rule, onSave, ...props }: Props) {
     onSubmit: onSave,
   });
 
-  const invalidSourceIndex = Object.keys(form.errors)
-    .find((key) => key.startsWith('sources.'))
-    ?.split('.')[1];
-
   useEffect(() => {
     if (!props.opened) return;
 
     const values = rule ?? defaultValues;
     form.setValues(values);
     form.resetDirty(values);
+    setPortEntries(values.ports ? formatPortRanges(values.ports) : []);
   }, [props.opened]);
+
+  const invalidSources = form.getValues().sources.filter((source) => !isNetwork(source));
+  const tooManySources = form.getValues().sources.length > maxSources;
+  const { resolved: resolvedPorts, toRemove: invalidPorts } = resolvePorts(portEntries);
+  const tooManyPorts = resolvedPorts.length > serverFirewallRuleMaxPorts;
+
+  const sourcesError =
+    invalidSources.length > 0
+      ? t('pages.server.firewall.form.invalidSource', { source: invalidSources[0] })
+      : tooManySources
+        ? t('pages.server.firewall.form.tooManySources', { max: maxSources })
+        : undefined;
+  const portsError =
+    invalidPorts.length > 0
+      ? t('pages.server.firewall.form.invalidPort', { port: invalidPorts[0] })
+      : tooManyPorts
+        ? t('pages.server.firewall.form.tooManyPorts', { max: serverFirewallRuleMaxPorts })
+        : undefined;
+
+  const previewRule: Rule = {
+    ...form.getValues(),
+    sources: form.getValues().sources.filter(isNetwork),
+    ports: resolvedPorts.length > 0 ? resolvedPorts : null,
+  };
 
   return (
     <FormModal
@@ -87,20 +125,21 @@ export default function FirewallRuleModal({ rule, onSave, ...props }: Props) {
           {...form.getInputProps('protocols')}
         />
 
-        <TagsInput
-          label={t('pages.server.firewall.form.sources', {})}
-          description={t('pages.server.firewall.form.sourcesDescription', {})}
-          placeholder='e.g. 203.0.113.4 or 10.0.0.0/8'
-          allowReordering={false}
-          {...form.getInputProps('sources')}
-          error={
-            invalidSourceIndex === undefined
-              ? undefined
-              : t('pages.server.firewall.form.invalidSource', {
-                  source: form.getValues().sources[Number(invalidSourceIndex)],
-                })
-          }
-        />
+        <Stack gap={4}>
+          <TagsInput
+            label={t('pages.server.firewall.form.sources', {})}
+            description={t('pages.server.firewall.form.sourcesDescription', {})}
+            placeholder='e.g. 203.0.113.4 or 10.0.0.0/8'
+            allowReordering={false}
+            value={form.getValues().sources}
+            onChange={(sources) => form.setFieldValue('sources', splitEntries(sources))}
+            invalidTags={invalidSources}
+            error={sourcesError}
+          />
+          <Text size='xs' c={tooManySources ? 'red' : 'dimmed'}>
+            {t('pages.server.firewall.form.sourcesCount', { count: form.getValues().sources.length, max: maxSources })}
+          </Text>
+        </Stack>
 
         <ServerFileInput
           serverUuid={serverUuid}
@@ -117,16 +156,38 @@ export default function FirewallRuleModal({ rule, onSave, ...props }: Props) {
           description={t('pages.server.firewall.form.portsDescription', {})}
           placeholder='e.g. 25565 or 25565-25570'
           allowReordering={false}
-          value={form.getValues().ports?.map(String) ?? []}
-          onChange={(ports) => {
-            const { resolved } = resolvePorts(ports);
+          value={portEntries}
+          onChange={(entries) => {
+            const next = splitEntries(entries);
+            const { resolved } = resolvePorts(next);
+
+            setPortEntries(next);
             form.setFieldValue('ports', resolved.length === 0 ? null : resolved.sort((a, b) => a - b));
           }}
-          error={form.errors.ports}
+          invalidTags={invalidPorts}
+          error={portsError}
         />
 
+        <Stack gap={2}>
+          <Input.Label>{t('pages.server.firewall.form.preview', {})}</Input.Label>
+          <Card p='sm'>
+            <Group gap='xs' wrap='nowrap' align='center'>
+              <Badge color={serverFirewallRuleActionColorMapping[previewRule.action]} className='shrink-0'>
+                {serverFirewallRuleActionLabelMapping[previewRule.action]()}
+              </Badge>
+              <Text size='sm' c='dimmed'>
+                {ruleSummary(previewRule)}
+              </Text>
+            </Group>
+          </Card>
+        </Stack>
+
         <ModalFooter>
-          <Button type='submit' loading={loading} disabled={!form.isValid()}>
+          <Button
+            type='submit'
+            loading={loading}
+            disabled={!form.isValid() || sourcesError !== undefined || portsError !== undefined}
+          >
             {rule ? t('common.button.update', {}) : t('common.button.create', {})}
           </Button>
           <Button variant='default' onClick={handleClose}>
