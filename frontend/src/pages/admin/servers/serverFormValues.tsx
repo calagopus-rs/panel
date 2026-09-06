@@ -13,6 +13,7 @@ import { AdminServer, AdminServerCreate, AdminServerUpdate } from '@/lib/schemas
 import { fullUserSchema } from '@/lib/schemas/user.ts';
 import { useSearchableResource } from '@/plugins/resource/useSearchableResource.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import OwnerCreateField from './OwnerCreateField.tsx';
 
 type TFunc = ReturnType<typeof useTranslations>['t'];
 type ServerCreateFormValues = AdminServerCreate;
@@ -426,18 +427,31 @@ function buildServerAssignmentFields<T extends ServerEggAssignmentFormValues>(
   };
 
   const ownerField: FieldDef<T> = {
-    type: 'select',
-    name: 'ownerUuid',
-    label: t('pages.admin.servers.tabs.general.page.form.owner', {}),
-    required: true,
-    options: users.items.map((user) => ({ label: user.username, value: user.uuid })),
-    props: {
-      searchable: true,
-      searchValue: users.search,
-      onSearchChange: users.setSearch,
-      loading: users.loading,
-      disabled: !canReadUsers,
-    },
+    type: 'custom',
+    name: '_ownerSelect',
+    render: (f) => (
+      <div className='flex flex-col gap-1'>
+        <Select
+          withAsterisk
+          label={t('pages.admin.servers.tabs.general.page.form.owner', {})}
+          data={users.items.map((user) => ({ label: `${user.username} (${user.email})`, value: user.uuid }))}
+          searchable
+          searchValue={users.search}
+          onSearchChange={users.setSearch}
+          loading={users.loading}
+          disabled={!canReadUsers}
+          key={f.key('ownerUuid')}
+          {...f.getInputProps('ownerUuid')}
+        />
+        <OwnerCreateField
+          search={users.search}
+          onCreated={(user) => {
+            users.setSearch(user.username);
+            f.setFieldValue('ownerUuid', user.uuid as never);
+          }}
+        />
+      </div>
+    ),
   };
 
   const nestField = buildNestSelectField<T>(t, { form, selectedNestUuid, setSelectedNestUuid, nests, canReadNests });

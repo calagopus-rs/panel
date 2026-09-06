@@ -3168,6 +3168,7 @@ const baseTranslations = defineTranslations({
                   externalIdPlaceholder: 'Optional external identifier',
                   descriptionPlaceholder: 'Server description',
                   owner: 'Owner',
+                  ownerCreateHint: "Can't find them? Create a new user",
                   egg: 'Egg',
                   backupConfigurationPlaceholder: 'Inherit from Node/Location',
                   cpuLimit: 'CPU Limit (%)',
