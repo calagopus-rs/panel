@@ -567,7 +567,7 @@
       "custom": "Aangepast",
       "system": "Systeem",
       "schedule": "Planning",
-      "impersonatedBy": "Nagebootst door {gebruikersnaam}"
+      "impersonatedBy": "Nagebootst door {username}"
     },
     "elements": {
       "chartLegend": {

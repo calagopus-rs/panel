@@ -3783,15 +3783,11 @@
                   }
                 },
                 "toast": {
-                  "installed": "Egg installiert.",
-                  "installedBulk": "{eggs} installiert."
+                  "installed": "{eggs} installiert."
                 },
                 "modal": {
                   "install": {
-                    "title": "Egg Repository Egg installieren"
-                  },
-                  "installBulk": {
-                    "title": "Egg Repository Eggs installieren",
+                    "title": "{eggs} installieren",
                     "button": "{eggs} installieren"
                   }
                 },
