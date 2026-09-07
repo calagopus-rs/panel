@@ -19,14 +19,16 @@ import Group from '@/elements/layout/Group.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import Title from '@/elements/typography/Title.tsx';
 import { fileModelUri } from '@/lib/editor/fileModelUri.ts';
-import { hashContent, readFileDraft, removeFileDraft, storeFileDraft } from '@/lib/files/fileDrafts.ts';
+import { readFileDraft, removeFileDraft } from '@/lib/files/fileDrafts.ts';
 import { useBlocker } from '@/plugins/useBlocker.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
+import { useContainerAutoHeight } from '@/plugins/viewport/useContainerAutoHeight.ts';
 import { useCurrentWindow } from '@/providers/CurrentWindowProvider.tsx';
 import { FileManagerProvider, useFileManager } from '@/providers/FileManagerProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
+import useFileDraft from '../hooks/useFileDraft.ts';
 import useFileDraftPersistence from '../hooks/useFileDraftPersistence.ts';
 import FileEditorDraftModal from '../modals/FileEditorDraftModal.tsx';
 
@@ -35,6 +37,7 @@ function FileRevisionDiffComponent() {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
+  const { setSavedContent, persistDraft } = useFileDraft(server.uuid);
   const { getParent } = useCurrentWindow();
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -55,8 +58,6 @@ function FileRevisionDiffComponent() {
   const [restoreConfirm, setRestoreConfirm] = useState(false);
   const [pendingDraft, setPendingDraft] = useState<{ content: string; hashMismatch: boolean } | null>(null);
   const modifiedRef = useRef('');
-  const savedContentRef = useRef('');
-  const savedHashRef = useRef(hashContent(''));
   const mountedRef = useRef(true);
   const handoffTargetRef = useRef<string | null>(null);
   const instanceId = useId();
@@ -109,16 +110,15 @@ function FileRevisionDiffComponent() {
         if (cancelled) return;
         const initial = !previousRevisionId && passedContent !== undefined ? passedContent : modified;
         setOriginalContent(original);
-        savedContentRef.current = modified;
-        savedHashRef.current = hashContent(modified);
+        const hash = setSavedContent(modified);
         modifiedRef.current = initial;
         setModifiedContent(initial);
         setDirty(initial !== modified);
-        if (initial !== modified) storeFileDraft(server.uuid, filePath, initial, savedHashRef.current);
+        if (initial !== modified) persistDraft(filePath, initial);
         if (!previousRevisionId && passedContent === undefined) {
           const draft = readFileDraft(server.uuid, filePath);
           if (draft && draft.content !== modified)
-            setPendingDraft({ content: draft.content, hashMismatch: draft.originalHash !== savedHashRef.current });
+            setPendingDraft({ content: draft.content, hashMismatch: draft.originalHash !== hash });
         }
       })
       .catch((err) => {
@@ -132,50 +132,19 @@ function FileRevisionDiffComponent() {
     };
   }, [filePath, revisionId, previousRevisionId]);
 
-  useEffect(() => {
-    const el = editorContainerRef.current;
-    if (!el || loading) return;
-
-    const updateHeight = () => {
-      const virtualWindowEl = getParent();
-      const elRect = el.getBoundingClientRect();
-
-      let bottomEdge;
-      if (virtualWindowEl) {
-        bottomEdge = virtualWindowEl.getBoundingClientRect().bottom;
-      } else {
-        bottomEdge = window.innerHeight;
-      }
-
-      const newHeight = Math.max(0, bottomEdge - elRect.top);
-      el.style.height = `${newHeight}px`;
-
-      if (diffEditorRef.current?.layout) {
-        diffEditorRef.current.layout();
-      }
-    };
-
-    const observer = new ResizeObserver(() => updateHeight());
-
-    const virtualWindowEl = getParent();
-    if (virtualWindowEl) {
-      observer.observe(virtualWindowEl);
-    } else {
-      observer.observe(document.body);
-    }
-
-    updateHeight();
-
-    return () => observer.disconnect();
-  }, [loading, getParent]);
+  useContainerAutoHeight({
+    containerRef: editorContainerRef,
+    loading,
+    getParent,
+    layout: () => diffEditorRef.current?.layout(),
+    deps: [loading, getParent],
+  });
 
   const updateContent = (value: string) => {
     modifiedRef.current = value;
     setModifiedContent(value);
-    const changed = value !== savedContentRef.current;
+    const changed = persistDraft(filePath, value, { preserve: pendingDraft !== null });
     setDirty(changed);
-    if (changed) storeFileDraft(server.uuid, filePath, value, savedHashRef.current);
-    else if (!pendingDraft) removeFileDraft(server.uuid, filePath);
   };
 
   const handleSave = () => {
@@ -185,8 +154,7 @@ function FileRevisionDiffComponent() {
     saveFileContent(server.uuid, filePath, content)
       .then(() => {
         if (!mountedRef.current) return;
-        savedContentRef.current = content;
-        savedHashRef.current = hashContent(content);
+        setSavedContent(content);
         updateContent(modifiedRef.current);
         addToast(t('pages.server.files.toast.fileSaved', {}), 'success');
       })

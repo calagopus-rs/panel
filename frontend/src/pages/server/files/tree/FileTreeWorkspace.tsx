@@ -1,9 +1,8 @@
 import { useMediaQuery } from '@mantine/hooks';
-import { basename, dirname, join } from 'pathe';
+import { join } from 'pathe';
 import { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useBeforeUnload, useNavigate, useSearchParams } from 'react-router';
 import loadDirectory from '@/api/server/files/loadDirectory.ts';
-import saveFileContent from '@/api/server/files/saveFileContent.ts';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import { hashContent, readFileDraft, removeFileDraft, storeFileDraft } from '@/lib/files/fileDrafts.ts';
 import {
@@ -34,6 +33,7 @@ import {
   storeFileTreeWorkspace,
 } from '@/pages/server/files/tree/fileTreeWorkspaceState.ts';
 import useFileTreeEditorShortcuts from '@/pages/server/files/tree/useFileTreeEditorShortcuts.ts';
+import useFileTreeFileCreation from '@/pages/server/files/tree/useFileTreeFileCreation.ts';
 import { useBlocker } from '@/plugins/useBlocker.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { useContainerAutoHeight } from '@/plugins/viewport/useContainerAutoHeight.ts';
@@ -74,7 +74,6 @@ export default function FileTreeWorkspace({
   const [, setSearchParams] = useSearchParams();
   const server = useServerStore((state) => state.server);
   const canReadContent = useServerCan('files.read-content');
-  const canCreate = useServerCan('files.create');
   const store = useFileManagerApi();
   const workspaceRef = useRef<HTMLDivElement>(null);
   const { getParent } = useCurrentWindow();
@@ -90,8 +89,6 @@ export default function FileTreeWorkspace({
   const draftContentsRef = useRef(new Map<string, string>());
   const renameDraftsRef = useRef(new Map<string, string>());
   const workspaceStateRef = useRef(workspace);
-  const creatingTabIds = useRef(new Map<string, string>());
-  const newFileSequence = useRef(workspace.tabs.length);
   const [pendingClose, setPendingClose] = useState<PendingTabClose | null>(null);
   const hasUnsavedChanges = dirtyTabIds.size > 0;
   const blocker = useBlocker(hasUnsavedChanges, true);
@@ -316,33 +313,47 @@ export default function FileTreeWorkspace({
     });
   }, []);
 
+  const { createFile: createNewFile, saveNewFile } = useFileTreeFileCreation({
+    initialTabCount: workspace.tabs.length,
+    getTabs: () => workspaceStateRef.current.tabs,
+    getDraftContent: (tabId) => draftContentsRef.current.get(tabId),
+    onSaved: (tab, nextTab, submitted) => {
+      const tabId = getFileTreeEditorTabId(tab);
+      const nextId = getFileTreeEditorTabId(nextTab);
+      const filePath = join(nextTab.directory, nextTab.file.name);
+      const latest = draftContentsRef.current.get(tabId) ?? '';
+      const stillDirty = latest !== submitted;
+      if (stillDirty) {
+        draftContentsRef.current.set(nextId, latest);
+        renameDraftsRef.current.set(nextId, latest);
+        storeFileDraft(server.uuid, filePath, latest, hashContent(submitted));
+      } else removeFileDraft(server.uuid, filePath);
+      draftContentsRef.current.delete(tabId);
+      removeFileDraft(server.uuid, getFileTreeEditorDraftPath(tab));
+      setDirtyTabIds((current) => {
+        const next = new Set(current);
+        next.delete(tabId);
+        if (stillDirty) next.add(nextId);
+        return next;
+      });
+      setWorkspace((current) =>
+        normalizeFileTreeWorkspace({
+          ...current,
+          tabs: current.tabs.map((entry) => (getFileTreeEditorTabId(entry) === tabId ? nextTab : entry)),
+          panes: current.panes.map((pane) => ({
+            ...pane,
+            tabIds: pane.tabIds.map((id) => (id === tabId ? nextId : id)),
+            activeTabId: pane.activeTabId === tabId ? nextId : pane.activeTabId,
+          })),
+        }),
+      );
+    },
+  });
+
   const createFile = (directory: string, capabilities: TreeDirectoryCapabilities) => {
-    if (!canCreate || !capabilities.writable) return;
-    newFileSequence.current += 1;
-    const now = new Date();
-    requestOpenTab({
-      directory,
-      action: 'new',
-      params: { draftId: crypto.randomUUID() },
-      primary: capabilities.primary,
-      writable: capabilities.writable,
-      file: {
-        name: `${t('pages.server.files.titleEditorNew', {})} ${newFileSequence.current}`,
-        mode: '',
-        modeBits: '',
-        size: 0,
-        sizePhysical: 0,
-        editable: true,
-        innerEditable: false,
-        directory: false,
-        file: true,
-        symlink: false,
-        virtual: false,
-        mime: 'text/plain',
-        modified: now,
-        created: now,
-      },
-    });
+    const tab = createNewFile(directory, capabilities);
+    if (!tab) return;
+    requestOpenTab(tab);
     if (mobile && fileTreeVisible) onToggleFileTree();
   };
 
@@ -356,66 +367,6 @@ export default function FileTreeWorkspace({
       });
     },
   }));
-
-  const saveNewFile = async (tabId: string, name: string) => {
-    const tab = workspaceStateRef.current.tabs.find((entry) => getFileTreeEditorTabId(entry) === tabId);
-    if (!canCreate || !tab?.writable || tab.action !== 'new' || creatingTabIds.current.has(tabId)) return;
-    const filePath = join(tab.directory, name);
-    if (
-      Array.from(creatingTabIds.current.values()).includes(filePath) ||
-      workspaceStateRef.current.tabs.some(
-        (entry) => entry.action !== 'new' && join(entry.directory, entry.file.name) === filePath,
-      )
-    ) {
-      throw new Error(t('pages.server.files.toast.closeDestinationBeforeCreate', {}));
-    }
-    const draftPath = getFileTreeEditorDraftPath(tab);
-    const submitted = draftContentsRef.current.get(tabId) ?? readFileDraft(server.uuid, draftPath)?.content ?? '';
-    creatingTabIds.current.set(tabId, filePath);
-    return saveFileContent(server.uuid, filePath, submitted)
-      .then(() => {
-        store.getState().invalidateFilemanager();
-        if (!workspaceStateRef.current.tabs.some((entry) => getFileTreeEditorTabId(entry) === tabId)) return;
-        const latest = draftContentsRef.current.get(tabId) ?? '';
-        const nextTab: FileTreeEditorSelection = {
-          ...tab,
-          directory: dirname(filePath),
-          action: 'edit',
-          params: {},
-          file: { ...tab.file, name: basename(filePath), size: new Blob([submitted]).size, modified: new Date() },
-        };
-        const nextId = getFileTreeEditorTabId(nextTab);
-        const stillDirty = latest !== submitted;
-        if (stillDirty) {
-          draftContentsRef.current.set(nextId, latest);
-          renameDraftsRef.current.set(nextId, latest);
-          storeFileDraft(server.uuid, filePath, latest, hashContent(submitted));
-        } else removeFileDraft(server.uuid, filePath);
-        draftContentsRef.current.delete(tabId);
-        removeFileDraft(server.uuid, draftPath);
-        setDirtyTabIds((current) => {
-          const next = new Set(current);
-          next.delete(tabId);
-          if (stillDirty) next.add(nextId);
-          return next;
-        });
-        setWorkspace((current) =>
-          normalizeFileTreeWorkspace({
-            ...current,
-            tabs: current.tabs.map((entry) => (getFileTreeEditorTabId(entry) === tabId ? nextTab : entry)),
-            panes: current.panes.map((pane) => ({
-              ...pane,
-              tabIds: pane.tabIds.map((id) => (id === tabId ? nextId : id)),
-              activeTabId: pane.activeTabId === tabId ? nextId : pane.activeTabId,
-            })),
-          }),
-        );
-        addToast(t('pages.server.files.toast.fileSaved', {}), 'success');
-      })
-      .finally(() => {
-        creatingTabIds.current.delete(tabId);
-      });
-  };
 
   const commitCloseTab = useCallback(
     (requestedPaneId: string, tabId: string) => {

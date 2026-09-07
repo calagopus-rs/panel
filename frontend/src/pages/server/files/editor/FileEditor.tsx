@@ -18,7 +18,7 @@ import ScreenBlock from '@/elements/feedback/ScreenBlock.tsx';
 import Spinner from '@/elements/feedback/Spinner.tsx';
 import Group from '@/elements/layout/Group.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
-import { hashContent, readFileDraft, removeFileDraft, storeFileDraft } from '@/lib/files/fileDrafts.ts';
+import { readFileDraft, removeFileDraft } from '@/lib/files/fileDrafts.ts';
 import { useBlocker } from '@/plugins/useBlocker.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { useContainerAutoHeight } from '@/plugins/viewport/useContainerAutoHeight.ts';
@@ -30,6 +30,7 @@ import { useServerStore } from '@/stores/server.ts';
 import FileRevisionsDrawer from '../drawers/FileRevisionsDrawer.tsx';
 import FileBreadcrumbs from '../FileBreadcrumbs.tsx';
 import useFileCollab from '../hooks/useFileCollab.ts';
+import useFileDraft from '../hooks/useFileDraft.ts';
 import useFileDraftPersistence from '../hooks/useFileDraftPersistence.ts';
 import FileEditorConflictDiffModal from '../modals/FileEditorConflictDiffModal.tsx';
 import FileEditorDraftModal from '../modals/FileEditorDraftModal.tsx';
@@ -50,6 +51,7 @@ function FileEditorComponent() {
   const location = useLocation();
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
+  const { setSavedContent, hasChanges, persistDraft } = useFileDraft(server.uuid);
   const {
     editorEngine,
     browsingPrimaryFilesystem,
@@ -95,8 +97,6 @@ function FileEditorComponent() {
   const editorRef = useRef<Parameters<OnMount>[0]>(null);
   const pierreEditorRef = useRef<PierreEditorHandle | null>(null);
   const contentRef = useRef(content);
-  const savedContentRef = useRef('');
-  const originalHashRef = useRef('');
   const draftPathRef = useRef<string | null>(null);
   const handoffTargetRef = useRef<string | null>(null);
   const mountedRef = useRef(true);
@@ -131,17 +131,13 @@ function FileEditorComponent() {
         setSaving(false);
       }
 
-      if (!dirty) {
-        savedContentRef.current = hasEditor() ? getEditorValue() : savedContentRef.current;
-        originalHashRef.current = hashContent(savedContentRef.current);
-      }
+      if (!dirty && hasEditor()) setSavedContent(getEditorValue());
       setDirty(dirty);
     },
     onSaved: () => {
       if (collabSaveTimerRef.current) clearTimeout(collabSaveTimerRef.current);
       setDirty(false);
-      savedContentRef.current = hasEditor() ? getEditorValue() : savedContentRef.current;
-      originalHashRef.current = hashContent(savedContentRef.current);
+      if (hasEditor()) setSavedContent(getEditorValue());
       removeFileDraft(server.uuid, currentDraftPath);
 
       if (collabSavingRef.current) {
@@ -223,15 +219,13 @@ function FileEditorComponent() {
             const restored = handoffContent ?? content;
             contentRef.current = restored;
             setContent(restored);
-            savedContentRef.current = content;
+            const hash = setSavedContent(content);
             setDirty(restored !== content);
 
             if (params.action === 'edit') {
-              const hash = hashContent(content);
-              originalHashRef.current = hash;
               const draft = readFileDraft(server.uuid, currentDraftPath);
               if (handoffContent !== undefined) {
-                if (restored !== content) storeFileDraft(server.uuid, currentDraftPath, restored, hash);
+                if (restored !== content) persistDraft(currentDraftPath, restored);
               } else if (draft) {
                 if (draft.content === content) removeFileDraft(server.uuid, currentDraftPath);
                 else setPendingDraft({ content: draft.content, hashMismatch: draft.originalHash !== hash });
@@ -338,13 +332,12 @@ function FileEditorComponent() {
     contentRef.current = value;
     setContent(value);
 
-    const changed = value !== savedContentRef.current;
+    const changed = hasChanges(value);
     setDirty(collabActiveRef.current ? true : changed);
 
     if (draftPathRef.current) {
       const path = draftPathRef.current;
-      if (changed) storeFileDraft(server.uuid, path, value, originalHashRef.current);
-      else if (!pendingDraft) removeFileDraft(server.uuid, path);
+      persistDraft(path, value, { dirty: changed, preserve: pendingDraft !== null });
     }
   };
 
@@ -365,8 +358,7 @@ function FileEditorComponent() {
       .then((text) => {
         if (draftPathRef.current !== path || !hasEditor()) return;
 
-        savedContentRef.current = text;
-        originalHashRef.current = hashContent(text);
+        setSavedContent(text);
         setEditorValue(text);
         setDirty(false);
       })
@@ -422,12 +414,9 @@ function FileEditorComponent() {
           setNameModalOpen(false);
         });
 
-        savedContentRef.current = currentContent;
-        originalHashRef.current = hashContent(currentContent);
-        const stillDirty = contentRef.current !== currentContent;
+        setSavedContent(currentContent);
+        const stillDirty = persistDraft(savedPath, contentRef.current);
         setDirty(stillDirty);
-        if (stillDirty) storeFileDraft(server.uuid, savedPath, contentRef.current, originalHashRef.current);
-        else removeFileDraft(server.uuid, savedPath);
         addToast(t('pages.server.files.toast.fileSaved', {}), 'success');
 
         if (name) {

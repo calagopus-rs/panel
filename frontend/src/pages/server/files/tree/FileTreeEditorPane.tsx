@@ -30,7 +30,7 @@ import Text from '@/elements/typography/Text.tsx';
 import Title from '@/elements/typography/Title.tsx';
 import { fileModelUri } from '@/lib/editor/fileModelUri.ts';
 import { registerHoconLanguage, registerTomlLanguage } from '@/lib/editor/monaco.ts';
-import { hashContent, readFileDraft, removeFileDraft, storeFileDraft } from '@/lib/files/fileDrafts.ts';
+import { readFileDraft, removeFileDraft } from '@/lib/files/fileDrafts.ts';
 import FileRevisionsDrawer from '@/pages/server/files/drawers/FileRevisionsDrawer.tsx';
 import FileEditorSettings from '@/pages/server/files/editor/FileEditorSettings.tsx';
 import FileImageViewerSettings from '@/pages/server/files/editor/FileImageViewerSettings.tsx';
@@ -38,6 +38,7 @@ import { FileAudioPreview, FileImagePreview } from '@/pages/server/files/editor/
 import FileSqliteQuery from '@/pages/server/files/editor/FileSqliteQuery.tsx';
 import { findFileEditorAction } from '@/pages/server/files/editor/useFileEditorPresentation.ts';
 import useFileCollab from '@/pages/server/files/hooks/useFileCollab.ts';
+import useFileDraft from '@/pages/server/files/hooks/useFileDraft.ts';
 import useFileDraftPersistence from '@/pages/server/files/hooks/useFileDraftPersistence.ts';
 import FileEditorConflictDiffModal from '@/pages/server/files/modals/FileEditorConflictDiffModal.tsx';
 import FileEditorDraftModal from '@/pages/server/files/modals/FileEditorDraftModal.tsx';
@@ -94,6 +95,7 @@ export default function FileTreeEditorPane({
   const { t } = useTranslations();
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
+  const { setSavedContent, hasChanges, persistDraft } = useFileDraft(server.uuid);
   const canCreate = useServerCan('files.create');
   const canReadContent = useServerCan('files.read-content');
   const canUpdate = useServerCan('files.update');
@@ -120,8 +122,6 @@ export default function FileTreeEditorPane({
   const [restoreOnConnect, setRestoreOnConnect] = useState<string | undefined>();
   const [blobContent, setBlobContent] = useState(new Blob());
   const contentRef = useRef('');
-  const savedContentRef = useRef('');
-  const savedHashRef = useRef(hashContent(''));
   const mountedRef = useRef(true);
   const instanceId = useId();
   const initialDraftContentRef = useRef(draftContent);
@@ -143,8 +143,7 @@ export default function FileTreeEditorPane({
   useFileDraftPersistence(server.uuid, draftPath, dirty);
   const publishDraft = (value: string, changed: boolean) => {
     if (activeTabId) onDraftChange(activeTabId, changed ? value : null);
-    if (changed) storeFileDraft(server.uuid, draftPath, value, savedHashRef.current);
-    else if (!pendingDraft) removeFileDraft(server.uuid, draftPath);
+    persistDraft(draftPath, value, { dirty: changed, preserve: pendingDraft !== null });
   };
   const editorContext = selection
     ? {
@@ -184,16 +183,12 @@ export default function FileTreeEditorPane({
     },
     onActivated: (serverDirty) => {
       collabActiveRef.current = true;
-      if (!serverDirty) {
-        savedContentRef.current = contentRef.current;
-        savedHashRef.current = hashContent(contentRef.current);
-      }
+      if (!serverDirty) setSavedContent(contentRef.current);
       setDirty(serverDirty);
       if (!pendingDraft) publishDraft(contentRef.current, serverDirty);
     },
     onSaved: () => {
-      savedContentRef.current = contentRef.current;
-      savedHashRef.current = hashContent(contentRef.current);
+      setSavedContent(contentRef.current);
       setDirty(false);
       publishDraft(contentRef.current, false);
 
@@ -268,15 +263,14 @@ export default function FileTreeEditorPane({
           setContent(loaded);
         } else {
           const restoredContent = initialDraftContentRef.current ?? loaded;
-          savedContentRef.current = loaded;
-          savedHashRef.current = hashContent(loaded);
+          const hash = setSavedContent(loaded);
           contentRef.current = restoredContent;
           setContent(restoredContent);
           setDirty(restoredContent !== loaded);
           if (initialDraftContentRef.current === undefined) {
             const draft = readFileDraft(server.uuid, filePath);
             if (draft && draft.content !== loaded) {
-              setPendingDraft({ content: draft.content, hashMismatch: draft.originalHash !== savedHashRef.current });
+              setPendingDraft({ content: draft.content, hashMismatch: draft.originalHash !== hash });
             } else if (draft) removeFileDraft(server.uuid, filePath);
           }
         }
@@ -318,7 +312,7 @@ export default function FileTreeEditorPane({
   }, [collab.conflict]);
 
   const updateContent = (value: string) => {
-    const changed = collabActiveRef.current ? true : value !== savedContentRef.current;
+    const changed = collabActiveRef.current || hasChanges(value);
     contentRef.current = value;
     setContent(value);
     setDirty(changed);
@@ -364,9 +358,8 @@ export default function FileTreeEditorPane({
     try {
       await saveFileContent(server.uuid, filePath, submittedContent);
       if (!mountedRef.current) return;
-      savedContentRef.current = submittedContent;
-      savedHashRef.current = hashContent(submittedContent);
-      const stillDirty = contentRef.current !== submittedContent;
+      setSavedContent(submittedContent);
+      const stillDirty = hasChanges(contentRef.current);
       setDirty(stillDirty);
       publishDraft(contentRef.current, stillDirty);
       addToast(t('pages.server.files.toast.fileSaved', {}), 'success');
@@ -402,8 +395,7 @@ export default function FileTreeEditorPane({
     setLoading(true);
     try {
       const loaded = await getFileContent(server.uuid, filePath).then((blob) => blob.text());
-      savedContentRef.current = loaded;
-      savedHashRef.current = hashContent(loaded);
+      setSavedContent(loaded);
       replaceEditorContent(loaded, false);
     } catch (error) {
       reportFileError(error);
