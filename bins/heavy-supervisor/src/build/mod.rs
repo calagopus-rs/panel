@@ -319,6 +319,7 @@ pub async fn run<R: CommandRunner>(
         intended_extensions: Vec::new(),
         verified_extensions: Vec::new(),
         verified: false,
+        stock: false,
         started_at: crate::store::record::now(),
         finished_at: None,
         exit_code: None,

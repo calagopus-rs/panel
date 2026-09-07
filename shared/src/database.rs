@@ -24,6 +24,17 @@ pub struct Database {
     batch_actions: Arc<Mutex<HashMap<(&'static str, uuid::Uuid), BatchFuture>>>,
 }
 
+async fn connect_pool(label: &str, url: &str, max_connections: u32) -> sqlx::PgPool {
+    crate::retry::startup_connect(label, || {
+        PgPoolOptions::new()
+            .min_connections(10)
+            .max_connections(max_connections)
+            .test_before_acquire(false)
+            .connect(url)
+    })
+    .await
+}
+
 impl Database {
     pub async fn new(env: &crate::env::Env, cache: Arc<crate::cache::Cache>) -> Self {
         let start = std::time::Instant::now();
@@ -32,32 +43,11 @@ impl Database {
             cache,
 
             write: match &env.database_url_primary {
-                Some(url) => PgPoolOptions::new()
-                    .min_connections(10)
-                    .max_connections(20)
-                    .test_before_acquire(false)
-                    .connect(url)
-                    .await
-                    .unwrap(),
-
-                None => PgPoolOptions::new()
-                    .min_connections(10)
-                    .max_connections(50)
-                    .test_before_acquire(false)
-                    .connect(&env.database_url)
-                    .await
-                    .unwrap(),
+                Some(url) => connect_pool("primary database", url, 20).await,
+                None => connect_pool("database", &env.database_url, 50).await,
             },
             read: if env.database_url_primary.is_some() {
-                Some(
-                    PgPoolOptions::new()
-                        .min_connections(10)
-                        .max_connections(50)
-                        .test_before_acquire(false)
-                        .connect(&env.database_url)
-                        .await
-                        .unwrap(),
-                )
+                Some(connect_pool("read database", &env.database_url, 50).await)
             } else {
                 None
             },

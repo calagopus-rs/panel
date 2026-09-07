@@ -60,15 +60,17 @@ pub struct Supervision {
     policy: Policy,
     attempt: u32,
     consecutive_failures: u32,
+    fallback_allowed: bool,
     fell_back: bool,
 }
 
 impl Supervision {
-    pub fn new(policy: Policy) -> Self {
+    pub fn new(policy: Policy, fallback_allowed: bool) -> Self {
         Self {
             policy,
             attempt: 0,
             consecutive_failures: 0,
+            fallback_allowed,
             fell_back: false,
         }
     }
@@ -100,7 +102,10 @@ impl Supervision {
                     return Decision::GiveUp;
                 }
 
-                if self.attempt <= self.policy.start_retries || self.fell_back {
+                if self.attempt <= self.policy.start_retries
+                    || self.fell_back
+                    || !self.fallback_allowed
+                {
                     return Decision::Retry {
                         after: self.policy.backoff(self.attempt),
                     };
@@ -291,5 +296,67 @@ pub async fn start(
             Decision::FallBack => return StartOutcome::FallBack(failure),
             Decision::GiveUp | Decision::Continue => return StartOutcome::GiveUp(failure),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn policy() -> Policy {
+        Policy {
+            startup_probe: Duration::from_secs(1),
+            backoff_base: Duration::from_secs(1),
+            backoff_factor: 4,
+            start_retries: 3,
+            failure_limit: 5,
+        }
+    }
+
+    #[test]
+    fn falls_back_after_the_start_retries() {
+        let mut supervision = Supervision::new(policy(), true);
+
+        for expected in [1, 4, 16] {
+            assert_eq!(
+                supervision.record(Outcome::StartFailed),
+                Decision::Retry {
+                    after: Duration::from_secs(expected)
+                }
+            );
+        }
+        assert_eq!(supervision.record(Outcome::StartFailed), Decision::FallBack);
+        assert_eq!(supervision.record(Outcome::StartFailed), Decision::GiveUp);
+    }
+
+    #[test]
+    fn never_falls_back_when_disallowed() {
+        let mut supervision = Supervision::new(policy(), false);
+
+        for expected in [1, 4, 16, 16] {
+            assert_eq!(
+                supervision.record(Outcome::StartFailed),
+                Decision::Retry {
+                    after: Duration::from_secs(expected)
+                }
+            );
+        }
+        assert_eq!(supervision.record(Outcome::StartFailed), Decision::GiveUp);
+    }
+
+    #[test]
+    fn a_successful_start_resets_the_counters() {
+        let mut supervision = Supervision::new(policy(), false);
+
+        supervision.record(Outcome::StartFailed);
+        supervision.record(Outcome::StartFailed);
+        assert_eq!(supervision.record(Outcome::Started), Decision::Continue);
+        assert_eq!(supervision.consecutive_failures(), 0);
+        assert_eq!(
+            supervision.record(Outcome::StartFailed),
+            Decision::Retry {
+                after: Duration::from_secs(1)
+            }
+        );
     }
 }

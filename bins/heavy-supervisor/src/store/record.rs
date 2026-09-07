@@ -30,6 +30,8 @@ pub struct BuildRecord {
     pub intended_extensions: Vec<ExtensionRef>,
     pub verified_extensions: Vec<ExtensionRef>,
     pub verified: bool,
+    #[serde(default)]
+    pub stock: bool,
     pub started_at: String,
     pub finished_at: Option<String>,
     pub exit_code: Option<i32>,
