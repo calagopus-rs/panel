@@ -25,6 +25,7 @@ import SelectionArea from '@/elements/dnd/SelectionArea.tsx';
 import Spinner from '@/elements/feedback/Spinner.tsx';
 import Group from '@/elements/layout/Group.tsx';
 import SegmentedControl from '@/elements/layout/SegmentedControl.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import Tooltip from '@/elements/overlays/Tooltip.tsx';
 import Title from '@/elements/typography/Title.tsx';
 import { isOpenableFile } from '@/lib/files/files.ts';
@@ -50,6 +51,7 @@ import ServerFilesColumnRightSection, {
   columnOnClick,
   type ServerFilesColumn,
 } from '@/pages/server/files/list/ServerFilesColumnRightSection.tsx';
+import type { FileTreeWorkspaceHandle } from '@/pages/server/files/tree/FileTreeWorkspace.tsx';
 import {
   isInputFocused,
   matchesActiveShortcut,
@@ -463,17 +465,25 @@ function ServerFilesComponent() {
   const [view, setView] = useState<FileManagerView>(getStoredFileManagerView);
   const [fileTreeVisible, setFileTreeVisible] = useState(() => getStoredFileTreeVisibility(serverUuid));
   const [treeInitialDirectory, setTreeInitialDirectory] = useState(browsingDirectory);
+  const [treeDirty, setTreeDirty] = useState(false);
+  const [pendingView, setPendingView] = useState<FileManagerView | null>(null);
+  const treeWorkspaceRef = useRef<FileTreeWorkspaceHandle>(null);
+  const createTreeFile = view === 'tree' ? () => treeWorkspaceRef.current?.createFile() : undefined;
 
-  useFileBrowserQuickActions({ treeView: view === 'tree' });
+  useFileBrowserQuickActions({ treeView: view === 'tree', onCreateFile: createTreeFile });
 
   useEffect(() => setFileTreeVisible(getStoredFileTreeVisibility(serverUuid)), [serverUuid]);
 
-  const changeView = (value: string) => {
-    if (value !== 'list' && value !== 'tree') return;
-
+  const applyView = (value: FileManagerView) => {
     if (value === 'tree') setTreeInitialDirectory(browsingDirectory);
     localStorage.setItem(FILE_MANAGER_VIEW_STORAGE_KEY, value);
     setView(value);
+  };
+
+  const changeView = (value: string) => {
+    if ((value !== 'list' && value !== 'tree') || value === view) return;
+    if (view === 'tree' && treeDirty) setPendingView(value);
+    else applyView(value);
   };
 
   const toggleFileTree = () => {
@@ -486,6 +496,18 @@ function ServerFilesComponent() {
   return (
     <div data-file-manager-page className='flex w-full min-w-0 flex-col'>
       <FileModals treeView={view === 'tree'} />
+      <ConfirmationModal
+        title={t('pages.server.files.modal.unsavedChanges.title', {})}
+        opened={pendingView !== null}
+        onClose={() => setPendingView(null)}
+        onConfirmed={() => {
+          if (pendingView) applyView(pendingView);
+          setPendingView(null);
+        }}
+        confirm={t('common.button.leavePage', {})}
+      >
+        {t('pages.server.files.modal.unsavedChanges.content', {}).md()}
+      </ConfirmationModal>
       <FileUpload showOverlay={view === 'list'} />
       <FileActionBar />
 
@@ -541,7 +563,7 @@ function ServerFilesComponent() {
           />
 
           <FileOperationsProgress />
-          <FileToolbar />
+          <FileToolbar onCreateFile={createTreeFile} />
         </Group>
       </Group>
 
@@ -558,6 +580,8 @@ function ServerFilesComponent() {
             }
           >
             <FileTreeWorkspace
+              ref={treeWorkspaceRef}
+              onDirtyStateChange={setTreeDirty}
               key={serverUuid}
               initialDirectory={treeInitialDirectory}
               fileTreeVisible={fileTreeVisible}

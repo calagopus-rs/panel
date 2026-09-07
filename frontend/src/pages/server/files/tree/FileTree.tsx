@@ -1,7 +1,7 @@
 import { faFileCirclePlus, faFolderPlus, faLink } from '@fortawesome/free-solid-svg-icons';
 import { dirname, resolve } from 'pathe';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import copyFile from '@/api/server/files/copyFile.ts';
 import loadDirectory from '@/api/server/files/loadDirectory.ts';
@@ -48,10 +48,16 @@ import { useFileManagerApi, useFileManagerStore } from '@/stores/fileManager.ts'
 import { useServerStore } from '@/stores/server.ts';
 import { fileManagerUndoScope, runLastUndoEntry } from '@/stores/undoHistory.ts';
 
-function FileTree({ onOpenFile, activePath, initialDirectory, collapsed, onToggleCollapsed }: FileTreeProps) {
+function FileTree({
+  onOpenFile,
+  onCreateFile,
+  activePath,
+  initialDirectory,
+  collapsed,
+  onToggleCollapsed,
+}: FileTreeProps) {
   const { t } = useTranslations();
   const { addToast } = useToast();
-  const navigate = useNavigate();
   const [, setSearchParams] = useSearchParams();
   const server = useServerStore((state) => state.server);
   const canCreateFiles = useServerCan('files.create');
@@ -520,7 +526,7 @@ function FileTree({ onOpenFile, activePath, initialDirectory, collapsed, onToggl
 
   const openCreateFile = () => {
     prepareCreateTarget();
-    navigate(`/server/${server.uuidShort}/files/new?${createSearchParams({ directory: createTarget })}`);
+    onCreateFile(createTarget, getDirectoryCapabilities(createTarget));
   };
 
   const openCreateDirectory = () => {
@@ -943,7 +949,7 @@ function FileTree({ onOpenFile, activePath, initialDirectory, collapsed, onToggl
         <Card
           ref={treeRef}
           p={0}
-          className='flex h-(--file-manager-workspace-height) min-h-(--file-manager-workspace-min-height) w-full flex-col overflow-hidden transition-colors'
+          className='flex h-full min-h-full w-full flex-col overflow-hidden transition-colors'
           data-file-manager-tree
           data-file-tree-directory={ROOT_DIRECTORY}
           data-file-tree-drop-target={ROOT_DIRECTORY}

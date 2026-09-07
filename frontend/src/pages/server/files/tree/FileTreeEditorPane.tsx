@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AvatarGroup } from '@mantine/core';
 import { AxiosError } from 'axios';
 import { join } from 'pathe';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import getFileContent from '@/api/server/files/getFileContent.ts';
@@ -28,7 +28,9 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import Tooltip from '@/elements/overlays/Tooltip.tsx';
 import Text from '@/elements/typography/Text.tsx';
 import Title from '@/elements/typography/Title.tsx';
+import { fileModelUri } from '@/lib/editor/fileModelUri.ts';
 import { registerHoconLanguage, registerTomlLanguage } from '@/lib/editor/monaco.ts';
+import { hashContent, readFileDraft, removeFileDraft, storeFileDraft } from '@/lib/files/fileDrafts.ts';
 import FileRevisionsDrawer from '@/pages/server/files/drawers/FileRevisionsDrawer.tsx';
 import FileEditorSettings from '@/pages/server/files/editor/FileEditorSettings.tsx';
 import FileImageViewerSettings from '@/pages/server/files/editor/FileImageViewerSettings.tsx';
@@ -36,9 +38,12 @@ import { FileAudioPreview, FileImagePreview } from '@/pages/server/files/editor/
 import FileSqliteQuery from '@/pages/server/files/editor/FileSqliteQuery.tsx';
 import { findFileEditorAction } from '@/pages/server/files/editor/useFileEditorPresentation.ts';
 import useFileCollab from '@/pages/server/files/hooks/useFileCollab.ts';
+import useFileDraftPersistence from '@/pages/server/files/hooks/useFileDraftPersistence.ts';
 import FileEditorConflictDiffModal from '@/pages/server/files/modals/FileEditorConflictDiffModal.tsx';
+import FileEditorDraftModal from '@/pages/server/files/modals/FileEditorDraftModal.tsx';
+import FileNameModal from '@/pages/server/files/modals/FileNameModal.tsx';
 import FileTreeEditorTabs from '@/pages/server/files/tree/FileTreeEditorTabs.tsx';
-import { FileTreeEditorSelection } from '@/pages/server/files/tree/fileTreeEditor.ts';
+import { FileTreeEditorSelection, getFileTreeEditorDraftPath } from '@/pages/server/files/tree/fileTreeEditor.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
@@ -63,6 +68,7 @@ interface FileTreeEditorPaneProps {
   onMissing: (tabId: string) => void;
   onDirtyChange: (tabId: string, dirty: boolean) => void;
   onDraftChange: (tabId: string, content: string | null) => void;
+  onCreateFile: (name: string) => Promise<void>;
 }
 
 export default function FileTreeEditorPane({
@@ -83,6 +89,7 @@ export default function FileTreeEditorPane({
   onMissing,
   onDirtyChange,
   onDraftChange,
+  onCreateFile,
 }: FileTreeEditorPaneProps) {
   const { t } = useTranslations();
   const { addToast } = useToast();
@@ -99,7 +106,8 @@ export default function FileTreeEditorPane({
       editorEngine: state.editorEngine,
     })),
   );
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!selection && !['new', 'sqlite'].includes(selection.action));
+  const [nameModalOpen, setNameModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(draftContent !== undefined);
   const [revertConfirm, setRevertConfirm] = useState(false);
@@ -108,9 +116,14 @@ export default function FileTreeEditorPane({
   const [conflictDiskContent, setConflictDiskContent] = useState<string | null>(null);
   const [conflictModifiedContent, setConflictModifiedContent] = useState('');
   const [content, setContent] = useState('');
+  const [pendingDraft, setPendingDraft] = useState<{ content: string; hashMismatch: boolean } | null>(null);
+  const [restoreOnConnect, setRestoreOnConnect] = useState<string | undefined>();
   const [blobContent, setBlobContent] = useState(new Blob());
   const contentRef = useRef('');
   const savedContentRef = useRef('');
+  const savedHashRef = useRef(hashContent(''));
+  const mountedRef = useRef(true);
+  const instanceId = useId();
   const initialDraftContentRef = useRef(draftContent);
   const pierreEditorRef = useRef<PierreEditorHandle | null>(null);
   const saveRef = useRef<() => void>(() => undefined);
@@ -125,6 +138,14 @@ export default function FileTreeEditorPane({
   }, [onMissing]);
 
   const filePath = selection ? join(selection.directory, selection.file.name) : '';
+  const draftPath = selection ? getFileTreeEditorDraftPath(selection) : '';
+  const modelPath = fileModelUri(server.uuid, filePath, instanceId);
+  useFileDraftPersistence(server.uuid, draftPath, dirty);
+  const publishDraft = (value: string, changed: boolean) => {
+    if (activeTabId) onDraftChange(activeTabId, changed ? value : null);
+    if (changed) storeFileDraft(server.uuid, draftPath, value, savedHashRef.current);
+    else if (!pendingDraft) removeFileDraft(server.uuid, draftPath);
+  };
   const editorContext = selection
     ? {
         surface: 'inline' as const,
@@ -136,7 +157,8 @@ export default function FileTreeEditorPane({
       }
     : undefined;
   const matchedAction = findFileEditorAction(selection?.action);
-  const editableText = selection?.action === 'edit' || matchedAction?.contentType === 'string';
+  const editableText =
+    selection?.action === 'new' || selection?.action === 'edit' || matchedAction?.contentType === 'string';
   const reportFileError = (error: unknown) => {
     if (error instanceof AxiosError && error.response?.status === 404) {
       if (activeTabId) onMissingRef.current(activeTabId);
@@ -155,20 +177,25 @@ export default function FileTreeEditorPane({
     enabled: selection?.action === 'edit' && selection.primary && !loading,
     engine: editorEngine,
     filePath,
-    restoreContent: canUpdate && selection?.writable ? restoreContent : undefined,
+    restoreContent: canUpdate && selection?.writable ? (restoreContent ?? draftContent ?? restoreOnConnect) : undefined,
     onRestoreContent: () => {
+      setRestoreOnConnect(undefined);
       if (activeTabId) onRestoreContent(activeTabId);
     },
     onActivated: (serverDirty) => {
       collabActiveRef.current = true;
-      if (!serverDirty) savedContentRef.current = contentRef.current;
+      if (!serverDirty) {
+        savedContentRef.current = contentRef.current;
+        savedHashRef.current = hashContent(contentRef.current);
+      }
       setDirty(serverDirty);
-      if (activeTabId) onDraftChange(activeTabId, serverDirty ? contentRef.current : null);
+      if (!pendingDraft) publishDraft(contentRef.current, serverDirty);
     },
     onSaved: () => {
       savedContentRef.current = contentRef.current;
+      savedHashRef.current = hashContent(contentRef.current);
       setDirty(false);
-      if (activeTabId) onDraftChange(activeTabId, null);
+      publishDraft(contentRef.current, false);
 
       if (stopCollabSave()) {
         addToast(t('pages.server.files.toast.fileSaved', {}), 'success');
@@ -208,6 +235,16 @@ export default function FileTreeEditorPane({
       return;
     }
 
+    if (selection.action === 'new') {
+      const draft = initialDraftContentRef.current ?? readFileDraft(server.uuid, draftPath)?.content ?? '';
+      contentRef.current = draft;
+      setContent(draft);
+      setDirty(draft !== '');
+      if (activeTabId) onDraftChange(activeTabId, draft || null);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
     let nextMediaUrl: string | null = null;
     resetContent(initialDraftContentRef.current !== undefined);
@@ -232,9 +269,16 @@ export default function FileTreeEditorPane({
         } else {
           const restoredContent = initialDraftContentRef.current ?? loaded;
           savedContentRef.current = loaded;
+          savedHashRef.current = hashContent(loaded);
           contentRef.current = restoredContent;
           setContent(restoredContent);
           setDirty(restoredContent !== loaded);
+          if (initialDraftContentRef.current === undefined) {
+            const draft = readFileDraft(server.uuid, filePath);
+            if (draft && draft.content !== loaded) {
+              setPendingDraft({ content: draft.content, hashMismatch: draft.originalHash !== savedHashRef.current });
+            } else if (draft) removeFileDraft(server.uuid, filePath);
+          }
         }
       })
       .catch((error) => {
@@ -259,14 +303,15 @@ export default function FileTreeEditorPane({
     };
   }, [server.uuid, filePath, selection?.action, matchedAction?.contentType, addToast, activeTabId]);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
       if (collabSaveTimerRef.current) window.clearTimeout(collabSaveTimerRef.current);
       conflictModelsRef.current.forEach((model) => model.dispose());
       conflictModelsRef.current = [];
-    },
-    [],
-  );
+    };
+  }, []);
 
   useEffect(() => {
     if (!collab.conflict) setConflictDiffOpen(false);
@@ -277,7 +322,7 @@ export default function FileTreeEditorPane({
     contentRef.current = value;
     setContent(value);
     setDirty(changed);
-    if (activeTabId) onDraftChange(activeTabId, changed ? value : null);
+    publishDraft(value, changed);
   };
 
   const replaceEditorContent = (value: string, changed: boolean) => {
@@ -285,7 +330,7 @@ export default function FileTreeEditorPane({
     setContent(value);
     pierreEditorRef.current?.setValue(value);
     setDirty(changed);
-    if (activeTabId) onDraftChange(activeTabId, changed ? value : null);
+    publishDraft(value, changed);
   };
 
   const beginCollabSave = (force = false) => {
@@ -305,18 +350,28 @@ export default function FileTreeEditorPane({
   };
 
   const save = async () => {
-    if (!canSave) return;
+    if (!canSave || saving || loading) return;
+
+    if (selection?.action === 'new') {
+      setNameModalOpen(true);
+      return;
+    }
 
     if (collabActiveRef.current && beginCollabSave()) return;
 
     setSaving(true);
+    const submittedContent = contentRef.current;
     try {
-      await saveFileContent(server.uuid, filePath, contentRef.current);
-      savedContentRef.current = contentRef.current;
-      setDirty(false);
-      if (activeTabId) onDraftChange(activeTabId, null);
+      await saveFileContent(server.uuid, filePath, submittedContent);
+      if (!mountedRef.current) return;
+      savedContentRef.current = submittedContent;
+      savedHashRef.current = hashContent(submittedContent);
+      const stillDirty = contentRef.current !== submittedContent;
+      setDirty(stillDirty);
+      publishDraft(contentRef.current, stillDirty);
       addToast(t('pages.server.files.toast.fileSaved', {}), 'success');
     } catch (error) {
+      if (!mountedRef.current) return;
       reportFileError(error);
     }
     setSaving(false);
@@ -348,6 +403,7 @@ export default function FileTreeEditorPane({
     try {
       const loaded = await getFileContent(server.uuid, filePath).then((blob) => blob.text());
       savedContentRef.current = loaded;
+      savedHashRef.current = hashContent(loaded);
       replaceEditorContent(loaded, false);
     } catch (error) {
       reportFileError(error);
@@ -395,7 +451,7 @@ export default function FileTreeEditorPane({
   }
 
   const title = matchedAction ? matchedAction.title(selection.file.name) : selection.file.name;
-  const unknownAction = !matchedAction && !['edit', 'image', 'audio', 'sqlite'].includes(selection.action);
+  const unknownAction = !matchedAction && !['new', 'edit', 'image', 'audio', 'sqlite'].includes(selection.action);
   const unavailableAction = unknownAction || (selection.action === 'sqlite' && !canQuerySqlite);
   const showRevertAction =
     (collab.active ? canUpdate : canReadContent) &&
@@ -411,15 +467,15 @@ export default function FileTreeEditorPane({
 
       <div
         data-file-manager-editor-header
-        className='flex min-h-12 shrink-0 items-center justify-between gap-3 border-b border-(--mantine-color-default-border) px-3'
+        className='flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-(--mantine-color-default-border) px-3 py-2'
       >
-        <Group wrap='nowrap' gap='xs' className='min-w-0'>
+        <Group wrap='nowrap' gap='xs' className='min-w-0 flex-1 basis-32'>
           <Title order={3} className='truncate! text-base!'>
             {title}
           </Title>
           {matchedAction?.header.settings ? (
             <matchedAction.header.settings />
-          ) : selection.action === 'edit' ? (
+          ) : selection.action === 'edit' || selection.action === 'new' ? (
             <FileEditorSettings />
           ) : selection.action === 'image' ? (
             <FileImageViewerSettings />
@@ -442,14 +498,26 @@ export default function FileTreeEditorPane({
           {matchedAction?.header.rightSection && <matchedAction.header.rightSection />}
           {showRevertAction && (
             <Tooltip label={t('pages.server.files.tooltip.revertToDisk', {})}>
-              <ActionIcon size='md' variant='subtle' color='gray' onClick={() => setRevertConfirm(true)}>
+              <ActionIcon
+                size='md'
+                variant='subtle'
+                color='gray'
+                aria-label={t('pages.server.files.tooltip.revertToDisk', {})}
+                onClick={() => setRevertConfirm(true)}
+              >
                 <FontAwesomeIcon icon={faArrowsRotate} />
               </ActionIcon>
             </Tooltip>
           )}
           {showHistoryAction && (
             <Tooltip label={t('pages.server.files.tooltip.fileHistory', {})}>
-              <ActionIcon size='md' variant='subtle' color='gray' onClick={() => setRevisionsOpen(true)}>
+              <ActionIcon
+                size='md'
+                variant='subtle'
+                color='gray'
+                aria-label={t('pages.server.files.tooltip.fileHistory', {})}
+                onClick={() => setRevisionsOpen(true)}
+              >
                 <FontAwesomeIcon icon={faClockRotateLeft} />
               </ActionIcon>
             </Tooltip>
@@ -458,7 +526,7 @@ export default function FileTreeEditorPane({
             <Button
               size='compact-sm'
               loading={saving}
-              disabled={!dirty}
+              disabled={!dirty && selection.action !== 'new'}
               leftSection={<FontAwesomeIcon icon={faFloppyDisk} />}
               onClick={() => void save()}
             >
@@ -466,7 +534,7 @@ export default function FileTreeEditorPane({
             </Button>
           )}
           <Tooltip label={t('common.button.close', {})}>
-            <ActionIcon variant='subtle' color='gray' onClick={onClose}>
+            <ActionIcon variant='subtle' color='gray' aria-label={t('common.button.close', {})} onClick={onClose}>
               <FontAwesomeIcon icon={faXmark} />
             </ActionIcon>
           </Tooltip>
@@ -556,7 +624,7 @@ export default function FileTreeEditorPane({
               key={filePath}
               height='100%'
               width='100%'
-              path={selection.file.name}
+              path={modelPath}
               defaultValue={content}
               readOnly={!canSave}
               wordWrap={editorLineOverflow}
@@ -573,7 +641,7 @@ export default function FileTreeEditorPane({
               key={filePath}
               height='100%'
               width='100%'
-              path={selection.file.name}
+              path={modelPath}
               value={content}
               options={{
                 readOnly: !canSave,
@@ -598,6 +666,31 @@ export default function FileTreeEditorPane({
           )}
         </div>
       </div>
+
+      <FileEditorDraftModal
+        pendingDraft={pendingDraft}
+        onDiscard={() => {
+          removeFileDraft(server.uuid, draftPath);
+          setPendingDraft(null);
+        }}
+        onRestore={(value) => {
+          if (!collabActiveRef.current) setRestoreOnConnect(value);
+          replaceEditorContent(value, true);
+          setPendingDraft(null);
+        }}
+      />
+
+      <FileNameModal
+        opened={nameModalOpen}
+        onClose={() => setNameModalOpen(false)}
+        onFileName={async (name) => {
+          if (!canSave || saving) return;
+          setSaving(true);
+          await onCreateFile(name).finally(() => {
+            if (mountedRef.current) setSaving(false);
+          });
+        }}
+      />
 
       <FileEditorConflictDiffModal
         opened={conflictDiffOpen}

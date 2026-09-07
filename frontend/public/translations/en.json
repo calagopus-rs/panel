@@ -4814,7 +4814,9 @@
             "closeEditorTab": "Close {name}",
             "unsavedTab": "{name} has unsaved changes",
             "dropToSplit": "Drop to open in a new editor pane",
-            "resizeEditorPanes": "Resize editor panes"
+            "resizeEditorPanes": "Resize editor panes",
+            "selectPane": "Select editor pane",
+            "editorPane": "Editor pane {number}"
           },
           "titleEditorViewing": "Viewing {file}",
           "titleEditorPlaying": "Playing {file}",
@@ -4853,6 +4855,8 @@
             "fileFromUpload": "File from Upload",
             "directoryFromUpload": "Directory from Upload",
             "viewDiff": "View Diff",
+            "openInEditor": "Open in Editor",
+            "editorActions": "Editor Actions",
             "loadDisk": "Load Disk Version",
             "keepEditor": "Keep Editor Version"
           },
@@ -4948,6 +4952,7 @@
             "fileRenamed": "File has been renamed.",
             "fileCouldNotBeRenamed": "File could not be renamed.",
             "closeDestinationBeforeRename": "Close the editor tab for the destination file before renaming.",
+            "closeDestinationBeforeCreate": "Close the editor tab for the destination file before creating this file.",
             "closeTabsBeforeBulkRename": "Close affected editor tabs before renaming overlapping paths.",
             "filesRenamed": "{files} renamed.",
             "renameUndone": "Rename undone.",

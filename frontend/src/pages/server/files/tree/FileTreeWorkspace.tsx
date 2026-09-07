@@ -1,8 +1,11 @@
-import { join } from 'pathe';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useMediaQuery } from '@mantine/hooks';
+import { basename, dirname, join } from 'pathe';
+import { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { useBeforeUnload, useNavigate, useSearchParams } from 'react-router';
 import loadDirectory from '@/api/server/files/loadDirectory.ts';
+import saveFileContent from '@/api/server/files/saveFileContent.ts';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { hashContent, readFileDraft, removeFileDraft, storeFileDraft } from '@/lib/files/fileDrafts.ts';
 import {
   hasOverlappingFileRenames,
   isWithinRenamedPath,
@@ -17,6 +20,7 @@ import { TreeDirectoryCapabilities, TreeSelectionItem } from '@/pages/server/fil
 import {
   FileTreeEditorDragItem,
   FileTreeEditorSelection,
+  getFileTreeEditorDraftPath,
   getFileTreeEditorDragData,
   getFileTreeEditorTabDragData,
   getFileTreeEditorTabId,
@@ -30,6 +34,7 @@ import {
   storeFileTreeWorkspace,
 } from '@/pages/server/files/tree/fileTreeWorkspaceState.ts';
 import useFileTreeEditorShortcuts from '@/pages/server/files/tree/useFileTreeEditorShortcuts.ts';
+import { useBlocker } from '@/plugins/useBlocker.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { useContainerAutoHeight } from '@/plugins/viewport/useContainerAutoHeight.ts';
 import { useCurrentWindow } from '@/providers/CurrentWindowProvider.tsx';
@@ -44,31 +49,62 @@ interface PendingTabClose {
 }
 
 interface FileTreeWorkspaceProps {
+  ref?: Ref<FileTreeWorkspaceHandle>;
   initialDirectory: string;
   fileTreeVisible: boolean;
   onToggleFileTree: () => void;
+  onDirtyStateChange: (dirty: boolean) => void;
+}
+
+export interface FileTreeWorkspaceHandle {
+  createFile: () => void;
 }
 
 export default function FileTreeWorkspace({
+  ref,
   initialDirectory,
   fileTreeVisible,
   onToggleFileTree,
+  onDirtyStateChange,
 }: FileTreeWorkspaceProps) {
   const { t } = useTranslations();
+  const mobile = useMediaQuery('(max-width: 47.999rem)');
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [, setSearchParams] = useSearchParams();
   const server = useServerStore((state) => state.server);
   const canReadContent = useServerCan('files.read-content');
+  const canCreate = useServerCan('files.create');
   const store = useFileManagerApi();
   const workspaceRef = useRef<HTMLDivElement>(null);
   const { getParent } = useCurrentWindow();
   const [workspace, setWorkspace] = useState<FileTreeEditorWorkspaceState>(() => restoreFileTreeWorkspace(server.uuid));
-  const [dirtyTabIds, setDirtyTabIds] = useState(() => new Set<string>());
+  const [dirtyTabIds, setDirtyTabIds] = useState(
+    () =>
+      new Set(
+        workspace.tabs
+          .filter((tab) => readFileDraft(server.uuid, getFileTreeEditorDraftPath(tab)))
+          .map(getFileTreeEditorTabId),
+      ),
+  );
   const draftContentsRef = useRef(new Map<string, string>());
   const renameDraftsRef = useRef(new Map<string, string>());
   const workspaceStateRef = useRef(workspace);
+  const creatingTabIds = useRef(new Map<string, string>());
+  const newFileSequence = useRef(workspace.tabs.length);
   const [pendingClose, setPendingClose] = useState<PendingTabClose | null>(null);
+  const hasUnsavedChanges = dirtyTabIds.size > 0;
+  const blocker = useBlocker(hasUnsavedChanges, true);
+  useBeforeUnload((event) => {
+    if (hasUnsavedChanges) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  });
+  useEffect(() => {
+    onDirtyStateChange(hasUnsavedChanges);
+    return () => onDirtyStateChange(false);
+  }, [hasUnsavedChanges, onDirtyStateChange]);
 
   useEffect(() => {
     workspaceStateRef.current = workspace;
@@ -114,6 +150,17 @@ export default function FileTreeWorkspace({
         if (cancelled || files.length === 0) return;
         const renamed = renameFileTreeWorkspace(workspaceStateRef.current, files);
         if (renamed.ids.size === 0) return;
+        for (const tab of workspaceStateRef.current.tabs) {
+          const nextId = renamed.ids.get(getFileTreeEditorTabId(tab));
+          if (!nextId) continue;
+          const nextTab = renamed.workspace.tabs.find((entry) => getFileTreeEditorTabId(entry) === nextId);
+          if (!nextTab) continue;
+          const oldPath = getFileTreeEditorDraftPath(tab);
+          const draft = readFileDraft(server.uuid, oldPath);
+          if (draft)
+            storeFileDraft(server.uuid, getFileTreeEditorDraftPath(nextTab), draft.content, draft.originalHash);
+          removeFileDraft(server.uuid, oldPath);
+        }
         const remapId = (id: string) => renamed.ids.get(id) ?? id;
         draftContentsRef.current = new Map(
           Array.from(draftContentsRef.current, ([id, content]) => [remapId(id), content]),
@@ -269,8 +316,111 @@ export default function FileTreeWorkspace({
     });
   }, []);
 
+  const createFile = (directory: string, capabilities: TreeDirectoryCapabilities) => {
+    if (!canCreate || !capabilities.writable) return;
+    newFileSequence.current += 1;
+    const now = new Date();
+    requestOpenTab({
+      directory,
+      action: 'new',
+      params: { draftId: crypto.randomUUID() },
+      primary: capabilities.primary,
+      writable: capabilities.writable,
+      file: {
+        name: `${t('pages.server.files.titleEditorNew', {})} ${newFileSequence.current}`,
+        mode: '',
+        modeBits: '',
+        size: 0,
+        sizePhysical: 0,
+        editable: true,
+        innerEditable: false,
+        directory: false,
+        file: true,
+        symlink: false,
+        virtual: false,
+        mime: 'text/plain',
+        modified: now,
+        created: now,
+      },
+    });
+    if (mobile && fileTreeVisible) onToggleFileTree();
+  };
+
+  useImperativeHandle(ref, () => ({
+    createFile: () => {
+      const state = store.getState();
+      createFile(state.browsingDirectory, {
+        primary: state.browsingPrimaryFilesystem,
+        writable: state.browsingWritableDirectory,
+        fast: state.browsingFastDirectory,
+      });
+    },
+  }));
+
+  const saveNewFile = async (tabId: string, name: string) => {
+    const tab = workspaceStateRef.current.tabs.find((entry) => getFileTreeEditorTabId(entry) === tabId);
+    if (!canCreate || !tab?.writable || tab.action !== 'new' || creatingTabIds.current.has(tabId)) return;
+    const filePath = join(tab.directory, name);
+    if (
+      Array.from(creatingTabIds.current.values()).includes(filePath) ||
+      workspaceStateRef.current.tabs.some(
+        (entry) => entry.action !== 'new' && join(entry.directory, entry.file.name) === filePath,
+      )
+    ) {
+      throw new Error(t('pages.server.files.toast.closeDestinationBeforeCreate', {}));
+    }
+    const draftPath = getFileTreeEditorDraftPath(tab);
+    const submitted = draftContentsRef.current.get(tabId) ?? readFileDraft(server.uuid, draftPath)?.content ?? '';
+    creatingTabIds.current.set(tabId, filePath);
+    return saveFileContent(server.uuid, filePath, submitted)
+      .then(() => {
+        store.getState().invalidateFilemanager();
+        if (!workspaceStateRef.current.tabs.some((entry) => getFileTreeEditorTabId(entry) === tabId)) return;
+        const latest = draftContentsRef.current.get(tabId) ?? '';
+        const nextTab: FileTreeEditorSelection = {
+          ...tab,
+          directory: dirname(filePath),
+          action: 'edit',
+          params: {},
+          file: { ...tab.file, name: basename(filePath), size: new Blob([submitted]).size, modified: new Date() },
+        };
+        const nextId = getFileTreeEditorTabId(nextTab);
+        const stillDirty = latest !== submitted;
+        if (stillDirty) {
+          draftContentsRef.current.set(nextId, latest);
+          renameDraftsRef.current.set(nextId, latest);
+          storeFileDraft(server.uuid, filePath, latest, hashContent(submitted));
+        } else removeFileDraft(server.uuid, filePath);
+        draftContentsRef.current.delete(tabId);
+        removeFileDraft(server.uuid, draftPath);
+        setDirtyTabIds((current) => {
+          const next = new Set(current);
+          next.delete(tabId);
+          if (stillDirty) next.add(nextId);
+          return next;
+        });
+        setWorkspace((current) =>
+          normalizeFileTreeWorkspace({
+            ...current,
+            tabs: current.tabs.map((entry) => (getFileTreeEditorTabId(entry) === tabId ? nextTab : entry)),
+            panes: current.panes.map((pane) => ({
+              ...pane,
+              tabIds: pane.tabIds.map((id) => (id === tabId ? nextId : id)),
+              activeTabId: pane.activeTabId === tabId ? nextId : pane.activeTabId,
+            })),
+          }),
+        );
+        addToast(t('pages.server.files.toast.fileSaved', {}), 'success');
+      })
+      .finally(() => {
+        creatingTabIds.current.delete(tabId);
+      });
+  };
+
   const commitCloseTab = useCallback(
     (requestedPaneId: string, tabId: string) => {
+      const tab = workspaceStateRef.current.tabs.find((entry) => getFileTreeEditorTabId(entry) === tabId);
+      if (tab) removeFileDraft(server.uuid, getFileTreeEditorDraftPath(tab));
       setWorkspace((current) => {
         const paneIndex = current.panes.findIndex((pane) => pane.id === requestedPaneId && pane.tabIds.includes(tabId));
         const actualPaneIndex =
@@ -311,7 +461,7 @@ export default function FileTreeWorkspace({
       renameDraftsRef.current.delete(tabId);
       clearDirty(tabId);
     },
-    [clearDirty],
+    [clearDirty, server.uuid],
   );
 
   const requestCloseTab = useCallback(
@@ -525,18 +675,26 @@ export default function FileTreeWorkspace({
             <div
               data-file-manager-tree-shell
               data-file-manager-tree-collapsed={!fileTreeVisible}
-              className={`file-manager-tree-shell h-(--file-manager-workspace-height) min-h-(--file-manager-workspace-min-height) min-w-0 overflow-hidden transition-[width] duration-[180ms] [transition-timing-function:ease] motion-reduce:transition-none max-[47.999rem]:w-full ${
+              className={`file-manager-tree-shell min-w-0 overflow-hidden transition-[width] duration-[180ms] [transition-timing-function:ease] motion-reduce:transition-none max-[47.999rem]:w-full ${
                 fileTreeVisible
-                  ? 'w-(--file-manager-tree-width)'
-                  : 'w-(--file-manager-tree-collapsed-width) max-[47.999rem]:h-11 max-[47.999rem]:min-h-11'
+                  ? 'h-(--file-manager-workspace-height) min-h-(--file-manager-workspace-min-height) w-(--file-manager-tree-width)'
+                  : 'h-11 min-h-11 w-(--file-manager-tree-collapsed-width)'
               }`}
             >
               <FileTree
-                activePath={activeSelection ? join(activeSelection.directory, activeSelection.file.name) : null}
+                activePath={
+                  activeSelection && activeSelection.action !== 'new'
+                    ? join(activeSelection.directory, activeSelection.file.name)
+                    : null
+                }
+                onCreateFile={createFile}
                 initialDirectory={initialDirectory}
                 collapsed={!fileTreeVisible}
                 onToggleCollapsed={onToggleFileTree}
-                onOpenFile={openFile}
+                onOpenFile={(...args) => {
+                  openFile(...args);
+                  if (mobile && fileTreeVisible) onToggleFileTree();
+                }}
               />
             </div>
             <FileTreeEditorSplit
@@ -574,6 +732,9 @@ export default function FileTreeWorkspace({
                     restoreContent={pane.activeTabId ? renameDraftsRef.current.get(pane.activeTabId) : undefined}
                     onRestoreContent={handleRenameDraftRestored}
                     onDraftChange={handleDraftChange}
+                    onCreateFile={(name) =>
+                      pane.activeTabId ? saveNewFile(pane.activeTabId, name) : Promise.resolve()
+                    }
                   />
                 );
               }}
@@ -581,6 +742,16 @@ export default function FileTreeWorkspace({
           </div>
         </div>
       </div>
+
+      <ConfirmationModal
+        title={t('pages.server.files.modal.unsavedChanges.title', {})}
+        opened={blocker.state === 'blocked'}
+        onClose={blocker.reset}
+        onConfirmed={blocker.proceed}
+        confirm={t('common.button.leavePage', {})}
+      >
+        {t('pages.server.files.modal.unsavedChanges.content', {}).md()}
+      </ConfirmationModal>
 
       <ConfirmationModal
         title={t('pages.server.files.modal.unsavedChanges.title', {})}

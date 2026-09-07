@@ -105,19 +105,38 @@ function RevisionRow({
         </div>
         <div className='flex items-center gap-1'>
           <Tooltip label={t('pages.server.files.drawer.revisions.tooltip.viewDiff', {})}>
-            <ActionIcon size='sm' variant='subtle' color='gray' onClick={handleViewDiff}>
+            <ActionIcon
+              size='sm'
+              variant='subtle'
+              color='gray'
+              aria-label={t('pages.server.files.drawer.revisions.tooltip.viewDiff', {})}
+              onClick={handleViewDiff}
+            >
               <FontAwesomeIcon icon={faCodeCompare} />
             </ActionIcon>
           </Tooltip>
           {previousRevisionId !== null && (
             <Tooltip label={t('pages.server.files.drawer.revisions.tooltip.compareToPrevious', {})}>
-              <ActionIcon size='sm' variant='subtle' color='gray' onClick={handleCompareToPrevious}>
+              <ActionIcon
+                size='sm'
+                variant='subtle'
+                color='gray'
+                aria-label={t('pages.server.files.drawer.revisions.tooltip.compareToPrevious', {})}
+                onClick={handleCompareToPrevious}
+              >
                 <FontAwesomeIcon icon={faArrowsLeftRight} />
               </ActionIcon>
             </Tooltip>
           )}
           <Tooltip label={t('pages.server.files.drawer.revisions.tooltip.restore', {})}>
-            <ActionIcon size='sm' variant='subtle' color='gray' loading={loading} onClick={handleRestore}>
+            <ActionIcon
+              size='sm'
+              variant='subtle'
+              color='gray'
+              aria-label={t('pages.server.files.drawer.revisions.tooltip.restore', {})}
+              loading={loading}
+              onClick={handleRestore}
+            >
               <FontAwesomeIcon icon={faRotateLeft} />
             </ActionIcon>
           </Tooltip>

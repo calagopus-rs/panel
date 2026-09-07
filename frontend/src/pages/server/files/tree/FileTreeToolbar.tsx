@@ -86,7 +86,10 @@ export default function FileTreeToolbar({
   }, [searchOpen]);
 
   return (
-    <div data-file-manager-tree-toolbar className='shrink-0 border-b border-(--mantine-color-default-border)'>
+    <div
+      data-file-manager-tree-toolbar
+      className={`shrink-0 ${collapsed ? '' : 'border-b border-(--mantine-color-default-border)'}`}
+    >
       <div className='flex h-11 items-center justify-between px-2'>
         <div className='flex shrink-0 items-center gap-1'>
           <ActionIcon

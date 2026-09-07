@@ -26,6 +26,11 @@ export const getFileTreeEditorTabId = (selection: FileTreeEditorSelection) =>
     Object.entries(selection.params).sort(([left], [right]) => left.localeCompare(right)),
   ]);
 
+export const getFileTreeEditorDraftPath = (selection: FileTreeEditorSelection) =>
+  selection.action === 'new'
+    ? `new:${selection.directory}:${selection.params.draftId}`
+    : join(selection.directory, selection.file.name);
+
 export interface FileTreeEditorDragItem {
   item: TreeSelectionItem;
   capabilities: TreeDirectoryCapabilities;

@@ -4782,6 +4782,10 @@
             "moreMatches": "Weitere Treffer nicht angezeigt",
             "restricted": "Berechtigung für Dateiinhalte erforderlich"
           },
+          "tree": {
+            "selectPane": "Editorbereich auswählen",
+            "editorPane": "Editorbereich {number}"
+          },
           "titleEditorViewing": "Betrachte {file}",
           "titleEditorPlaying": "Spiele {file} ab",
           "titleEditorEditing": "Bearbeite {file}",
@@ -4819,6 +4823,8 @@
             "fileFromUpload": "Datei aus Upload",
             "directoryFromUpload": "Verzeichnis aus Upload",
             "viewDiff": "Unterschiede anzeigen",
+            "openInEditor": "Im Editor öffnen",
+            "editorActions": "Editoraktionen",
             "loadDisk": "Festplattenversion laden",
             "keepEditor": "Editor-Version behalten"
           },
@@ -4922,6 +4928,7 @@
             "permissionsRestored": "Berechtigungen wiederhergestellt.",
             "permissionsCouldNotBeRestored": "Berechtigungen konnten nicht wiederhergestellt werden.",
             "fileSaved": "Datei wurde gespeichert.",
+            "closeDestinationBeforeCreate": "Schließe den Editor-Tab der Zieldatei, bevor du diese Datei erstellst.",
             "collabSaveTimeout": "Die Datei konnte nicht gespeichert werden, der Daemon hat nicht rechtzeitig geantwortet.",
             "fileTooLargeToOpen": "Diese Datei ist zu groß, um sie im Dateimanager zu öffnen."
           },
