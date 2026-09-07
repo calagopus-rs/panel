@@ -64,8 +64,17 @@ function ServersContainer() {
     }
   };
 
+  // if server is already suspended suspending it again makes no sense so skip it lol
+  const actionTargets = (action: BulkServerAction) =>
+    selectedServers
+      .values()
+      .filter((server) =>
+        action === 'suspend' ? !server.isSuspended : action === 'unsuspend' ? server.isSuspended : true,
+      );
+
   const runBulkAction = async (action: BulkServerAction) => {
-    const uuids = selectedServers.keys();
+    const targets = actionTargets(action);
+    const skipped = selectedServers.size - targets.length;
     setBulkLoading(action);
 
     const request = (uuid: string) => {
@@ -81,7 +90,7 @@ function ServersContainer() {
       }
     };
 
-    const results = await Promise.allSettled(uuids.map(request));
+    const results = await Promise.allSettled(targets.map((server) => request(server.uuid)));
 
     const successful = results.filter((result) => result.status === 'fulfilled').length;
     const failed = results.length - successful;
@@ -89,7 +98,16 @@ function ServersContainer() {
 
     if (failed === 0) {
       addToast(
-        t('pages.admin.servers.bulkActions.success', { action: pastTense, servers: tItem('server', successful) }),
+        skipped > 0
+          ? t('pages.admin.servers.bulkActions.successWithSkipped', {
+              action: pastTense,
+              servers: tItem('server', successful),
+              skippedServers: tItem('server', skipped),
+            })
+          : t('pages.admin.servers.bulkActions.success', {
+              action: pastTense,
+              servers: tItem('server', successful),
+            }),
         'success',
       );
     } else {
@@ -136,7 +154,7 @@ function ServersContainer() {
                 : 'pages.admin.servers.bulkActions.modal.content',
               {
                 action: t(`pages.admin.servers.bulkActions.verb.${confirmAction}`, {}),
-                servers: tItem('server', selectedServers.size),
+                servers: tItem('server', actionTargets(confirmAction).length),
               },
             ).md()
           : null}
@@ -198,7 +216,22 @@ function ServersContainer() {
         </SelectionArea>
       </AdminContentContainer>
 
-      <ServersBulkActionBar selectedCount={selectedServers.size} onAction={setConfirmAction} loading={bulkLoading} />
+      <ServersBulkActionBar
+        selectedCount={selectedServers.size}
+        onAction={(action) => {
+          if (actionTargets(action).length === 0) {
+            addToast(
+              t('pages.admin.servers.bulkActions.nothingToDo', {
+                action: t(`pages.admin.servers.bulkActions.pastTense.${action}`, {}),
+              }),
+              'info',
+            );
+            return;
+          }
+          setConfirmAction(action);
+        }}
+        loading={bulkLoading}
+      />
     </>
   );
 }

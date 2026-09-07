@@ -3111,7 +3111,9 @@ const baseTranslations = defineTranslations({
                 'Are you sure you want to permanently delete **{servers}** and everything on them? This cannot be undone.',
             },
             success: 'Successfully {action} {servers}.',
+            successWithSkipped: 'Successfully {action} {servers}. {skippedServers} already {action}.',
             partial: 'Successfully {action} {successfulServers}. {failedServers} failed.',
+            nothingToDo: 'Every selected server is already {action}.',
           },
           externalIdLookup: {
             button: 'Find by External ID',
