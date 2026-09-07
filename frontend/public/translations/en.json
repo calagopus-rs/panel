@@ -3124,6 +3124,31 @@
             "clearState": "Clear Server State",
             "delete": "Delete Server"
           },
+          "bulkActions": {
+            "suspend": "Suspend",
+            "unsuspend": "Unsuspend",
+            "clearState": "Clear State",
+            "delete": "Delete",
+            "verb": {
+              "suspend": "suspend",
+              "unsuspend": "unsuspend",
+              "clearState": "clear the state of",
+              "delete": "delete"
+            },
+            "pastTense": {
+              "suspend": "suspended",
+              "unsuspend": "unsuspended",
+              "clearState": "cleared the state of",
+              "delete": "deleted"
+            },
+            "modal": {
+              "title": "Confirm Bulk Action",
+              "content": "Are you sure you want to {action} **{servers}**?",
+              "deleteContent": "Are you sure you want to permanently delete **{servers}** and everything on them? This cannot be undone."
+            },
+            "success": "Successfully {action} {servers}.",
+            "partial": "Successfully {action} {successfulServers}. {failedServers} failed."
+          },
           "externalIdLookup": {
             "button": "Find by External ID",
             "modal": {

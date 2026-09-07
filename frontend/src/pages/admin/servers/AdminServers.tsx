@@ -1,26 +1,41 @@
 import { faFingerprint, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Ref, useState } from 'react';
 import { Route, Routes, useNavigate } from 'react-router';
+import clearServerState from '@/api/admin/servers/clearServerState.ts';
+import deleteServer from '@/api/admin/servers/deleteServer.ts';
 import getServers from '@/api/admin/servers/getServers.ts';
+import updateServer from '@/api/admin/servers/updateServer.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/buttons/Button.tsx';
 import { AdminCan } from '@/elements/Can.tsx';
 import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/data-display/Table.tsx';
+import SelectionArea from '@/elements/dnd/SelectionArea.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import { queryKeys } from '@/lib/queryKeys.ts';
+import { AdminServer } from '@/lib/schemas/admin/servers.ts';
 import { serverTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/resource/useSearchablePaginatedTable.ts';
+import { useAdminTableSelection } from '@/plugins/selection/useAdminTableSelection.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import AdminPermissionGuard from '@/routers/guards/AdminPermissionGuard.tsx';
 import ExternalIdLookupModal from './modals/ExternalIdLookupModal.tsx';
 import ServerCreate from './ServerCreate.tsx';
 import ServerRow from './ServerRow.tsx';
+import ServersBulkActionBar, { BulkServerAction } from './ServersBulkActionBar.tsx';
 import ServerView from './ServerView.tsx';
 
 function ServersContainer() {
-  const { t } = useTranslations();
+  const { t, tItem } = useTranslations();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
   const [lookupOpen, setLookupOpen] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState<BulkServerAction | null>(null);
+  const [confirmAction, setConfirmAction] = useState<BulkServerAction | null>(null);
 
   const {
     data: servers,
@@ -34,42 +49,157 @@ function ServersContainer() {
     fetcher: getServers,
   });
 
-  return (
-    <AdminContentContainer
-      title={t('pages.admin.servers.title', {})}
-      search={search}
-      setSearch={setSearch}
-      contentRight={
-        <>
-          <ExternalIdLookupModal opened={lookupOpen} onClose={() => setLookupOpen(false)} />
-          <AdminCan action='servers.read'>
-            <Button
-              onClick={() => setLookupOpen(true)}
-              variant='default'
-              leftSection={<FontAwesomeIcon icon={faFingerprint} />}
-            >
-              {t('pages.admin.servers.externalIdLookup.button', {})}
-            </Button>
-          </AdminCan>
-          <AdminCan action='servers.create'>
-            <Button
-              onClick={() => navigate('/admin/servers/new')}
-              color='blue'
-              leftSection={<FontAwesomeIcon icon={faPlus} />}
-            >
-              {t('common.button.create', {})}
-            </Button>
-          </AdminCan>
-        </>
+  const {
+    selected: selectedServers,
+    clear: clearSelectedServers,
+    toggle: toggleServer,
+    selectionAreaProps,
+  } = useAdminTableSelection<AdminServer>({ items: servers?.data });
+
+  const handleServerClick = (server: AdminServer, event: React.MouseEvent) => {
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleServer(server, !selectedServers.has(server));
+    }
+  };
+
+  const runBulkAction = async (action: BulkServerAction) => {
+    const uuids = selectedServers.keys();
+    setBulkLoading(action);
+
+    const request = (uuid: string) => {
+      switch (action) {
+        case 'suspend':
+          return updateServer(uuid, { suspended: true });
+        case 'unsuspend':
+          return updateServer(uuid, { suspended: false });
+        case 'clearState':
+          return clearServerState(uuid);
+        case 'delete':
+          return deleteServer(uuid, { force: false, deleteBackups: false });
       }
-      registry={window.extensionContext.extensionRegistry.pages.admin.servers.container}
-    >
-      <Table columns={serverTableColumns()} loading={loading} pagination={servers} onPageSelect={setPage} error={error}>
-        {servers?.data.map((server) => (
-          <ServerRow key={server.uuid} server={server} />
-        ))}
-      </Table>
-    </AdminContentContainer>
+    };
+
+    const results = await Promise.allSettled(uuids.map(request));
+
+    const successful = results.filter((result) => result.status === 'fulfilled').length;
+    const failed = results.length - successful;
+    const pastTense = t(`pages.admin.servers.bulkActions.pastTense.${action}`, {});
+
+    if (failed === 0) {
+      addToast(
+        t('pages.admin.servers.bulkActions.success', { action: pastTense, servers: tItem('server', successful) }),
+        'success',
+      );
+    } else {
+      const firstError = results.find((result) => result.status === 'rejected');
+
+      addToast(
+        successful === 0 && firstError
+          ? httpErrorToHuman(firstError.reason)
+          : t('pages.admin.servers.bulkActions.partial', {
+              action: pastTense,
+              successfulServers: tItem('server', successful),
+              failedServers: tItem('server', failed),
+            }),
+        successful === 0 ? 'error' : 'warning',
+      );
+    }
+
+    setBulkLoading(null);
+    clearSelectedServers();
+    queryClient.invalidateQueries({ queryKey: queryKeys.admin.servers.all() });
+  };
+
+  const columns = ['', ...serverTableColumns()];
+
+  return (
+    <>
+      <ConfirmationModal
+        opened={confirmAction !== null}
+        onClose={() => setConfirmAction(null)}
+        title={t('pages.admin.servers.bulkActions.modal.title', {})}
+        confirm={t(confirmAction === 'delete' ? 'common.button.delete' : 'common.button.continue', {})}
+        onConfirmed={() => {
+          const action = confirmAction;
+          setConfirmAction(null);
+          if (action) {
+            runBulkAction(action);
+          }
+        }}
+      >
+        {confirmAction
+          ? t(
+              confirmAction === 'delete'
+                ? 'pages.admin.servers.bulkActions.modal.deleteContent'
+                : 'pages.admin.servers.bulkActions.modal.content',
+              {
+                action: t(`pages.admin.servers.bulkActions.verb.${confirmAction}`, {}),
+                servers: tItem('server', selectedServers.size),
+              },
+            ).md()
+          : null}
+      </ConfirmationModal>
+
+      <AdminContentContainer
+        title={t('pages.admin.servers.title', {})}
+        search={search}
+        setSearch={setSearch}
+        contentRight={
+          <>
+            <ExternalIdLookupModal opened={lookupOpen} onClose={() => setLookupOpen(false)} />
+            <AdminCan action='servers.read'>
+              <Button
+                onClick={() => setLookupOpen(true)}
+                variant='default'
+                leftSection={<FontAwesomeIcon icon={faFingerprint} />}
+              >
+                {t('pages.admin.servers.externalIdLookup.button', {})}
+              </Button>
+            </AdminCan>
+            <AdminCan action='servers.create'>
+              <Button
+                onClick={() => navigate('/admin/servers/new')}
+                color='blue'
+                leftSection={<FontAwesomeIcon icon={faPlus} />}
+              >
+                {t('common.button.create', {})}
+              </Button>
+            </AdminCan>
+          </>
+        }
+        registry={window.extensionContext.extensionRegistry.pages.admin.servers.container}
+      >
+        <SelectionArea {...selectionAreaProps}>
+          <Table
+            columns={columns}
+            loading={loading}
+            pagination={servers}
+            onPageSelect={setPage}
+            error={error}
+            allowSelect={false}
+          >
+            {servers?.data.map((server) => (
+              <SelectionArea.Selectable key={server.uuid} item={server}>
+                {(innerRef: Ref<HTMLElement>) => (
+                  <ServerRow
+                    server={server}
+                    ref={innerRef as Ref<HTMLTableRowElement>}
+                    showSelection={true}
+                    isSelected={selectedServers.has(server.uuid)}
+                    onSelectionChange={(selected) => toggleServer(server, selected)}
+                    onClick={(e) => handleServerClick(server, e)}
+                  />
+                )}
+              </SelectionArea.Selectable>
+            ))}
+          </Table>
+        </SelectionArea>
+      </AdminContentContainer>
+
+      <ServersBulkActionBar selectedCount={selectedServers.size} onAction={setConfirmAction} loading={bulkLoading} />
+    </>
   );
 }
 

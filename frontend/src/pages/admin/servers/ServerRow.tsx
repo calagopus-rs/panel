@@ -1,3 +1,5 @@
+import { faBan } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import { forwardRef, memo } from 'react';
 import { TableData, TableRow } from '@/elements/data-display/Table.tsx';
@@ -50,8 +52,17 @@ const ServerRow = memo(
 
         <TableData>
           <div className='flex flex-row items-center'>
-            <span className={classNames('rounded-full size-3 animate-pulse mr-2', statusToColor(stats?.state))} />
-            {!stats ? t('common.enum.serverState.unknown', {}) : t(`common.enum.serverState.${stats.state}`, {})}
+            {server.isSuspended ? (
+              <>
+                <FontAwesomeIcon icon={faBan} className='size-3 mr-2 text-server-status-offline' />
+                {t('common.server.state.suspended', {})}
+              </>
+            ) : (
+              <>
+                <span className={classNames('rounded-full size-3 animate-pulse mr-2', statusToColor(stats?.state))} />
+                {!stats ? t('common.enum.serverState.unknown', {}) : t(`common.enum.serverState.${stats.state}`, {})}
+              </>
+            )}
           </div>
         </TableData>
 
