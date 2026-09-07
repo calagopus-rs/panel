@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { join } from 'pathe';
 import ActionIcon from '@/elements/buttons/ActionIcon.tsx';
 import UnstyledButton from '@/elements/buttons/UnstyledButton.tsx';
+import ScrollArea from '@/elements/layout/ScrollArea.tsx';
 import FileRowIcon from '@/pages/server/files/list/FileRowIcon.tsx';
 import FileTreeName from '@/pages/server/files/tree/FileTreeName.tsx';
 import {
@@ -35,11 +36,14 @@ export default function FileTreeEditorTabs({
   if (tabs.length === 0) return null;
 
   return (
-    <div
-      role='tablist'
-      aria-label={t('pages.server.files.tree.editorTabsLabel', {})}
+    <ScrollArea
+      type='auto'
+      scrollbars='x'
+      scrollbarSize={10}
+      viewportProps={{ role: 'tablist', 'aria-label': t('pages.server.files.tree.editorTabsLabel', {}) }}
+      classNames={{ content: 'flex! w-max min-w-full' }}
       data-file-manager-editor-tabs
-      className='file-manager-editor-tabs flex h-[3.375rem] min-h-[2.625rem] shrink-0 overflow-x-scroll overflow-y-hidden border-b border-(--mantine-color-default-border)'
+      className='h-[calc(2.625rem+1px+var(--file-manager-editor-tab-gutter,0px))] min-w-0 shrink-0 border-b border-(--mantine-color-default-border)'
     >
       {tabs.map((tab) => {
         const tabId = getFileTreeEditorTabId(tab);
@@ -107,6 +111,6 @@ export default function FileTreeEditorTabs({
           </div>
         );
       })}
-    </div>
+    </ScrollArea>
   );
 }

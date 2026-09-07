@@ -621,15 +621,15 @@ export default function FileTreeWorkspace({
           <div
             data-file-manager-workspace-grid
             data-file-manager-tree-visible={fileTreeVisible}
-            className='file-manager-workspace-grid'
+            className='file-manager-workspace-grid transition-[grid-template-columns] duration-200 ease-in-out motion-reduce:transition-none'
           >
             <div
               data-file-manager-tree-shell
               data-file-manager-tree-collapsed={!fileTreeVisible}
-              className={`file-manager-tree-shell min-w-0 overflow-hidden transition-[width] duration-[180ms] [transition-timing-function:ease] motion-reduce:transition-none max-[47.999rem]:w-full ${
+              className={`file-manager-tree-shell w-full min-w-0 overflow-hidden transition-[height,min-height] duration-200 ease-in-out motion-reduce:transition-none ${
                 fileTreeVisible
-                  ? 'h-(--file-manager-workspace-height) min-h-(--file-manager-workspace-min-height) w-(--file-manager-tree-width)'
-                  : 'h-11 min-h-11 w-(--file-manager-tree-collapsed-width)'
+                  ? 'h-(--file-manager-workspace-height) min-h-(--file-manager-workspace-min-height)'
+                  : 'h-11 min-h-11'
               }`}
             >
               <FileTree

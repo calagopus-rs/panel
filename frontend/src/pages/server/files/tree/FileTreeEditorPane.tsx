@@ -44,6 +44,9 @@ import FileEditorConflictDiffModal from '@/pages/server/files/modals/FileEditorC
 import FileEditorDraftModal from '@/pages/server/files/modals/FileEditorDraftModal.tsx';
 import FileNameModal from '@/pages/server/files/modals/FileNameModal.tsx';
 import FileTreeEditorTabs from '@/pages/server/files/tree/FileTreeEditorTabs.tsx';
+import FileTreeRevisionComparison, {
+  type FileRevisionComparison,
+} from '@/pages/server/files/tree/FileTreeRevisionComparison.tsx';
 import { FileTreeEditorSelection, getFileTreeEditorDraftPath } from '@/pages/server/files/tree/fileTreeEditor.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
@@ -114,6 +117,7 @@ export default function FileTreeEditorPane({
   const [dirty, setDirty] = useState(draftContent !== undefined);
   const [revertConfirm, setRevertConfirm] = useState(false);
   const [revisionsOpen, setRevisionsOpen] = useState(false);
+  const [revisionComparison, setRevisionComparison] = useState<FileRevisionComparison | null>(null);
   const [conflictDiffOpen, setConflictDiffOpen] = useState(false);
   const [conflictDiskContent, setConflictDiskContent] = useState<string | null>(null);
   const [conflictModifiedContent, setConflictModifiedContent] = useState('');
@@ -206,7 +210,11 @@ export default function FileTreeEditorPane({
     },
   });
   const contentWritable = !!selection && selection.writable && (collab.active ? canUpdate : canCreate);
-  const canSave = contentWritable && editableText;
+  const canEdit = contentWritable && editableText;
+  const canSave =
+    canEdit &&
+    revisionComparison?.previousRevisionId === undefined &&
+    (!revisionComparison || editorEngine === 'monaco');
 
   useEffect(() => {
     collabActiveRef.current = collab.active;
@@ -325,6 +333,11 @@ export default function FileTreeEditorPane({
     pierreEditorRef.current?.setValue(value);
     setDirty(changed);
     publishDraft(value, changed);
+  };
+
+  const restoreRevision = (value: string) => {
+    replaceEditorContent(value, true);
+    setRevisionComparison(null);
   };
 
   const beginCollabSave = (force = false) => {
@@ -508,6 +521,7 @@ export default function FileTreeEditorPane({
                 variant='subtle'
                 color='gray'
                 aria-label={t('pages.server.files.tooltip.fileHistory', {})}
+                disabled={loading}
                 onClick={() => setRevisionsOpen(true)}
               >
                 <FontAwesomeIcon icon={faClockRotateLeft} />
@@ -576,7 +590,22 @@ export default function FileTreeEditorPane({
           </Alert>
         )}
 
-        <div className='min-h-0 flex-1'>
+        {revisionComparison && (
+          <FileTreeRevisionComparison
+            key={`${revisionComparison.revisionId}:${revisionComparison.previousRevisionId ?? 'current'}`}
+            {...revisionComparison}
+            filePath={filePath}
+            content={content}
+            dirty={dirty}
+            canSave={canSave && !loading}
+            canRestore={contentWritable && !loading}
+            onChange={updateContent}
+            onSave={() => void save()}
+            onBack={() => setRevisionComparison(null)}
+            onRestore={restoreRevision}
+          />
+        )}
+        <div className={`min-h-0 flex-1 ${revisionComparison ? 'hidden' : ''}`}>
           {loading ? (
             <div className='flex h-full items-center justify-center'>
               <Spinner size={48} />
@@ -618,7 +647,7 @@ export default function FileTreeEditorPane({
               width='100%'
               path={modelPath}
               defaultValue={content}
-              readOnly={!canSave}
+              readOnly={!canEdit}
               wordWrap={editorLineOverflow}
               fontSize={editorFontSize}
               onChange={updateContent}
@@ -636,7 +665,7 @@ export default function FileTreeEditorPane({
               path={modelPath}
               value={content}
               options={{
-                readOnly: !canSave,
+                readOnly: !canEdit,
                 automaticLayout: true,
                 stickyScroll: { enabled: false },
                 minimap: { enabled: editorMinimap },
@@ -724,7 +753,8 @@ export default function FileTreeEditorPane({
         opened={revisionsOpen}
         onClose={() => setRevisionsOpen(false)}
         getContent={() => contentRef.current}
-        onRestore={(nextContent) => replaceEditorContent(nextContent, true)}
+        onCompare={(revisionId, previousRevisionId) => setRevisionComparison({ revisionId, previousRevisionId })}
+        onRestore={restoreRevision}
       />
     </Card>
   );

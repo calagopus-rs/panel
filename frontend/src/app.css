@@ -167,10 +167,6 @@
   box-shadow: inset 3px 0 0 var(--mantine-color-blue-5) !important;
 }
 
-.file-manager-editor-tabs::-webkit-scrollbar {
-  height: 0.75rem;
-}
-
 .file-manager-tree-viewport {
   scrollbar-color: var(--mantine-color-default-border) transparent;
   scrollbar-gutter: stable;
@@ -196,7 +192,17 @@
   background-color: var(--mantine-color-dimmed);
 }
 
+@media (min-width: 48rem) {
+  [data-file-manager-editor-split]:has([data-file-manager-editor-tabs] [data-mantine-scrollbar][data-state="visible"]) {
+    --file-manager-editor-tab-gutter: 10px;
+  }
+}
+
 @media (max-width: 47.999rem) {
+  [data-file-manager-editor-tabs]:has([data-mantine-scrollbar][data-state="visible"]) {
+    --file-manager-editor-tab-gutter: 10px;
+  }
+
   .file-manager-workspace-grid,
   .file-manager-workspace-grid[data-file-manager-tree-visible="false"] {
     --file-manager-workspace-min-height: 0px;

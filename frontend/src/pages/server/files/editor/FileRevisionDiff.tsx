@@ -2,7 +2,7 @@ import { faArrowLeft, faRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { editor } from 'monaco-editor';
 import { basename, dirname } from 'pathe';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createSearchParams, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import getFileContent from '@/api/server/files/getFileContent.ts';
@@ -12,14 +12,12 @@ import ActionIcon from '@/elements/buttons/ActionIcon.tsx';
 import Button from '@/elements/buttons/Button.tsx';
 import { ServerCan } from '@/elements/Can.tsx';
 import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
-import { MonacoDiffEditor } from '@/elements/editors/MonacoEditor.tsx';
-import { PierreDiffEditor } from '@/elements/editors/PierreEditor.tsx';
 import Spinner from '@/elements/feedback/Spinner.tsx';
 import Group from '@/elements/layout/Group.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import Title from '@/elements/typography/Title.tsx';
-import { fileModelUri } from '@/lib/editor/fileModelUri.ts';
 import { readFileDraft, removeFileDraft } from '@/lib/files/fileDrafts.ts';
+import FileRevisionDiffEditor from '@/pages/server/files/editor/FileRevisionDiffEditor.tsx';
 import { useBlocker } from '@/plugins/useBlocker.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { useContainerAutoHeight } from '@/plugins/viewport/useContainerAutoHeight.ts';
@@ -41,14 +39,11 @@ function FileRevisionDiffComponent() {
   const { getParent } = useCurrentWindow();
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const editorMinimap = useFileManager((state) => state.editorMinimap);
-  const editorLineOverflow = useFileManager((state) => state.editorLineOverflow);
   const editorEngine = useFileManager((state) => state.editorEngine);
-  const editorFontSize = useFileManager((state) => state.editorFontSize);
 
   const filePath = searchParams.get('file') || '';
   const revisionId = parseInt(searchParams.get('revision') || '0', 10);
-  const previousRevisionId = parseInt(searchParams.get('previousRevision') || '0', 10) || null;
+  const previousRevisionId = parseInt(searchParams.get('previousRevision') || '0', 10) || undefined;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -60,7 +55,6 @@ function FileRevisionDiffComponent() {
   const modifiedRef = useRef('');
   const mountedRef = useRef(true);
   const handoffTargetRef = useRef<string | null>(null);
-  const instanceId = useId();
   const canCreate = useServerCan('files.create');
   const canSave = !previousRevisionId && canCreate && editorEngine === 'monaco';
   const blocker = useBlocker(
@@ -74,7 +68,6 @@ function FileRevisionDiffComponent() {
 
   const diffEditorRef = useRef<editor.IStandaloneDiffEditor | null>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
-  const saveRef = useRef<() => void>(() => undefined);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -166,14 +159,10 @@ function FileRevisionDiffComponent() {
       });
   };
 
-  useEffect(() => {
-    saveRef.current = handleSave;
-  });
-
+  const editorUrl = `/server/${server.uuidShort}/files/edit?${createSearchParams({ directory: dirname(filePath), file: basename(filePath) })}`;
   const openInEditor = (content: string) => {
-    const target = `/server/${server.uuidShort}/files/edit?${createSearchParams({ directory: dirname(filePath), file: basename(filePath) })}`;
-    handoffTargetRef.current = target;
-    navigate(target, { state: { editorContent: content } });
+    handoffTargetRef.current = editorUrl;
+    navigate(editorUrl, { state: { editorContent: content } });
   };
 
   const title = previousRevisionId
@@ -186,17 +175,6 @@ function FileRevisionDiffComponent() {
         file: basename(filePath),
         revision: String(revisionId),
       });
-
-  const originalModelPath = fileModelUri(
-    server.uuid,
-    filePath,
-    `${instanceId}:revision:${previousRevisionId ?? revisionId}`,
-  );
-  const modifiedModelPath = fileModelUri(
-    server.uuid,
-    filePath,
-    `${instanceId}:modified:${previousRevisionId ? revisionId : 'current'}`,
-  );
 
   return (
     <ServerContentContainer hideTitleComponent fullscreen title={title}>
@@ -245,13 +223,7 @@ function FileRevisionDiffComponent() {
                 return;
               }
 
-              navigate(
-                `/server/${server.uuidShort}/files/edit?${createSearchParams({
-                  directory: dirname(filePath),
-                  file: basename(filePath),
-                })}`,
-                { state: { openRevisions: true } },
-              );
+              navigate(editorUrl, { state: { openRevisions: true } });
             }}
           >
             <FontAwesomeIcon icon={faArrowLeft} />
@@ -292,47 +264,19 @@ function FileRevisionDiffComponent() {
         <div className='flex flex-col relative mt-4'>
           <div className='relative'>
             <div ref={editorContainerRef} className='flex max-w-full w-full z-1 absolute'>
-              {editorEngine === 'pierre' ? (
-                <PierreDiffEditor
-                  height='100%'
-                  width='100%'
-                  originalPath={originalModelPath}
-                  originalValue={originalContent}
-                  modifiedPath={modifiedModelPath}
-                  modifiedValue={modifiedContent}
-                  readOnly
-                  fontSize={editorFontSize}
-                  wordWrap={editorLineOverflow}
-                />
-              ) : (
-                <MonacoDiffEditor
-                  height='100%'
-                  width='100%'
-                  original={originalContent}
-                  modified={modifiedContent}
-                  originalModelPath={originalModelPath}
-                  modifiedModelPath={modifiedModelPath}
-                  options={{
-                    readOnly: !canSave,
-                    fontSize: editorFontSize,
-                    stickyScroll: { enabled: false },
-                    minimap: { enabled: editorMinimap },
-                    wordWrap: editorLineOverflow ? 'on' : 'off',
-                    codeLens: false,
-                    scrollBeyondLastLine: false,
-                    smoothScrolling: false,
-                    inertialScroll: true,
-                    fixedOverflowWidgets: true,
-                  }}
-                  onMount={(diffEditor, monaco) => {
-                    diffEditorRef.current = diffEditor;
-
-                    const modifiedEditor = diffEditor.getModifiedEditor();
-                    modifiedEditor.onDidChangeModelContent(() => updateContent(modifiedEditor.getValue()));
-                    modifiedEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => saveRef.current());
-                  }}
-                />
-              )}
+              <FileRevisionDiffEditor
+                original={originalContent}
+                modified={modifiedContent}
+                filePath={filePath}
+                revisionId={revisionId}
+                previousRevisionId={previousRevisionId}
+                readOnly={!canSave}
+                onChange={updateContent}
+                onSave={handleSave}
+                onMount={(diffEditor) => {
+                  diffEditorRef.current = diffEditor;
+                }}
+              />
             </div>
           </div>
         </div>
