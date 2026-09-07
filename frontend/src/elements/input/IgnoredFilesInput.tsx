@@ -39,13 +39,15 @@ function MatchIndicator({ serverUuid, pattern, enabled }: { serverUuid: string; 
 
   const { data, isFetching } = useQuery({
     queryKey: queryKeys.server(serverUuid).files.ignoreMatches(pattern),
-    queryFn: () =>
-      searchFiles(serverUuid, {
+    queryFn: async () => {
+      const { entries } = await searchFiles(serverUuid, {
         root: '/',
         pathFilter: { include: includeGlobs(pattern), exclude: [], caseInsensitive: false },
         sizeFilter: null,
         contentFilter: null,
-      }),
+      });
+      return entries;
+    },
     enabled,
     staleTime: 60_000,
     retry: false,

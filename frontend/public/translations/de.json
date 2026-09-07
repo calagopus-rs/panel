@@ -4771,6 +4771,17 @@
         },
         "files": {
           "title": "Dateien",
+          "searchPreview": {
+            "expand": "Inhaltsvorschau für {file} ausklappen",
+            "collapse": "Inhaltsvorschau für {file} einklappen",
+            "lines": "Zeilen {start}-{end}",
+            "loading": "Vorschau wird geladen...",
+            "empty": "Leere Datei",
+            "unavailable": "Vorschau nicht verfügbar",
+            "noContext": "Treffer gefunden, Vorschau nicht verfügbar",
+            "moreMatches": "Weitere Treffer nicht angezeigt",
+            "restricted": "Berechtigung für Dateiinhalte erforderlich"
+          },
           "titleEditorViewing": "Betrachte {file}",
           "titleEditorPlaying": "Spiele {file} ab",
           "titleEditorEditing": "Bearbeite {file}",
@@ -6563,6 +6574,8 @@
             "anyProtocol": "TCP & UDP",
             "sources": "Quellen",
             "sourcesDescription": "IP-Adressen oder Netzwerke wie 10.0.0.0/8. Bei einem Netzwerk müssen die Host-Bits null sein. Leer lassen, um jede Quelle zu treffen.",
+            "sourceFile": "Quelldatei",
+            "sourceFileDescription": "Pfad einer Datei im Serververzeichnis mit einer IP-Adresse oder einem Netzwerk pro Zeile, Zeilen die mit # beginnen werden ignoriert. Ihre Einträge werden zu den Quellen oben hinzugefügt, Änderungen an der Datei übernimmt der Node von selbst.",
             "ports": "Ports",
             "portsDescription": "Allocation-Ports, für die diese Regel gilt, als einzelne Ports oder Bereiche wie 25565-25570. Leer lassen, um alle Allocations des Servers zu treffen.",
             "preview": "Vorschau",
@@ -6570,9 +6583,7 @@
             "invalidSource": "{source} ist keine gültige IP-Adresse und kein gültiges Netzwerk.",
             "tooManySources": "Eine Regel kann höchstens {max} Quellen haben.",
             "invalidPort": "{port} ist kein gültiger Port und kein gültiger Portbereich.",
-            "tooManyPorts": "Eine Regel kann höchstens {max} Ports abdecken.",
-            "sourceFile": "Quelldatei",
-            "sourceFileDescription": "Pfad einer Datei im Serververzeichnis mit einer IP-Adresse oder einem Netzwerk pro Zeile, Zeilen die mit # beginnen werden ignoriert. Ihre Einträge werden zu den Quellen oben hinzugefügt, Änderungen an der Datei übernimmt der Node von selbst."
+            "tooManyPorts": "Eine Regel kann höchstens {max} Ports abdecken."
           },
           "toast": {
             "saved": "Firewall-Regeln gespeichert."

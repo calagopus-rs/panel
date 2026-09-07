@@ -54,7 +54,39 @@ export const serverFilesFingerprintSchema = z.object({
   algorithm: z.lazy(() => fingerprintAlgorithm),
 });
 
+export const serverFilesMatchContextSchema = z.object({
+  before: z.number().int().min(0),
+  after: z.number().int().min(0),
+  maxMatches: z.number().int().min(1),
+});
+
+export const serverFileLinesSchema = z.object({
+  startLine: z.number().int().min(1).nullable(),
+  endLine: z.number().int().min(1).nullable(),
+  content: z.string(),
+  eof: z.boolean(),
+});
+
+export const serverFilesContentMatchesSchema = z.object({
+  file: z.string(),
+  truncated: z.boolean(),
+  blocks: z.array(
+    z.object({
+      startLine: z.number().int().min(1),
+      endLine: z.number().int().min(1),
+      content: z.string(),
+      matches: z.array(
+        z.object({
+          startByte: z.number().int().min(0),
+          endByte: z.number().int().min(0),
+        }),
+      ),
+    }),
+  ),
+});
+
 export const serverFilesSearchSchema = z.object({
+  matchContext: serverFilesMatchContextSchema.optional(),
   pathFilter: z
     .object({
       include: z.string().array(),

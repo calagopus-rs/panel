@@ -24,15 +24,22 @@ mod post {
         #[schema(inline)]
         pub content_filter:
             Option<wings_api::servers_server_files_search::post::RequestBodyContentFilter>,
+        #[schema(inline)]
+        pub match_context: Option<wings_api::servers_server_files_search::post::ExtraMatchContext>,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
         entries: Vec<wings_api::DirectoryEntry>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        content_matches: Option<Vec<wings_api::ContentMatches>>,
     }
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
+        (status = BAD_REQUEST, body = ApiError),
+        (status = PAYLOAD_TOO_LARGE, body = ApiError),
+        (status = UNPROCESSABLE_ENTITY, body = ApiError),
         (status = UNAUTHORIZED, body = ApiError),
         (status = NOT_FOUND, body = ApiError),
         (status = EXPECTATION_FAILED, body = ApiError),
@@ -50,6 +57,9 @@ mod post {
         shared::Payload(data): shared::Payload<Payload>,
     ) -> ApiResponseResult {
         permissions.has_server_permission("files.read")?;
+        if data.match_context.is_some() {
+            permissions.has_server_permission("files.read-content")?;
+        }
 
         if server.is_ignored(&data.root, true) {
             return ApiResponse::error("root not found")
@@ -93,20 +103,24 @@ mod post {
             }),
             per_page: settings.server.max_file_manager_search_results,
         };
+        let extra = wings_api::servers_server_files_search::post::Extra {
+            match_context: data.match_context,
+            ..Default::default()
+        };
 
         drop(settings);
 
-        let entries = match server
+        let response = match server
             .0
             .node
             .fetch_cached(&state.database)
             .await?
             .api_client(&state.database)
             .await?
-            .post_servers_server_files_search(server.0.uuid, &request_body)
+            .post_servers_server_files_search_with(server.0.uuid, &request_body, &extra)
             .await
         {
-            Ok(data) => data.results,
+            Ok(data) => data,
             Err(wings_api::client::ApiHttpError::Http(StatusCode::NOT_FOUND, err)) => {
                 return ApiResponse::new_serialized(ApiError::new_wings_value(err))
                     .with_status(StatusCode::NOT_FOUND)
@@ -117,10 +131,29 @@ mod post {
                     .with_status(StatusCode::EXPECTATION_FAILED)
                     .ok();
             }
+            Err(wings_api::client::ApiHttpError::Http(StatusCode::BAD_REQUEST, err)) => {
+                return ApiResponse::new_serialized(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::BAD_REQUEST)
+                    .ok();
+            }
+            Err(wings_api::client::ApiHttpError::Http(StatusCode::PAYLOAD_TOO_LARGE, err)) => {
+                return ApiResponse::new_serialized(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::PAYLOAD_TOO_LARGE)
+                    .ok();
+            }
+            Err(wings_api::client::ApiHttpError::Http(StatusCode::UNPROCESSABLE_ENTITY, err)) => {
+                return ApiResponse::new_serialized(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::UNPROCESSABLE_ENTITY)
+                    .ok();
+            }
             Err(err) => return Err(err.into()),
         };
 
-        ApiResponse::new_serialized(Response { entries }).ok()
+        ApiResponse::new_serialized(Response {
+            entries: response.results,
+            content_matches: response.content_matches,
+        })
+        .ok()
     }
 }
 

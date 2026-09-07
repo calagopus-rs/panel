@@ -1,12 +1,12 @@
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useMergedRef } from '@mantine/hooks';
 import classNames from 'classnames';
 import { ReactNode, Ref, RefObject, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import UnstyledButton from '@/elements/buttons/UnstyledButton.tsx';
 import SelectionArea from '@/elements/dnd/SelectionArea.tsx';
 import Spinner from '@/elements/feedback/Spinner.tsx';
 import { useElementVirtualizer } from '@/lib/elementVirtualizer.ts';
+import { canPreviewFile, estimateFileSearchPreviewHeight } from '@/pages/server/files/list/FileSearchPreview.tsx';
 import FileTreeRow from '@/pages/server/files/tree/FileTreeRow.tsx';
 import FileTreeScrollingRow from '@/pages/server/files/tree/FileTreeScrollingRow.tsx';
 import {
@@ -15,6 +15,7 @@ import {
   TreeSelectionItem,
 } from '@/pages/server/files/tree/fileTreeData.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import { useFileManagerStore } from '@/stores/fileManager.ts';
 
 interface FileTreeVirtualListProps {
   rows: FileTreeRowData[];
@@ -25,6 +26,7 @@ interface FileTreeVirtualListProps {
   rowHeight: number;
   moving: boolean;
   canUpdateFiles: boolean;
+  dragDisabled: boolean;
   preferPhysicalSize: boolean;
   massSelectionDirectory: string | null;
   openMassMenu: (x: number, y: number) => void;
@@ -45,23 +47,13 @@ interface FileTreeVirtualListProps {
 
 interface VirtualTreeRowContainerProps {
   index: number;
-  height: number;
   measureElement: (node: HTMLDivElement | null) => void;
-  selectionRef?: Ref<HTMLElement>;
   children: ReactNode;
 }
 
-function VirtualTreeRowContainer({
-  index,
-  height,
-  measureElement,
-  selectionRef,
-  children,
-}: VirtualTreeRowContainerProps) {
-  const ref = useMergedRef<HTMLDivElement>(selectionRef as Ref<HTMLDivElement>, measureElement);
-
+function VirtualTreeRowContainer({ index, measureElement, children }: VirtualTreeRowContainerProps) {
   return (
-    <div ref={ref} data-index={index} className='absolute left-0 top-0 w-full will-change-transform' style={{ height }}>
+    <div ref={measureElement} data-index={index} className='absolute left-0 top-0 w-full will-change-transform'>
       {children}
     </div>
   );
@@ -76,6 +68,7 @@ export default function FileTreeVirtualList({
   rowHeight,
   moving,
   canUpdateFiles,
+  dragDisabled,
   preferPhysicalSize,
   massSelectionDirectory,
   openMassMenu,
@@ -96,6 +89,7 @@ export default function FileTreeVirtualList({
   'use no memo'; // The virtualizer's return value cannot be memoized safely; opt this component out of the compiler.
 
   const { t } = useTranslations();
+  const collapsedSearchPreviews = useFileManagerStore((state) => state.collapsedSearchPreviews);
   const lastScrollLeftRef = useRef(0);
   const lastScrollTopRef = useRef(0);
   const [menuRequest, setMenuRequest] = useState<{ path: string; x: number; y: number } | null>(null);
@@ -107,7 +101,18 @@ export default function FileTreeVirtualList({
     setMenuRequest({ path: item.path, x, y });
   }, []);
   const getScrollElement = useCallback(() => viewportRef.current, [viewportRef]);
-  const estimateRowSize = useCallback(() => rowHeight, [rowHeight]);
+  const estimateRowSize = useCallback(
+    (index: number) => {
+      const row = rows[index];
+      return row?.type === 'entry' &&
+        row.searchResult &&
+        canPreviewFile(row.entry) &&
+        !collapsedSearchPreviews.has(row.path)
+        ? rowHeight + estimateFileSearchPreviewHeight(row.contentMatches) + 8
+        : rowHeight;
+    },
+    [collapsedSearchPreviews, rowHeight, rows],
+  );
   const getRowKey = useCallback((index: number) => rows[index]?.key ?? index, [rows]);
   const syncScrollPosition = useCallback(
     ({ x, y }: { x: number; y: number }) => {
@@ -185,7 +190,6 @@ export default function FileTreeVirtualList({
                 <VirtualTreeRowContainer
                   key={row.key}
                   index={virtualRow.index}
-                  height={virtualRow.size}
                   measureElement={virtualizer.measureElement}
                 >
                   {row.type === 'loading' ? (
@@ -239,21 +243,19 @@ export default function FileTreeVirtualList({
             const selected = selectedPaths.has(row.path);
             const active = row.path === activePath;
             const useMassMenu = !scrolling && !!massSelectionDirectory && selected;
-            const parentCapabilities = scrolling ? null : getDirectoryCapabilities(row.parent);
+            const hasSearchPreview = row.searchResult && canPreviewFile(row.entry);
+            const renderScrollingRow = scrolling && !hasSearchPreview;
+            const parentCapabilities = renderScrollingRow ? null : getDirectoryCapabilities(row.parent);
 
             return (
               <SelectionArea.Selectable key={row.key} item={item}>
                 {(innerRef: Ref<HTMLElement>) => (
-                  <VirtualTreeRowContainer
-                    index={virtualRow.index}
-                    height={virtualRow.size}
-                    measureElement={virtualizer.measureElement}
-                    selectionRef={innerRef}
-                  >
-                    {scrolling ? (
+                  <VirtualTreeRowContainer index={virtualRow.index} measureElement={virtualizer.measureElement}>
+                    {renderScrollingRow ? (
                       <FileTreeScrollingRow
                         row={row}
                         rowHeight={rowHeight}
+                        selectionRef={innerRef}
                         active={active}
                         selected={selected}
                         preferPhysicalSize={preferPhysicalSize}
@@ -261,13 +263,16 @@ export default function FileTreeVirtualList({
                     ) : (
                       <FileTreeRow
                         item={item}
+                        previewExpanded={!collapsedSearchPreviews.has(row.path)}
                         row={row}
                         rowHeight={rowHeight}
+                        selectionRef={innerRef}
                         active={active}
                         selected={selected}
                         dragged={draggedPaths.has(row.path)}
                         moving={moving}
                         canUpdateFiles={canUpdateFiles}
+                        dragDisabled={dragDisabled}
                         parentWritable={parentCapabilities!.writable}
                         parentFast={parentCapabilities!.fast}
                         directoryWritable={isDirectoryWritable(row.path, row.parent, row.entry.virtual)}

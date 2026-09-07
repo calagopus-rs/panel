@@ -5,8 +5,11 @@ import {
   type FileContents,
   type FileDiffMetadata,
   type FileDiffOptions,
+  type File as FileInstance,
   type FileOptions,
+  type PostRenderPhase,
   parseDiffFromFile,
+  type SelectedLineRange,
 } from '@pierre/diffs';
 import { Editor, type EditorChangeEvent, type EditorOptions, type TextEdit } from '@pierre/diffs/edit';
 import { EditProvider, File, FileDiff, Virtualizer } from '@pierre/diffs/react';
@@ -30,9 +33,12 @@ export interface PierreEditorProps extends CommonPierreProps {
   path: string;
   defaultValue: string;
   readOnly?: boolean;
+  selectedLines?: SelectedLineRange;
+  unsafeCSS?: string;
   onChange?: (value: string) => void;
   onChangeEvent?: (event: EditorChangeEvent<undefined>) => void;
   onMount?: (handle: PierreEditorHandle) => void;
+  onPostRender?: (node: HTMLElement, instance: FileInstance<undefined>, phase: PostRenderPhase) => void;
 }
 
 export interface PierreDiffEditorProps extends CommonPierreProps {
@@ -117,6 +123,8 @@ export const PierreEditor = memo(
       path,
       defaultValue,
       readOnly = false,
+      selectedLines,
+      unsafeCSS,
       wordWrap = false,
       fontSize = 13,
       height,
@@ -124,6 +132,7 @@ export const PierreEditor = memo(
       onChange,
       onChangeEvent,
       onMount,
+      onPostRender,
     },
     ref,
   ) {
@@ -132,16 +141,28 @@ export const PierreEditor = memo(
     const style = usePierreStyle(height, width, fontSize, isDark);
     const baseOptions = useBaseOptions(colorScheme, wordWrap);
 
-    const callbacks = useRef({ onMount, onChange, onChangeEvent });
+    const callbacks = useRef({ onMount, onChange, onChangeEvent, onPostRender });
 
     useEffect(() => {
-      callbacks.current = { onMount, onChange, onChangeEvent };
+      callbacks.current = { onMount, onChange, onChangeEvent, onPostRender };
     });
+
+    const fileOptions = useMemo<FileOptions<undefined>>(
+      () => ({
+        ...baseOptions,
+        unsafeCSS,
+        onPostRender: (node, instance, phase) => callbacks.current.onPostRender?.(node, instance, phase),
+      }),
+      [baseOptions, unsafeCSS],
+    );
 
     const instanceRef = useRef<Editor<undefined> | null>(null);
     const defaultValueRef = useRef(defaultValue);
 
-    const file = useMemo(() => toFile(path, defaultValue), [path, defaultValue]);
+    const file = useMemo(
+      () => (readOnly ? { name: path.trim() || 'untitled', contents: defaultValue } : toFile(path, defaultValue)),
+      [path, defaultValue, readOnly],
+    );
 
     const handle = useMemo<PierreEditorHandle>(
       () => ({
@@ -191,8 +212,9 @@ export const PierreEditor = memo(
           <File
             key={colorScheme}
             file={file}
-            options={baseOptions as FileOptions<undefined>}
+            options={fileOptions}
             edit={!readOnly}
+            selectedLines={selectedLines}
             editorOptions={editorOptions}
             style={style}
           />

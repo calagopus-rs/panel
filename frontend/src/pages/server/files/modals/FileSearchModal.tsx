@@ -29,35 +29,34 @@ import FormModal from '@/elements/modals/FormModal.tsx';
 import { ModalFooter } from '@/elements/modals/Modal.tsx';
 import Text from '@/elements/typography/Text.tsx';
 import { serverFilesSearchSchema } from '@/lib/schemas/server/files.ts';
+import { ROOT_DIRECTORY } from '@/pages/server/files/tree/fileTreeData.ts';
 import { useModalForm } from '@/plugins/form/useModalForm.ts';
-import { useFileManager } from '@/providers/contexts/fileManagerContext.ts';
+import { useServerCan } from '@/plugins/usePermissions.ts';
+import { useFileManager, useFileManagerApi } from '@/providers/contexts/fileManagerContext.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 import { useServerStore } from '@/stores/server.ts';
 
-export default function FileSearchModal({ ...props }: ModalProps) {
+export default function FileSearchModal({ treeView = false, ...props }: ModalProps & { treeView?: boolean }) {
   const { t } = useTranslations();
   const settings = useGlobalStore((state) => state.settings);
   const server = useServerStore((state) => state.server);
-  const {
-    browsingDirectory,
-    browsingFastDirectory,
-    searchInfo,
-    setBrowsingEntries,
-    setSearchInfo,
-    doSelectFiles,
-    clearActingFiles,
-  } = useFileManager(
-    useShallow((state) => ({
-      browsingDirectory: state.browsingDirectory,
-      browsingFastDirectory: state.browsingFastDirectory,
-      searchInfo: state.searchInfo,
-      setBrowsingEntries: state.setBrowsingEntries,
-      setSearchInfo: state.setSearchInfo,
-      doSelectFiles: state.doSelectFiles,
-      clearActingFiles: state.clearActingFiles,
-    })),
-  );
+  const store = useFileManagerApi();
+  const canReadContent = useServerCan('files.read-content');
+  const { browsingDirectory, browsingFastDirectory, searchInfo, setSearchResults, doSelectFiles, clearActingFiles } =
+    useFileManager(
+      useShallow((state) => ({
+        browsingDirectory: state.browsingDirectory,
+        browsingFastDirectory: state.browsingFastDirectory,
+        searchInfo: state.searchInfo,
+        setSearchResults: state.setSearchResults,
+        doSelectFiles: state.doSelectFiles,
+        clearActingFiles: state.clearActingFiles,
+      })),
+    );
+
+  const searchRoot = treeView ? ROOT_DIRECTORY : browsingDirectory;
+  const fastDirectory = treeView || browsingFastDirectory;
 
   const [query, setQuery] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -74,6 +73,8 @@ export default function FileSearchModal({ ...props }: ModalProps) {
       const queryInclude = query ? [`**/*${query}*`] : [];
       const searchFilters = {
         ...values,
+        matchContext:
+          values.contentFilter?.query && canReadContent ? { before: 1, after: 1, maxMatches: 1 } : undefined,
         pathFilter: values.pathFilter
           ? { ...values.pathFilter, include: [...values.pathFilter.include, ...queryInclude] }
           : query
@@ -81,10 +82,27 @@ export default function FileSearchModal({ ...props }: ModalProps) {
             : null,
       };
 
-      const entries = await searchFiles(server.uuid, { root: browsingDirectory, ...searchFilters });
+      const generation = store.getState().beginSearch();
+      const isCurrent = () => {
+        const state = store.getState();
+        return state.searchGeneration === generation && state.externals.serverUuid === server.uuid;
+      };
+
+      let response: Awaited<ReturnType<typeof searchFiles>>;
+      try {
+        response = await searchFiles(server.uuid, { root: searchRoot, ...searchFilters });
+      } catch (error) {
+        if (isCurrent()) throw error;
+        return;
+      }
+      if (!isCurrent()) return;
+
       startTransition(() => {
-        setBrowsingEntries({ total: entries.length, page: 1, perPage: entries.length, data: entries });
-        setSearchInfo({ query, root: browsingDirectory, filters: searchFilters });
+        setSearchResults(
+          { query, root: searchRoot, filters: searchFilters },
+          response.entries,
+          response.contentMatches,
+        );
         doSelectFiles([]);
         clearActingFiles();
       });
@@ -273,7 +291,7 @@ export default function FileSearchModal({ ...props }: ModalProps) {
               </Stack>
             </CollapsibleSection>
 
-            {browsingFastDirectory && (
+            {fastDirectory && (
               <CollapsibleSection
                 icon={<FontAwesomeIcon icon={faFileAlt} />}
                 title={t('pages.server.files.modal.searchFiles.fileContent', {})}

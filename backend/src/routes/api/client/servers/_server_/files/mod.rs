@@ -15,6 +15,7 @@ mod delete;
 mod download;
 mod fingerprint;
 mod largest_directories;
+mod lines;
 mod list;
 mod operations;
 mod pull;
@@ -29,6 +30,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .nest("/list", list::router(state))
         .nest("/contents", contents::router(state))
+        .nest("/lines", lines::router(state))
         .nest("/fingerprint", fingerprint::router(state))
         .nest("/download", download::router(state))
         .nest("/upload", upload::router(state))

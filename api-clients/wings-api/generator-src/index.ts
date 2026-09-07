@@ -9,6 +9,34 @@ function rustIdent(name: string): string {
     return ['type', 'override', 'match', 'move', 'ref', 'virtual', 'self', 'use', 'mod'].includes(name) ? `r#${name}` : name
 }
 
+/**
+ * Resolves the Rust type of an `extra` compat property. Inline object schemas get their own
+ * module-level struct (`Extra<Property>`), since they no longer have a `RequestBody` to nest in.
+ */
+function extraPropertyType(output: fs.WriteStream, modPath: string, name: string, property: oas31.SchemaObject | oas31.ReferenceObject): { local: string, qualified: string } {
+    let schema = property as oas31.SchemaObject
+    let nullable = false
+
+    if (!schema.type && schema.oneOf) {
+        nullable = schema.oneOf.some((t) => (t as oas31.SchemaObject).type === 'null')
+        schema = schema.oneOf.find((t) => (t as oas31.SchemaObject).type !== 'null') as oas31.SchemaObject
+    }
+
+    if (schema.$ref || schema.type !== 'object') {
+        const type = convertType(property)
+        return { local: type, qualified: type }
+    }
+
+    const structName = `Extra${pascalCase(name)}`
+    output.write('\n')
+    generateSchemaObject(output, 8, null, structName, schema)
+
+    return {
+        local: nullable ? `Option<${structName}>` : structName,
+        qualified: nullable ? `Option<${modPath}::${structName}>` : `${modPath}::${structName}`,
+    }
+}
+
 const handImplementedMethods = new Set([
     'get /api/tundra',
     'get /api/tundra/metrics',
@@ -29,6 +57,7 @@ const compatBodyProperties: Record<string, Record<string, 'client' | 'extra'>> =
     'post /api/servers/{server}/files/delete': { ignored: 'client' },
     'post /api/servers/{server}/files/pull': { ignored: 'client' },
     'put /api/servers/{server}/files/rename': { ignored: 'client', create_directories: 'extra' },
+    'post /api/servers/{server}/files/search': { match_context: 'extra' },
     'post /api/servers/{server}/files/sqlite-query': { ignored: 'client' },
 }
 
@@ -418,14 +447,20 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
             output.write('        }\n')
         }
 
+        const extraTypes: Record<string, { local: string, qualified: string }> = {}
         if (extraProps.length) {
             const schema = Object.values((data.requestBody as oas31.RequestBodyObject).content)[0].schema as oas31.SchemaObject
+            const modPath = `super::${snakeCase(path).slice(4)}::${method}`
+
+            for (const name of extraProps) {
+                extraTypes[name] = extraPropertyType(output, modPath, name, schema.properties![name]!)
+            }
 
             output.write('\n        #[derive(Debug, Clone, Default)]\n')
             output.write('        #[allow(clippy::manual_non_exhaustive)]\n')
             output.write('        pub struct Extra {\n')
             for (const name of extraProps) {
-                output.write(`            pub ${rustIdent(name)}: ${convertType(schema.properties![name] as any)},\n`)
+                output.write(`            pub ${rustIdent(name)}: ${extraTypes[name].local},\n`)
             }
             output.write('            #[doc(hidden)]\n')
             output.write('            pub __priv: (),\n')
@@ -454,7 +489,7 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
                     + `struct ${overlay}<'a> {\n`
                     + '    #[serde(flatten)]\n'
                     + `    inner: &'a super::${modName}::${method}::RequestBody,\n`
-                    + compatEntries.map(([name]) => `    ${rustIdent(name)}: &'a ${convertType(schema.properties![name] as any)},\n`).join('')
+                    + compatEntries.map(([name, source]) => `    ${rustIdent(name)}: &'a ${source === 'extra' ? extraTypes[name].qualified : convertType(schema.properties![name] as any)},\n`).join('')
                     + '}\n'
                 )
             }

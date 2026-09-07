@@ -327,7 +327,7 @@ function FileTree({ onOpenFile, activePath, initialDirectory, collapsed, onToggl
         sizeFilter: null,
         contentFilter: null,
       })
-        .then((entries) => {
+        .then(({ entries }) => {
           if (searchRequestRef.current === request) setSearchResults(entries);
         })
         .catch((error) => {
@@ -345,6 +345,7 @@ function FileTree({ onOpenFile, activePath, initialDirectory, collapsed, onToggl
   }, [server.uuid, searchOpen, searchQuery, searchRevision]);
 
   const searching = searchOpen && searchQuery.trim().length > 0;
+  const dragDisabled = searching || !!modalSearchInfo;
 
   const rows = useMemo(() => {
     if (searching) {
@@ -369,7 +370,15 @@ function FileTree({ onOpenFile, activePath, initialDirectory, collapsed, onToggl
       }
 
       const result: FileTreeRowData[] = [];
-      appendSearchRows(result, modalSearchInfo.root, modalSearchEntries.data, directories, expandedDirectories);
+      appendSearchRows(
+        result,
+        modalSearchInfo.root,
+        modalSearchEntries.data,
+        directories,
+        expandedDirectories,
+        modalSearchInfo.contentMatches,
+      );
+
       return result;
     }
 
@@ -770,6 +779,11 @@ function FileTree({ onOpenFile, activePath, initialDirectory, collapsed, onToggl
 
   const startDrag = useCallback(
     (event: React.DragEvent, item: TreeSelectionItem) => {
+      if (dragDisabled) {
+        event.preventDefault();
+        return;
+      }
+
       const items = collapseNestedTreeItems(selectedPathsRef.current.has(item.path) ? getSelectedItems() : [item]);
       const canMove =
         canUpdateFiles &&
@@ -794,7 +808,7 @@ function FileTree({ onOpenFile, activePath, initialDirectory, collapsed, onToggl
       store.getState().doDragFileGroups(groupTreeItems(items));
       event.dataTransfer.setData('application/x-calagopus-file-manager', 'move');
     },
-    [canUpdateFiles, getDirectoryCapabilities, getSelectedItems, setHorizontalDragScrollLocked, store],
+    [canUpdateFiles, dragDisabled, getDirectoryCapabilities, getSelectedItems, setHorizontalDragScrollLocked, store],
   );
 
   const refreshDirectories = (paths: string[]) => {
@@ -1010,6 +1024,7 @@ function FileTree({ onOpenFile, activePath, initialDirectory, collapsed, onToggl
                 rowHeight={rowHeight}
                 moving={moving}
                 canUpdateFiles={canUpdateFiles}
+                dragDisabled={dragDisabled}
                 preferPhysicalSize={preferPhysicalSize}
                 massSelectionDirectory={massSelectionDirectory}
                 openMassMenu={openMassMenu}

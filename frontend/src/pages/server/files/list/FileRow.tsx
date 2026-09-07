@@ -14,6 +14,7 @@ import { bytesToString } from '@/lib/format/size.ts';
 import { serverDirectoryEntrySchema } from '@/lib/schemas/server/files.ts';
 import { useDraggedFileMove } from '@/pages/server/files/hooks/useDraggedFileMove.ts';
 import FileRowContextMenu from '@/pages/server/files/list/FileRowContextMenu.tsx';
+import { canPreviewFile, FileSearchPreviewToggle } from '@/pages/server/files/list/FileSearchPreview.tsx';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useFileManagerApi, useFileManagerStore } from '@/stores/fileManager.ts';
@@ -63,6 +64,7 @@ const FileRow = forwardRef<HTMLTableRowElement, FileRowProps>(function FileRow(
   const canUpdateFiles = useServerCan('files.update');
   const store = useFileManagerApi();
   const browsingDirectory = useFileManagerStore((state) => state.browsingDirectory);
+  const searchInfo = useFileManagerStore((state) => state.searchInfo);
   const browsingWritableDirectory = useFileManagerStore((state) => state.browsingWritableDirectory);
   const browsingFastDirectory = useFileManagerStore((state) => state.browsingFastDirectory);
   const anyActing = useFileManagerStore((state) => state.actingFiles.size > 0);
@@ -74,6 +76,7 @@ const FileRow = forwardRef<HTMLTableRowElement, FileRowProps>(function FileRow(
     (state) => state.draggingFiles.has(file) && state.draggingFilesSource === state.browsingDirectory,
   );
 
+  const searchPath = searchInfo ? join('/', searchInfo.root, file.name) : null;
   const targetDirectory = file.directory ? join(browsingDirectory, file.name) : null;
   const { moving, isDropTarget, getDropHandlers } = useDraggedFileMove({ targetDirectory });
   const openMode = useMemo(() => isOpenableFile(file, store.getState()), [file, browsingFastDirectory, store]);
@@ -89,7 +92,7 @@ const FileRow = forwardRef<HTMLTableRowElement, FileRowProps>(function FileRow(
 
   const clickCount = useRef(0);
   const clickTimer = useRef<NodeJS.Timeout | null>(null);
-  const canDragFile = canUpdateFiles && browsingWritableDirectory && !anyActing && !moving;
+  const canDragFile = !searchInfo && canUpdateFiles && browsingWritableDirectory && !anyActing && !moving;
   const fileIsDropTarget = !!targetDirectory && isDropTarget(targetDirectory);
 
   const handleDragStart = (e: React.DragEvent<HTMLElement>) => {
@@ -193,27 +196,30 @@ const FileRow = forwardRef<HTMLTableRowElement, FileRowProps>(function FileRow(
           )}
 
           <TableData className='w-full max-w-0'>
-            <Tooltip
-              label={t('pages.server.files.tooltip.dragToMove', {})}
-              disabled={!canDragFile}
-              innerClassName='w-full max-w-fit min-w-0'
-            >
-              <span
-                draggable={canDragFile}
-                className={classNames(
-                  'flex w-full min-w-0 items-center gap-4 overflow-hidden rounded-sm py-0.5 leading-5',
-                  canDragFile && 'cursor-grab active:cursor-grabbing',
-                )}
-                onMouseDown={(e) => {
-                  if (canDragFile) e.stopPropagation();
-                }}
-                onDragStart={handleDragStart}
-                onDragEnd={() => store.getState().clearDraggingFiles()}
+            <div className='flex min-w-0 items-center gap-2'>
+              {searchPath && canPreviewFile(file) && <FileSearchPreviewToggle path={searchPath} />}
+              <Tooltip
+                label={t('pages.server.files.tooltip.dragToMove', {})}
+                disabled={!canDragFile}
+                innerClassName='w-full max-w-fit min-w-0'
               >
-                <FileRowIcon className='shrink-0 text-(--mantine-color-dimmed)' file={file} />
-                <ScrollingText>{file.name}</ScrollingText>
-              </span>
-            </Tooltip>
+                <span
+                  draggable={canDragFile}
+                  className={classNames(
+                    'flex w-full min-w-0 items-center gap-4 overflow-hidden rounded-sm py-0.5 leading-5',
+                    canDragFile && 'cursor-grab active:cursor-grabbing',
+                  )}
+                  onMouseDown={(e) => {
+                    if (canDragFile) e.stopPropagation();
+                  }}
+                  onDragStart={handleDragStart}
+                  onDragEnd={() => store.getState().clearDraggingFiles()}
+                >
+                  <FileRowIcon className='shrink-0 text-(--mantine-color-dimmed)' file={file} />
+                  <ScrollingText>{file.name}</ScrollingText>
+                </span>
+              </Tooltip>
+            </div>
           </TableData>
 
           <TableData>

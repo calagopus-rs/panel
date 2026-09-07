@@ -17,10 +17,16 @@ mod get {
     #[derive(ToSchema, Deserialize)]
     pub struct Params {
         file: compact_str::CompactString,
+        start_line: u64,
+        end_line: u64,
     }
 
     #[utoipa::path(get, path = "/", responses(
-        (status = OK, body = String),
+        (status = OK, body = wings_api::servers_server_files_lines::get::Response),
+        (status = BAD_REQUEST, body = ApiError),
+        (status = PAYLOAD_TOO_LARGE, body = ApiError),
+        (status = EXPECTATION_FAILED, body = ApiError),
+        (status = UNPROCESSABLE_ENTITY, body = ApiError),
         (status = UNAUTHORIZED, body = ApiError),
         (status = NOT_FOUND, body = ApiError),
     ), params(
@@ -34,6 +40,8 @@ mod get {
             description = "The file to retrieve contents from",
             example = "/path/to/file.txt",
         ),
+        ("start_line" = u64, Query, description = "First line, one-based and inclusive"),
+        ("end_line" = u64, Query, description = "Last line, one-based and inclusive"),
     ))]
     pub async fn route(
         state: GetState,
@@ -61,10 +69,12 @@ mod get {
             .await?
             .api_client(&state.database)
             .await?
-            .get_servers_server_files_contents(
+            .get_servers_server_files_lines(
                 server.uuid,
-                &wings_api::servers_server_files_contents::get::Query {
+                &wings_api::servers_server_files_lines::get::Query {
                     file: Some(params.file.clone()),
+                    start_line: Some(params.start_line),
+                    end_line: Some(params.end_line),
                     max_size: Some(max_file_manager_view_size),
                     ignored: server.0.subuser_ignored_files,
                     ..Default::default()
@@ -73,6 +83,11 @@ mod get {
             .await
         {
             Ok(data) => data,
+            Err(wings_api::client::ApiHttpError::Http(StatusCode::BAD_REQUEST, err)) => {
+                return ApiResponse::new_serialized(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::BAD_REQUEST)
+                    .ok();
+            }
             Err(wings_api::client::ApiHttpError::Http(StatusCode::NOT_FOUND, err)) => {
                 return ApiResponse::new_serialized(ApiError::new_wings_value(err))
                     .with_status(StatusCode::NOT_FOUND)
@@ -83,6 +98,16 @@ mod get {
                     .with_status(StatusCode::PAYLOAD_TOO_LARGE)
                     .ok();
             }
+            Err(wings_api::client::ApiHttpError::Http(StatusCode::EXPECTATION_FAILED, err)) => {
+                return ApiResponse::new_serialized(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
+            }
+            Err(wings_api::client::ApiHttpError::Http(StatusCode::UNPROCESSABLE_ENTITY, err)) => {
+                return ApiResponse::new_serialized(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::UNPROCESSABLE_ENTITY)
+                    .ok();
+            }
             Err(err) => return Err(err.into()),
         };
 
@@ -91,17 +116,13 @@ mod get {
                 "server:file.read-content",
                 serde_json::json!({
                     "file": params.file,
+                    "start_line": params.start_line,
+                    "end_line": params.end_line,
                 }),
             )
             .await;
 
-        ApiResponse::new_stream(contents)
-            .with_header("Content-Type", "application/octet-stream")
-            .with_header("Content-Disposition", "attachment")
-            .with_header("Content-Security-Policy", "sandbox")
-            .with_header("X-Content-Type-Options", "nosniff")
-            .with_header("X-Frame-Options", "SAMEORIGIN")
-            .ok()
+        ApiResponse::new_serialized(contents).ok()
     }
 }
 

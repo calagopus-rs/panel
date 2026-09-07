@@ -1,7 +1,7 @@
 import { dirname, join } from 'pathe';
 import { z } from 'zod';
 import { isViewableArchive } from '@/lib/files/files.ts';
-import { serverDirectoryEntrySchema } from '@/lib/schemas/server/files.ts';
+import { serverDirectoryEntrySchema, serverFilesContentMatchesSchema } from '@/lib/schemas/server/files.ts';
 import { FileMoveGroup } from '@/pages/server/files/list/fileMove.ts';
 
 export type DirectoryEntry = z.infer<typeof serverDirectoryEntrySchema>;
@@ -27,6 +27,8 @@ export type FileTreeRow =
       entry: DirectoryEntry;
       expandable: boolean;
       expanded: boolean;
+      searchResult?: boolean;
+      contentMatches?: z.infer<typeof serverFilesContentMatchesSchema>;
     }
   | {
       type: 'loading';
@@ -186,12 +188,15 @@ export const searchRow = (
   entry: DirectoryEntry,
   fast: boolean,
   expandedDirectories: Set<string>,
+  contentMatches?: Record<string, z.infer<typeof serverFilesContentMatchesSchema>>,
 ): FileTreeRow => {
-  const path = join(root, entry.name);
+  const path = join('/', root, entry.name);
 
   return {
     type: 'entry',
     key: `search:${path}`,
+    searchResult: true,
+    contentMatches: contentMatches?.[path],
     path,
     parent: root,
     depth: 0,
@@ -257,11 +262,12 @@ export const appendSearchRows = (
   entries: DirectoryEntry[],
   directories: Record<string, DirectoryState>,
   expandedDirectories: Set<string>,
+  contentMatches?: Record<string, z.infer<typeof serverFilesContentMatchesSchema>>,
 ) => {
   const { fast } = resolveDirectoryCapabilities(directories, root);
 
   for (const entry of entries) {
-    const row = searchRow(root, entry, fast, expandedDirectories);
+    const row = searchRow(root, entry, fast, expandedDirectories, contentMatches);
     rows.push(row);
     if (row.type === 'entry' && row.expanded) {
       appendDirectoryRows(rows, row.path, 1, directories, expandedDirectories);

@@ -4806,6 +4806,17 @@ const baseTranslations = defineTranslations({
             list: 'List',
             tree: 'Tree',
           },
+          searchPreview: {
+            expand: 'Expand content preview for {file}',
+            collapse: 'Collapse content preview for {file}',
+            lines: 'Lines {start}-{end}',
+            loading: 'Loading preview...',
+            empty: 'Empty file',
+            unavailable: 'Preview unavailable',
+            noContext: 'Match found, preview unavailable',
+            moreMatches: 'More matches not shown',
+            restricted: 'Content permission required',
+          },
           tree: {
             empty: 'This folder is empty',
             loadMore: 'Load more',

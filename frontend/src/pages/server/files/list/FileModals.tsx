@@ -16,7 +16,7 @@ import SymlinkNameModal from '@/pages/server/files/modals/SymlinkNameModal.tsx';
 import { useFileManager } from '@/providers/contexts/fileManagerContext.ts';
 import FileDetailsModal from '../modals/FileDetailsModal.tsx';
 
-export default function FileModals() {
+export default function FileModals({ treeView = false }: { treeView?: boolean }) {
   const { openModal, modalDirectoryEntries, doCloseModal } = useFileManager(
     useShallow((state) => ({
       openModal: state.openModal,
@@ -54,7 +54,7 @@ export default function FileModals() {
       />
       <PullFileModal opened={openModal === 'pullFile'} onClose={doCloseModal} />
 
-      <FileSearchModal opened={openModal === 'search'} onClose={doCloseModal} />
+      <FileSearchModal treeView={treeView} opened={openModal === 'search'} onClose={doCloseModal} />
 
       <LargestDirectoriesModal opened={openModal === 'largestDirectories'} onClose={doCloseModal} />
     </>

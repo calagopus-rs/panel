@@ -106,6 +106,17 @@ pub enum CompressionType {
 }
 
 nestify::nest! {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ContentMatches {
+        #[schema(inline)]
+        pub file: compact_str::CompactString,
+        #[schema(inline)]
+        pub truncated: bool,
+        #[schema(inline)]
+        pub blocks: Vec<MatchBlock>,
+    }
+}
+
+nestify::nest! {
     #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct CopyFile {
         #[schema(inline)]
         pub from: compact_str::CompactString,
@@ -234,6 +245,28 @@ nestify::nest! {
         pub script: compact_str::CompactString,
         #[schema(inline)]
         pub environment: IndexMap<compact_str::CompactString, serde_json::Value>,
+    }
+}
+
+nestify::nest! {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct MatchBlock {
+        #[schema(inline)]
+        pub start_line: u64,
+        #[schema(inline)]
+        pub end_line: u64,
+        #[schema(inline)]
+        pub content: compact_str::CompactString,
+        #[schema(inline)]
+        pub matches: Vec<MatchSpan>,
+    }
+}
+
+nestify::nest! {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct MatchSpan {
+        #[schema(inline)]
+        pub start_byte: u64,
+        #[schema(inline)]
+        pub end_byte: u64,
     }
 }
 
@@ -1711,6 +1744,48 @@ pub mod servers_server_files_largest_directories {
         }
     }
 }
+pub mod servers_server_files_lines {
+    use super::*;
+
+    pub mod get {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub start_line: Option<u64>,
+                #[schema(inline)]
+                pub end_line: Option<u64>,
+                #[schema(inline)]
+                pub content: compact_str::CompactString,
+                #[schema(inline)]
+                pub eof: bool,
+            }
+        }
+
+        pub type Response400 = ApiError;
+
+        pub type Response404 = ApiError;
+
+        pub type Response413 = ApiError;
+
+        pub type Response417 = ApiError;
+
+        pub type Response = Response200;
+
+        #[derive(Debug, Clone, Default)]
+        #[allow(clippy::manual_non_exhaustive)]
+        pub struct Query {
+            pub file: Option<compact_str::CompactString>,
+            pub start_line: Option<u64>,
+            pub end_line: Option<u64>,
+            pub max_size: Option<u64>,
+            pub ignored: Option<Vec<compact_str::CompactString>>,
+            #[doc(hidden)]
+            pub __priv: (),
+        }
+    }
+}
 pub mod servers_server_files_list {
     use super::*;
 
@@ -2042,12 +2117,35 @@ pub mod servers_server_files_search {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub results: Vec<DirectoryEntry>,
+                #[schema(inline)]
+                pub content_matches: Option<Vec<ContentMatches>>,
             }
         }
+
+        pub type Response400 = ApiError;
 
         pub type Response404 = ApiError;
 
         pub type Response = Response200;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ExtraMatchContext {
+                #[schema(inline)]
+                pub before: u64,
+                #[schema(inline)]
+                pub after: u64,
+                #[schema(inline)]
+                pub max_matches: u64,
+            }
+        }
+
+        #[derive(Debug, Clone, Default)]
+        #[allow(clippy::manual_non_exhaustive)]
+        pub struct Extra {
+            pub match_context: Option<ExtraMatchContext>,
+            #[doc(hidden)]
+            pub __priv: (),
+        }
     }
 }
 pub mod servers_server_files_sqlite_query {
@@ -2558,6 +2656,16 @@ pub mod system_config {
                     pub send_offline_server_logs: bool,
                     #[schema(inline)]
                     pub file_search_threads: u64,
+                    #[schema(inline)]
+                    pub file_search_context: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200ApiFileSearchContext {
+                        #[schema(inline)]
+                        pub max_search_size: u64,
+                        #[schema(inline)]
+                        pub max_matches: u64,
+                        #[schema(inline)]
+                        pub max_response_size: u64,
+                    },
+
                     #[schema(inline)]
                     pub file_copy_threads: u64,
                     #[schema(inline)]
