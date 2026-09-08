@@ -1,6 +1,8 @@
 mod events;
 pub use events::ServerBackupEvent;
 
+pub mod retention;
+
 use crate::{
     jwt::BasePayload,
     models::{InsertQueryBuilder, UpdateQueryBuilder, server_variable::ServerVariable},
@@ -79,18 +81,6 @@ pub struct ServerBackupFilter {
 pub struct ServerBackupRestoreOptions {
     pub truncate_directory: bool,
     pub restore_startup: bool,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum GroupRotationOutcome {
-    /// The group has no `retention_count`, so count-based rotation does not apply.
-    NotConfigured,
-    /// The group is still under its `retention_count`; nothing was evicted.
-    WithinRetention,
-    /// The oldest unlocked usable backup in the group was evicted to make room.
-    Evicted,
-    /// The group is at/over `retention_count` but every usable backup is locked.
-    BlockedAllLocked,
 }
 
 /// What the backup being evicted belonged to, for the eviction activity log.
@@ -1718,433 +1708,6 @@ impl ServerBackup {
         }
     }
 
-    pub async fn evict_one_by_server_uuid_kind(
-        state: &crate::State,
-        server: &super::server::Server,
-        kind: ServerBackupKind,
-    ) -> Result<(), anyhow::Error> {
-        let row = sqlx::query(
-            r#"
-            SELECT candidates.uuid, candidates.tier, candidates.group_name
-            FROM (
-                SELECT
-                    server_backups.uuid,
-                    server_backups.created,
-                    (CASE
-                        WHEN NOT server_backups.successful THEN 0
-                        WHEN g.retention_count IS NOT NULL AND (
-                            SELECT COUNT(*)
-                            FROM server_backups b2
-                            WHERE b2.backup_group_uuid = server_backups.backup_group_uuid
-                                AND b2.kind = $2
-                                AND b2.deleted IS NULL
-                                AND b2.deleting IS NULL
-                                AND b2.successful
-                                AND b2.completed IS NOT NULL
-                                AND b2.created >= server_backups.created
-                        ) > g.retention_count THEN 1
-                        WHEN server_backups.backup_group_uuid IS NULL THEN 2
-                        ELSE 3
-                    END) AS tier,
-                    g.name AS group_name
-                FROM server_backups
-                LEFT JOIN server_backup_groups g ON g.uuid = server_backups.backup_group_uuid
-                WHERE server_backups.server_uuid = $1
-                    AND server_backups.kind = $2
-                    AND server_backups.system_backup_policy_uuid IS NULL
-                    AND server_backups.locked = false
-                    AND server_backups.completed IS NOT NULL
-                    AND server_backups.deleted IS NULL
-                    AND server_backups.deleting IS NULL
-            ) candidates
-            ORDER BY candidates.tier ASC, candidates.created ASC
-            LIMIT 1
-            "#,
-        )
-        .bind(server.uuid)
-        .bind(kind)
-        .fetch_optional(state.database.read())
-        .await?;
-
-        let Some(row) = row else {
-            return Err(sqlx::Error::RowNotFound.into());
-        };
-
-        let row_uuid: uuid::Uuid = row.try_get("uuid")?;
-        let row_tier: i32 = row.try_get("tier")?;
-        let row_group_name: Option<String> = row.try_get("group_name")?;
-
-        let rule = match row_tier {
-            0 => "failed",
-            1 => "over-retention",
-            2 => "ungrouped",
-            _ => "in-retention",
-        };
-
-        if row_tier == 3 {
-            tracing::warn!(
-                server = %server.uuid,
-                backup = %row_uuid,
-                group = ?row_group_name,
-                "evicting an in-retention grouped backup to satisfy backup_limit; retention quota exceeds backup_limit"
-            );
-        }
-
-        let Some(backup) =
-            Self::by_server_uuid_uuid(&state.database, server.uuid, row_uuid).await?
-        else {
-            return Err(sqlx::Error::RowNotFound.into());
-        };
-
-        backup.delete(state, Default::default()).await?;
-
-        Self::log_eviction_activity(
-            state,
-            server.uuid,
-            &backup,
-            rule,
-            match row_group_name.as_deref() {
-                Some(group_name) => EvictionScope::Group(group_name),
-                None => EvictionScope::Server,
-            },
-        )
-        .await;
-
-        Ok(())
-    }
-
-    pub async fn rotate_group_for_create(
-        state: &crate::State,
-        group: &super::server_backup_group::ServerBackupGroup,
-        kind: ServerBackupKind,
-    ) -> Result<GroupRotationOutcome, anyhow::Error> {
-        let Some(retention_count) = group.retention_count else {
-            return Ok(GroupRotationOutcome::NotConfigured);
-        };
-
-        let row = sqlx::query(
-            r#"
-            SELECT
-                (SELECT COUNT(*)
-                    FROM server_backups
-                    WHERE server_backups.backup_group_uuid = $1
-                        AND server_backups.kind = $2
-                        AND server_backups.deleted IS NULL
-                        AND server_backups.deleting IS NULL
-                        AND server_backups.successful
-                        AND server_backups.completed IS NOT NULL) AS usable,
-                (SELECT server_backups.uuid
-                    FROM server_backups
-                    WHERE server_backups.backup_group_uuid = $1
-                        AND server_backups.kind = $2
-                        AND server_backups.deleted IS NULL
-                        AND server_backups.deleting IS NULL
-                        AND server_backups.successful
-                        AND server_backups.completed IS NOT NULL
-                        AND server_backups.locked = false
-                    ORDER BY server_backups.created ASC
-                    LIMIT 1) AS oldest_unlocked
-            "#,
-        )
-        .bind(group.uuid)
-        .bind(kind)
-        .fetch_one(state.database.read())
-        .await?;
-
-        let usable: i64 = row.try_get("usable")?;
-        let oldest_unlocked: Option<uuid::Uuid> = row.try_get("oldest_unlocked")?;
-
-        if usable < retention_count as i64 {
-            return Ok(GroupRotationOutcome::WithinRetention);
-        }
-
-        let Some(oldest_unlocked) = oldest_unlocked else {
-            return Ok(GroupRotationOutcome::BlockedAllLocked);
-        };
-
-        let Some(backup) =
-            Self::by_server_uuid_uuid(&state.database, group.server_uuid, oldest_unlocked).await?
-        else {
-            return Ok(GroupRotationOutcome::WithinRetention);
-        };
-
-        backup.delete(state, Default::default()).await?;
-
-        Self::log_eviction_activity(
-            state,
-            group.server_uuid,
-            &backup,
-            "group-rotation",
-            EvictionScope::Group(group.name.as_str()),
-        )
-        .await;
-
-        Ok(GroupRotationOutcome::Evicted)
-    }
-
-    pub async fn prune_expired_group_backups(state: &crate::State) -> Result<u64, anyhow::Error> {
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, g.name AS group_name
-            FROM server_backups
-            JOIN server_backup_groups g ON g.uuid = server_backups.backup_group_uuid
-            WHERE g.retention_days IS NOT NULL
-                AND server_backups.deleted IS NULL
-                AND server_backups.deleting IS NULL
-                AND server_backups.locked = false
-                AND server_backups.completed IS NOT NULL
-                AND server_backups.created < NOW() - make_interval(days => g.retention_days)
-            "#,
-            Self::columns_sql(None)
-        )))
-        .fetch_all(state.database.read())
-        .await?;
-
-        let mut pruned = 0;
-        for row in rows {
-            let group_name: compact_str::CompactString = row.try_get("group_name")?;
-            let server_uuid: Option<uuid::Uuid> = row.try_get("server_uuid")?;
-            let backup = Self::map(None, &row)?;
-
-            if let Err(err) = backup.delete(state, Default::default()).await {
-                tracing::error!(
-                    backup = %backup.uuid,
-                    "failed to prune expired group backup: {:#?}",
-                    err
-                );
-                continue;
-            }
-
-            if let Some(server_uuid) = server_uuid {
-                Self::log_eviction_activity(
-                    state,
-                    server_uuid,
-                    &backup,
-                    "retention-days",
-                    EvictionScope::Group(group_name.as_str()),
-                )
-                .await;
-            }
-
-            pruned += 1;
-        }
-
-        Ok(pruned)
-    }
-
-    pub async fn rotate_system_for_create(
-        state: &crate::State,
-        system_backup_policy: &super::system_backup_policy::SystemBackupPolicy,
-        server_uuid: uuid::Uuid,
-    ) -> Result<(), anyhow::Error> {
-        let failed_rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}
-            FROM server_backups
-            WHERE server_backups.server_uuid = $1
-                AND server_backups.system_backup_policy_uuid = $2
-                AND server_backups.deleted IS NULL
-                AND server_backups.deleting IS NULL
-                AND server_backups.locked = false
-                AND NOT server_backups.successful
-                AND server_backups.completed IS NOT NULL
-            "#,
-            Self::columns_sql(None)
-        )))
-        .bind(server_uuid)
-        .bind(system_backup_policy.uuid)
-        .fetch_all(state.database.read())
-        .await?;
-
-        for row in failed_rows {
-            let backup = Self::map(None, &row)?;
-
-            if let Err(err) = backup.delete(state, Default::default()).await {
-                tracing::error!(
-                    backup = %backup.uuid,
-                    "failed to delete failed system backup: {:#?}",
-                    err
-                );
-                continue;
-            }
-
-            Self::log_eviction_activity(
-                state,
-                server_uuid,
-                &backup,
-                "system-failed",
-                EvictionScope::Policy(system_backup_policy.name.as_str()),
-            )
-            .await;
-        }
-
-        let Some(retention_count) = system_backup_policy.retention_count else {
-            return Ok(());
-        };
-
-        let row = sqlx::query(
-            r#"
-            SELECT
-                (SELECT COUNT(*)
-                    FROM server_backups
-                    WHERE server_backups.server_uuid = $1
-                        AND server_backups.system_backup_policy_uuid = $2
-                        AND server_backups.deleted IS NULL
-                        AND server_backups.deleting IS NULL
-                        AND server_backups.successful
-                        AND server_backups.completed IS NOT NULL) AS usable,
-                (SELECT server_backups.uuid
-                    FROM server_backups
-                    WHERE server_backups.server_uuid = $1
-                        AND server_backups.system_backup_policy_uuid = $2
-                        AND server_backups.deleted IS NULL
-                        AND server_backups.deleting IS NULL
-                        AND server_backups.successful
-                        AND server_backups.completed IS NOT NULL
-                        AND server_backups.locked = false
-                    ORDER BY server_backups.created ASC
-                    LIMIT 1) AS oldest_unlocked
-            "#,
-        )
-        .bind(server_uuid)
-        .bind(system_backup_policy.uuid)
-        .fetch_one(state.database.read())
-        .await?;
-
-        let usable: i64 = row.try_get("usable")?;
-        let oldest_unlocked: Option<uuid::Uuid> = row.try_get("oldest_unlocked")?;
-
-        if usable < retention_count as i64 {
-            return Ok(());
-        }
-
-        let Some(oldest_unlocked) = oldest_unlocked else {
-            return Ok(());
-        };
-
-        let Some(backup) =
-            Self::by_server_uuid_uuid(&state.database, server_uuid, oldest_unlocked).await?
-        else {
-            return Ok(());
-        };
-
-        backup.delete(state, Default::default()).await?;
-
-        Self::log_eviction_activity(
-            state,
-            server_uuid,
-            &backup,
-            "system-rotation",
-            EvictionScope::Policy(system_backup_policy.name.as_str()),
-        )
-        .await;
-
-        Ok(())
-    }
-
-    pub async fn prune_system_backups(state: &crate::State) -> Result<u64, anyhow::Error> {
-        let expired_rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, p.name AS policy_name, 'system-retention-days' AS rule
-            FROM server_backups
-            JOIN system_backup_policies p ON p.uuid = server_backups.system_backup_policy_uuid
-            WHERE p.retention_days IS NOT NULL
-                AND server_backups.deleted IS NULL
-                AND server_backups.deleting IS NULL
-                AND server_backups.locked = false
-                AND server_backups.completed IS NOT NULL
-                AND server_backups.created < NOW() - make_interval(days => p.retention_days)
-            "#,
-            Self::columns_sql(None)
-        )))
-        .fetch_all(state.database.read())
-        .await?;
-
-        let over_retention_rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, p.name AS policy_name, 'system-over-retention' AS rule
-            FROM (
-                SELECT b.*, ROW_NUMBER() OVER (
-                    PARTITION BY b.server_uuid, b.system_backup_policy_uuid
-                    ORDER BY b.created DESC
-                ) AS usable_position
-                FROM server_backups b
-                WHERE b.system_backup_policy_uuid IS NOT NULL
-                    AND b.server_uuid IS NOT NULL
-                    AND b.deleted IS NULL
-                    AND b.deleting IS NULL
-                    AND b.locked = false
-                    AND b.successful
-                    AND b.completed IS NOT NULL
-            ) server_backups
-            JOIN system_backup_policies p ON p.uuid = server_backups.system_backup_policy_uuid
-            WHERE p.retention_count IS NOT NULL
-                AND server_backups.usable_position > p.retention_count
-            "#,
-            Self::columns_sql(None)
-        )))
-        .fetch_all(state.database.read())
-        .await?;
-
-        let failed_rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, p.name AS policy_name, 'system-failed' AS rule
-            FROM server_backups
-            JOIN system_backup_policies p ON p.uuid = server_backups.system_backup_policy_uuid
-            WHERE server_backups.deleted IS NULL
-                AND server_backups.deleting IS NULL
-                AND server_backups.locked = false
-                AND NOT server_backups.successful
-                AND server_backups.completed IS NOT NULL
-                AND server_backups.created < NOW() - INTERVAL '1 day'
-            "#,
-            Self::columns_sql(None)
-        )))
-        .fetch_all(state.database.read())
-        .await?;
-
-        let mut seen = std::collections::HashSet::new();
-        let mut pruned = 0;
-        for row in expired_rows
-            .into_iter()
-            .chain(over_retention_rows)
-            .chain(failed_rows)
-        {
-            let policy_name: compact_str::CompactString = row.try_get("policy_name")?;
-            let rule: String = row.try_get("rule")?;
-            let server_uuid: Option<uuid::Uuid> = row.try_get("server_uuid")?;
-            let backup = Self::map(None, &row)?;
-
-            if !seen.insert(backup.uuid) {
-                continue;
-            }
-
-            if let Err(err) = backup.delete(state, Default::default()).await {
-                tracing::error!(
-                    backup = %backup.uuid,
-                    "failed to prune system backup: {:#?}",
-                    err
-                );
-                continue;
-            }
-
-            if let Some(server_uuid) = server_uuid {
-                Self::log_eviction_activity(
-                    state,
-                    server_uuid,
-                    &backup,
-                    &rule,
-                    EvictionScope::Policy(policy_name.as_str()),
-                )
-                .await;
-            }
-
-            pruned += 1;
-        }
-
-        Ok(pruned)
-    }
-
     async fn log_eviction_activity(
         state: &crate::State,
         server_uuid: uuid::Uuid,
@@ -2662,6 +2225,18 @@ impl UpdatableModel for ServerBackup {
         options.validate()?;
 
         if let Some(Some(backup_group_uuid)) = options.backup_group_uuid {
+            sqlx::query(
+                r#"
+                SELECT server_backup_groups.uuid
+                FROM server_backup_groups
+                WHERE server_backup_groups.uuid = $1
+                FOR KEY SHARE
+                "#,
+            )
+            .bind(backup_group_uuid)
+            .fetch_optional(&mut **transaction)
+            .await?;
+
             let group = super::server_backup_group::ServerBackupGroup::by_uuid_with_transaction(
                 transaction,
                 backup_group_uuid,
@@ -2677,6 +2252,28 @@ impl UpdatableModel for ServerBackup {
                 )
                 .into());
             }
+        }
+
+        if sqlx::query(
+            r#"
+            SELECT server_backups.uuid
+            FROM server_backups
+            WHERE server_backups.uuid = $1
+            AND server_backups.deleted IS NULL
+            AND server_backups.deleting IS NULL
+            FOR UPDATE
+            "#,
+        )
+        .bind(self.uuid)
+        .fetch_optional(&mut **transaction)
+        .await?
+        .is_none()
+        {
+            return Err(anyhow::Error::new(
+                crate::response::DisplayError::new("backup is being deleted")
+                    .with_status(StatusCode::EXPECTATION_FAILED),
+            )
+            .into());
         }
 
         let mut query_builder = UpdateQueryBuilder::new("server_backups");
@@ -2752,6 +2349,7 @@ impl ByUuid for ServerBackup {
 #[derive(Clone, Default)]
 pub struct DeleteServerBackupOptions {
     pub force: bool,
+    pub retention: Option<retention::RetentionDeletionGuard>,
 }
 
 impl ServerBackup {
@@ -3097,12 +2695,39 @@ impl DeletableModel for ServerBackup {
         state: &crate::State,
         options: Self::DeleteOptions,
     ) -> Result<(), anyhow::Error> {
-        if let Some(backup_configuration) = &self.backup_configuration
-            && backup_configuration
-                .fetch_cached(&state.database)
-                .await?
-                .maintenance_enabled
-        {
+        let mut transaction = state.database.write().begin().await?;
+
+        self.claim_deletion(state, &options, &mut transaction)
+            .await?;
+
+        transaction.commit().await?;
+
+        self.dispatch_claimed_deletion(state, &options).await
+    }
+}
+
+impl ServerBackup {
+    async fn backup_configuration_in_maintenance(
+        &self,
+        state: &crate::State,
+    ) -> Result<bool, anyhow::Error> {
+        let Some(configuration) = &self.backup_configuration else {
+            return Ok(false);
+        };
+
+        Ok(configuration
+            .fetch_cached(&state.database)
+            .await?
+            .maintenance_enabled)
+    }
+
+    async fn claim_deletion(
+        &self,
+        state: &crate::State,
+        options: &DeleteServerBackupOptions,
+        transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    ) -> Result<(), anyhow::Error> {
+        if self.backup_configuration_in_maintenance(state).await? {
             return Err(crate::response::DisplayError::new(
                 "cannot delete backup while backup configuration is in maintenance mode",
             )
@@ -3110,10 +2735,13 @@ impl DeletableModel for ServerBackup {
             .into());
         }
 
-        let mut transaction = state.database.write().begin().await?;
-
-        self.run_delete_handlers(&options, state, &mut transaction)
+        self.run_delete_handlers(options, state, transaction)
             .await?;
+
+        let retention_guard = options.retention.as_ref();
+        let retention = retention_guard
+            .map(|guard| serde_json::to_value(&guard.retention))
+            .transpose()?;
 
         let claimed = sqlx::query(
             r#"
@@ -3123,26 +2751,64 @@ impl DeletableModel for ServerBackup {
                 server_backups.uuid = $1
                 AND server_backups.deleted IS NULL
                 AND (server_backups.deleting IS NULL OR server_backups.deletion_retries >= $2)
+                AND (NOT $3 OR (
+                    NOT server_backups.locked
+                    AND server_backups.completed = $4
+                    AND server_backups.successful = $5
+                    AND server_backups.backup_group_uuid IS NOT DISTINCT FROM $6
+                    AND server_backups.system_backup_policy_uuid IS NOT DISTINCT FROM $7
+                    AND server_backups.server_uuid IS NOT DISTINCT FROM $8
+                    AND server_backups.database_instance_uuid IS NOT DISTINCT FROM $9
+                    AND (
+                        EXISTS (
+                            SELECT 1 FROM server_backup_groups g
+                            WHERE g.uuid = $6
+                                AND g.retention IS NOT DISTINCT FROM $10
+                        ) OR EXISTS (
+                            SELECT 1 FROM system_backup_policies p
+                            WHERE p.uuid = $7
+                                AND p.retention IS NOT DISTINCT FROM $10
+                        )
+                    )
+                ))
             "#,
         )
         .bind(self.uuid)
         .bind(Self::MAX_DELETION_RETRIES)
-        .execute(&mut *transaction)
+        .bind(retention_guard.is_some())
+        .bind(retention_guard.map(|guard| guard.completed))
+        .bind(retention_guard.map(|guard| guard.successful))
+        .bind(retention_guard.and_then(|guard| guard.backup_group_uuid))
+        .bind(retention_guard.and_then(|guard| guard.system_backup_policy_uuid))
+        .bind(self.server.as_ref().map(|server| server.uuid))
+        .bind(self.database_instance_uuid)
+        .bind(retention)
+        .execute(&mut **transaction)
         .await?
         .rows_affected();
 
         if claimed == 0 {
             return Err(
-                crate::response::DisplayError::new("backup is already being deleted")
-                    .with_status(StatusCode::EXPECTATION_FAILED)
-                    .into(),
+                crate::response::DisplayError::new(if retention_guard.is_some() {
+                    "backup is no longer eligible for retention cleanup"
+                } else {
+                    "backup is already being deleted"
+                })
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .into(),
             );
         }
 
-        transaction.commit().await?;
+        Ok(())
+    }
 
-        match self.dispatch_deletion(state, &options).await {
-            Ok(true) => self.finish_deletion(state, &options).await,
+    async fn dispatch_claimed_deletion(
+        &self,
+        state: &crate::State,
+        options: &DeleteServerBackupOptions,
+    ) -> Result<(), anyhow::Error> {
+        match self.dispatch_deletion(state, options).await {
+            Ok(true) => self.finish_deletion(state, options).await,
             Ok(false) => Ok(()),
             Err(err) => {
                 sqlx::query(

@@ -1,5 +1,5 @@
 use crate::{
-    models::{InsertQueryBuilder, UpdateQueryBuilder},
+    models::{InsertQueryBuilder, UpdateQueryBuilder, server_backup::retention::BackupRetention},
     prelude::*,
 };
 use compact_str::ToCompactString;
@@ -23,8 +23,7 @@ pub struct SystemBackupPolicy {
 
     pub enabled: bool,
     pub cron: croner::Cron,
-    pub retention_count: Option<i32>,
-    pub retention_days: Option<i32>,
+    pub retention: BackupRetention,
     pub parallelism: i32,
 
     pub triggered: Option<chrono::NaiveDateTime>,
@@ -77,12 +76,8 @@ impl BaseModel for SystemBackupPolicy {
                 compact_str::format_compact!("{prefix}cron"),
             ),
             (
-                "system_backup_policies.retention_count",
-                compact_str::format_compact!("{prefix}retention_count"),
-            ),
-            (
-                "system_backup_policies.retention_days",
-                compact_str::format_compact!("{prefix}retention_days"),
+                "system_backup_policies.retention",
+                compact_str::format_compact!("{prefix}retention"),
             ),
             (
                 "system_backup_policies.parallelism",
@@ -118,10 +113,9 @@ impl BaseModel for SystemBackupPolicy {
             enabled: row.try_get(compact_str::format_compact!("{prefix}enabled").as_str())?,
             cron: croner::Cron::from_str(&cron)
                 .map_err(|err| crate::database::DatabaseError::Any(anyhow::Error::new(err)))?,
-            retention_count: row
-                .try_get(compact_str::format_compact!("{prefix}retention_count").as_str())?,
-            retention_days: row
-                .try_get(compact_str::format_compact!("{prefix}retention_days").as_str())?,
+            retention: serde_json::from_value(
+                row.try_get(compact_str::format_compact!("{prefix}retention").as_str())?,
+            )?,
             parallelism: row
                 .try_get(compact_str::format_compact!("{prefix}parallelism").as_str())?,
             triggered: row.try_get(compact_str::format_compact!("{prefix}triggered").as_str())?,
@@ -385,8 +379,7 @@ impl IntoAdminApiObject for SystemBackupPolicy {
                 description: self.description,
                 enabled: self.enabled,
                 cron: self.cron,
-                retention_count: self.retention_count,
-                retention_days: self.retention_days,
+                retention: self.retention,
                 parallelism: self.parallelism,
                 triggered: self.triggered.map(|dt| dt.and_utc()),
                 total_nodes,
@@ -459,12 +452,9 @@ pub struct CreateSystemBackupPolicyOptions {
     #[garde(skip)]
     #[schema(value_type = String, example = "0 0 0 * * *")]
     pub cron: croner::Cron,
-    #[garde(inner(range(min = 1)))]
-    #[schema(minimum = 1)]
-    pub retention_count: Option<i32>,
-    #[garde(inner(range(min = 1)))]
-    #[schema(minimum = 1)]
-    pub retention_days: Option<i32>,
+    #[garde(dive)]
+    #[serde(default)]
+    pub retention: BackupRetention,
     #[garde(range(min = 1, max = 100))]
     #[schema(minimum = 1, maximum = 100)]
     pub parallelism: i32,
@@ -513,8 +503,7 @@ impl CreatableModel for SystemBackupPolicy {
             )
             .set("enabled", options.enabled)
             .set("cron", options.cron.to_compact_string())
-            .set("retention_count", options.retention_count)
-            .set("retention_days", options.retention_days)
+            .set("retention", serde_json::to_value(&options.retention)?)
             .set("parallelism", options.parallelism);
 
         let row = query_builder
@@ -554,22 +543,14 @@ pub struct UpdateSystemBackupPolicyOptions {
     #[garde(skip)]
     #[schema(value_type = Option<String>, example = "0 0 0 * * *")]
     pub cron: Option<croner::Cron>,
-    #[garde(inner(range(min = 1)))]
-    #[schema(minimum = 1)]
+    #[garde(dive)]
+    #[schema(nullable = false)]
     #[serde(
         default,
         skip_serializing_if = "Option::is_none",
-        with = "::serde_with::rust::double_option"
+        deserialize_with = "crate::deserialize::deserialize_non_null_option"
     )]
-    pub retention_count: Option<Option<i32>>,
-    #[garde(inner(range(min = 1)))]
-    #[schema(minimum = 1)]
-    #[serde(
-        default,
-        skip_serializing_if = "Option::is_none",
-        with = "::serde_with::rust::double_option"
-    )]
-    pub retention_days: Option<Option<i32>>,
+    pub retention: Option<BackupRetention>,
     #[garde(inner(range(min = 1, max = 100)))]
     #[schema(minimum = 1, maximum = 100)]
     pub parallelism: Option<i32>,
@@ -625,8 +606,14 @@ impl UpdatableModel for SystemBackupPolicy {
                 "cron",
                 options.cron.as_ref().map(|cron| cron.to_compact_string()),
             )
-            .set("retention_count", options.retention_count)
-            .set("retention_days", options.retention_days)
+            .set(
+                "retention",
+                options
+                    .retention
+                    .as_ref()
+                    .map(serde_json::to_value)
+                    .transpose()?,
+            )
             .set("parallelism", options.parallelism)
             .where_eq("uuid", self.uuid);
 
@@ -648,11 +635,8 @@ impl UpdatableModel for SystemBackupPolicy {
         if let Some(cron) = options.cron {
             self.cron = cron;
         }
-        if let Some(retention_count) = options.retention_count {
-            self.retention_count = retention_count;
-        }
-        if let Some(retention_days) = options.retention_days {
-            self.retention_days = retention_days;
+        if let Some(retention) = options.retention {
+            self.retention = retention;
         }
         if let Some(parallelism) = options.parallelism {
             self.parallelism = parallelism;
@@ -714,8 +698,7 @@ pub struct AdminApiSystemBackupPolicy {
     pub enabled: bool,
     #[schema(value_type = String, example = "0 0 0 * * *")]
     pub cron: croner::Cron,
-    pub retention_count: Option<i32>,
-    pub retention_days: Option<i32>,
+    pub retention: BackupRetention,
     pub parallelism: i32,
 
     pub triggered: Option<chrono::DateTime<chrono::Utc>>,

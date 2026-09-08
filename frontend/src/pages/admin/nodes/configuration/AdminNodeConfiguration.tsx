@@ -1,4 +1,4 @@
-import { faExclamationTriangle, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faExclamationTriangle, faEye, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { dump, load } from 'js-yaml';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -38,12 +38,15 @@ export default function AdminNodeConfiguration({ node }: { node: z.infer<typeof 
   const canReadToken = useAdminCan('nodes.read-token');
   const canUpdate = useAdminCan('nodes.update');
 
+  const isAIO = isNodeAIO(node);
+  const showInitialSetup = canReadToken && !isAIO;
+
   const [remote, setRemote] = useState(window.location.origin);
   const [apiPort, setApiPort] = useState(() => getNodeDefaultApiPort(node));
   const [sftpPort, setSftpPort] = useState(node.sftpPort);
 
   const connectPort = getNodeConnectPort(node);
-  const portMismatch = !isNodeAIO(node) && connectPort !== null && connectPort !== apiPort;
+  const portMismatch = !isAIO && connectPort !== null && connectPort !== apiPort;
 
   const [verifying, setVerifying] = useState(false);
   const [backendResult, setBackendResult] = useState<VerifyResult | null>(null);
@@ -52,7 +55,7 @@ export default function AdminNodeConfiguration({ node }: { node: z.infer<typeof 
   const { data: nodeToken } = useResource({
     queryKey: queryKeys.admin.nodes.token(node.uuid),
     queryFn: useCallback(() => getNodeToken(node.uuid), [node.uuid]),
-    enabled: canReadToken,
+    enabled: showInitialSetup,
   });
 
   const doVerify = () => {
@@ -143,7 +146,7 @@ export default function AdminNodeConfiguration({ node }: { node: z.infer<typeof 
       registry={window.extensionContext.extensionRegistry.pages.admin.nodes.view.configuration.subContainer}
       registryProps={{ node }}
     >
-      {canReadToken && !revealed ? (
+      {showInitialSetup && !revealed ? (
         <Stack>
           <Alert color='yellow' icon={<FontAwesomeIcon icon={faExclamationTriangle} />}>
             {t('pages.admin.nodes.tabs.configuration.page.alert.tokenWarning', {})}
@@ -159,7 +162,13 @@ export default function AdminNodeConfiguration({ node }: { node: z.infer<typeof 
         </Stack>
       ) : (
         <Stack gap='xl'>
-          {canReadToken && (
+          {isAIO && (
+            <Alert color='blue' icon={<FontAwesomeIcon icon={faInfoCircle} />}>
+              {t('pages.admin.nodes.tabs.configuration.page.alert.integratedNode', {}).md()}
+            </Alert>
+          )}
+
+          {showInitialSetup && (
             <>
               <NodeInitialSetupSection
                 node={node}

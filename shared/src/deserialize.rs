@@ -12,6 +12,15 @@ where
     Ok(serde_json::from_value(value).unwrap_or_default())
 }
 
+#[inline]
+pub fn deserialize_non_null_option<'de, T, D>(deserializer: D) -> Result<Option<T>, D::Error>
+where
+    T: Deserialize<'de>,
+    D: Deserializer<'de>,
+{
+    T::deserialize(deserializer).map(Some)
+}
+
 pub fn deserialize_stringable_option<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
 where
     D: Deserializer<'de>,

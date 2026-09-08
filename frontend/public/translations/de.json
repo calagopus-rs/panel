@@ -128,14 +128,6 @@
       "many": "{count} Backups",
       "other": "{count} Backups"
     },
-    "day": {
-      "zero": "{count} Tage",
-      "one": "{count} Tag",
-      "two": "{count} Tage",
-      "few": "{count} Tage",
-      "many": "{count} Tage",
-      "other": "{count} Tage"
-    },
     "row": {
       "zero": "{count} Zeilen",
       "one": "{count} Zeile",
@@ -266,6 +258,21 @@
             "weekday": "Wochentag"
           },
           "nextRun": "Nächste Ausführung ist {timestamp}."
+        },
+        "backupRetention": {
+          "title": "Aufbewahrung",
+          "disabled": "Keine Aufbewahrungsregeln",
+          "description": "Ein erfolgreiches Backup bleibt erhalten, wenn mindestens eine Regel es auswählt: die neueste Anzahl an Backups, alle Backups innerhalb der letzten angegebenen Tage oder das neueste Backup aus jedem Tag, jeder Woche, jedem Monat oder jedem Jahr mit vorhandenen Backups. Zeiträume richten sich nach UTC; Wochen beginnen montags. Zeiträume ohne Backups zählen nicht mit. Eine leere Regel oder der Wert 0 deaktiviert die jeweilige Regel. Sind alle Regeln deaktiviert, bleiben erfolgreiche Backups erhalten.",
+          "sourcesDescription": "Die Aufbewahrung wird getrennt für Serverdateien und jede Datenbank ausgewertet. Gesperrte Backups sind geschützt. Aufbewahrungsregeln planen keine Backups.",
+          "capacityDescription": "Am Backup-Limit des Servers werden Backups entfernt, die deine Regeln nicht mehr behalten. Geplante Backups löschen zusätzlich das älteste ungesperrte Backup; manuelle Backups werden stattdessen abgelehnt.",
+          "failedDescription": "Nicht gesperrte fehlgeschlagene Backups werden nach 24 Stunden automatisch gelöscht, ob gruppiert oder nicht.",
+          "count": "Neueste Backups behalten",
+          "days": "Alle Backups der letzten Tage behalten",
+          "daily": "Tägliche Backups behalten",
+          "weekly": "Wöchentliche Backups behalten",
+          "monthly": "Monatliche Backups behalten",
+          "yearly": "Jährliche Backups behalten",
+          "ruleSummary": "{rule}: {count}"
         }
       },
       "modal": {
@@ -2688,6 +2695,7 @@
                 },
                 "alert": {
                   "couldNotReach": "Node konnte nicht erreicht werden: {error}",
+                  "integratedNode": "Dieser Node läuft innerhalb des Panels. Seine Identität, die Panel-URL und die API-Bind-Einstellungen werden bei jedem Start des Panels neu geschrieben, Änderungen daran bleiben also nicht erhalten. Alles andere, was du hier änderst, schon.",
                   "tokenWarning": "Die folgende Konfiguration enthält den Node-Token. Zeige sie nur an, wenn nötig.",
                   "portMismatch": "Die Node-URL zeigt auf Port {connectPort}, aber diese Konfiguration lässt Wings auf Port {apiPort} lauschen. Außer ein Reverse-Proxy leitet Port {connectPort} an Wings weiter, kann das Panel den Node nicht erreichen.",
                   "verifyBackend": "Backend zu Wings",
@@ -4440,10 +4448,6 @@
             "backupConfigurationPlaceholder": "Vom Server erben",
             "cron": "Zeitplan",
             "cronDescription": "Cron-Ausdruck (mit Sekunden), der bestimmt, wann Backups erstellt werden, in UTC.",
-            "retentionCount": "Anzahl behalten",
-            "retentionCountDescription": "Maximale Anzahl erfolgreicher Backups, die pro Server behalten werden. Leer lassen für kein Limit.",
-            "retentionDays": "Tage behalten",
-            "retentionDaysDescription": "Backups löschen, die älter als diese Anzahl an Tagen sind. Leer lassen für kein Limit.",
             "parallelism": "Parallelität",
             "parallelismDescription": "Maximale Anzahl an Backups, die diese Richtlinie gleichzeitig auf einem einzelnen Node ausführt.",
             "enabledDescription": "Deaktivierte Richtlinien behalten ihre Backups, erstellen aber keine neuen."
@@ -6475,17 +6479,10 @@
             "createInGroup": "Backup in dieser Gruppe erstellen"
           },
           "badge": {
-            "keepCount": "{count} behalten",
-            "keepDays": "{days} behalten",
-            "noRetention": "Keine automatische Löschung",
             "allLocked": "Alle gesperrt"
           },
           "form": {
-            "retentionCount": "Anzahl behalten",
-            "retentionCountDescription": "Maximale Anzahl nutzbarer Backups, die in dieser Gruppe behalten werden. Leer lassen für kein Limit.",
-            "retentionDays": "Tage behalten",
-            "retentionDaysDescription": "Backups in dieser Gruppe löschen, die älter als diese Anzahl an Tagen sind. Leer lassen für kein Limit.",
-            "noRetentionDescription": "Ohne Aufbewahrungsrichtlinie ist diese Gruppe nur eine Bezeichnung und löscht niemals automatisch Backups."
+            "noRetentionDescription": "Ohne Aufbewahrungsrichtlinie ist diese Gruppe nur eine Bezeichnung und löscht niemals automatisch erfolgreiche Backups."
           },
           "modal": {
             "createGroup": {

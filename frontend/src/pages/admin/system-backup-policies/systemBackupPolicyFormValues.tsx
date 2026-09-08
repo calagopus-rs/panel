@@ -1,11 +1,13 @@
 import { z } from 'zod';
 import { type FieldDef } from '@/elements/form-engine/index.ts';
+import BackupRetentionInput from '@/elements/input/BackupRetentionInput.tsx';
 import CronInput from '@/elements/input/CronInput.tsx';
 import { adminBackupConfigurationSchema } from '@/lib/schemas/admin/backupConfigurations.ts';
 import {
   adminSystemBackupPolicySchema,
   adminSystemBackupPolicyUpdateSchema,
 } from '@/lib/schemas/admin/systemBackupPolicies.ts';
+import { emptyBackupRetention } from '@/lib/schemas/backupRetention.ts';
 import { useSearchableResource } from '@/plugins/resource/useSearchableResource.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
@@ -17,8 +19,7 @@ export const systemBackupPolicyEmptyFormValues: SystemBackupPolicyFormValues = {
   backupConfigurationUuid: null,
   enabled: true,
   cron: '0 0 0 * * *',
-  retentionCount: null,
-  retentionDays: null,
+  retention: { ...emptyBackupRetention },
   parallelism: 2,
 };
 
@@ -30,8 +31,7 @@ export const systemBackupPolicyToFormValues = (
   backupConfigurationUuid: policy.backupConfiguration?.uuid ?? null,
   enabled: policy.enabled,
   cron: policy.cron,
-  retentionCount: policy.retentionCount,
-  retentionDays: policy.retentionDays,
+  retention: policy.retention,
   parallelism: policy.parallelism,
 });
 
@@ -92,18 +92,12 @@ export function useSystemBackupPolicyFormFields({
       props: { min: 1, max: 100, allowDecimal: false },
     },
     {
-      type: 'number',
-      name: 'retentionCount',
-      label: t('pages.admin.systemBackupPolicies.form.retentionCount', {}),
-      description: t('pages.admin.systemBackupPolicies.form.retentionCountDescription', {}),
-      props: { min: 1, allowDecimal: false },
-    },
-    {
-      type: 'number',
-      name: 'retentionDays',
-      label: t('pages.admin.systemBackupPolicies.form.retentionDays', {}),
-      description: t('pages.admin.systemBackupPolicies.form.retentionDaysDescription', {}),
-      props: { min: 1, allowDecimal: false },
+      type: 'custom',
+      name: 'retention',
+      colSpan: 'full',
+      render: (f) => (
+        <BackupRetentionInput form={f} path='retention' label={t('common.elements.backupRetention.title', {})} />
+      ),
     },
     {
       type: 'switch',

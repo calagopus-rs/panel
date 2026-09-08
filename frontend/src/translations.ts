@@ -25,7 +25,6 @@ const baseTranslations = defineTranslations({
     line: defineEnglishItem('Line', 'Lines'),
     header: defineEnglishItem('Header', 'Headers'),
     backup: defineEnglishItem('Backup', 'Backups'),
-    day: defineEnglishItem('Day', 'Days'),
     row: defineEnglishItem('Row', 'Rows'),
     change: defineEnglishItem('Change', 'Changes'),
     session: defineEnglishItem('Session', 'Sessions'),
@@ -137,6 +136,24 @@ const baseTranslations = defineTranslations({
             weekday: 'Weekday',
           },
           nextRun: 'Next run is {timestamp}.',
+        },
+        backupRetention: {
+          title: 'Retention',
+          disabled: 'No retention rules',
+          description:
+            'Keep a successful backup when any rule selects it: the latest count, all backups within the recent number of days, or the newest backup in each daily, weekly, monthly or yearly period containing backups. Periods use UTC; weeks start on Monday. Missed periods do not consume the count. Leave a rule empty or set it to 0 to disable it. With all rules disabled, successful backups are kept.',
+          sourcesDescription:
+            'Retention is evaluated separately for server files and each database. Locked backups are protected. Retention does not schedule backups.',
+          capacityDescription:
+            'At the server backup limit, backups your rules no longer keep are removed to make room. Scheduled backups additionally evict the oldest unlocked backup; manual backups are refused instead.',
+          failedDescription: 'Unlocked failed backups are cleaned up after 24 hours, grouped or not.',
+          count: 'Keep latest',
+          days: 'Keep all within days',
+          daily: 'Keep daily',
+          weekly: 'Keep weekly',
+          monthly: 'Keep monthly',
+          yearly: 'Keep yearly',
+          ruleSummary: '{rule}: {count}',
         },
       },
       modal: {
@@ -2631,6 +2648,8 @@ const baseTranslations = defineTranslations({
                 },
                 alert: {
                   couldNotReach: 'Could not reach the node: {error}',
+                  integratedNode:
+                    'This node runs inside the panel. Its identity, panel URL and API bind settings are rewritten every time the panel starts, so changes to those are not kept. Everything else you change here is.',
                   tokenWarning: 'The configuration below contains the node token. Reveal it only when needed.',
                   portMismatch:
                     'The node URL points at port {connectPort}, but this configuration makes wings listen on port {apiPort}. Unless a reverse proxy forwards port {connectPort} to wings, the panel will not be able to reach the node.',
@@ -4449,11 +4468,6 @@ const baseTranslations = defineTranslations({
             backupConfigurationPlaceholder: 'Inherit from Server',
             cron: 'Schedule',
             cronDescription: 'Cron expression (with seconds) that determines when backups are taken, in UTC.',
-            retentionCount: 'Keep count',
-            retentionCountDescription:
-              'Maximum number of successful backups to keep per server. Leave empty for no limit.',
-            retentionDays: 'Keep days',
-            retentionDaysDescription: 'Delete backups older than this many days. Leave empty for no limit.',
             parallelism: 'Parallelism',
             parallelismDescription: 'Maximum number of backups this policy runs at the same time on a single node.',
             enabledDescription: 'Disabled policies keep their backups but do not take new ones.',
@@ -6570,20 +6584,11 @@ const baseTranslations = defineTranslations({
             createInGroup: 'Create backup in this group',
           },
           badge: {
-            keepCount: 'Keep {count}',
-            keepDays: 'Keep {days}',
-            noRetention: 'No auto-deletion',
             allLocked: 'All locked',
           },
           form: {
-            retentionCount: 'Keep count',
-            retentionCountDescription:
-              'Maximum number of usable backups to keep in this group. Leave empty for no limit.',
-            retentionDays: 'Keep days',
-            retentionDaysDescription:
-              'Delete backups in this group older than this many days. Leave empty for no limit.',
             noRetentionDescription:
-              'With no retention set, this group is just a label and never deletes backups automatically.',
+              'With no retention set, this group is just a label and never deletes successful backups automatically.',
           },
           modal: {
             createGroup: {

@@ -62,6 +62,7 @@ mod post {
         models::{
             CreatableModel, IntoApiObject,
             server::{GetServer, GetServerActivityLogger},
+            server_backup::retention::BackupRetention,
             server_backup_group::ServerBackupGroup,
             user::GetPermissionManager,
         },
@@ -74,12 +75,9 @@ mod post {
         #[garde(length(chars, min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
         name: compact_str::CompactString,
-        #[garde(range(min = 1))]
-        #[schema(minimum = 1)]
-        retention_count: Option<i32>,
-        #[garde(range(min = 1))]
-        #[schema(minimum = 1)]
-        retention_days: Option<i32>,
+        #[garde(dive)]
+        #[serde(default)]
+        retention: BackupRetention,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -134,8 +132,7 @@ mod post {
         let options = shared::models::server_backup_group::CreateServerBackupGroupOptions {
             server_uuid: server.uuid,
             name: data.name,
-            retention_count: data.retention_count,
-            retention_days: data.retention_days,
+            retention: data.retention,
         };
         let group = match ServerBackupGroup::create(&state, options).await {
             Ok(group) => group,
@@ -155,8 +152,7 @@ mod post {
                 serde_json::json!({
                     "uuid": group.uuid,
                     "name": group.name,
-                    "retention_count": group.retention_count,
-                    "retention_days": group.retention_days,
+                    "retention": group.retention,
                 }),
             )
             .await;

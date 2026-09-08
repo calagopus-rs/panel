@@ -6,6 +6,7 @@ import { getEmptyPaginationSet } from '@/api/axios.ts';
 import getBackupGroupBackups from '@/api/server/backups/groups/getBackupGroupBackups.ts';
 import ActionIcon from '@/elements/buttons/ActionIcon.tsx';
 import Button from '@/elements/buttons/Button.tsx';
+import BackupRetentionBadge from '@/elements/data-display/BackupRetentionBadge.tsx';
 import Badge from '@/elements/data-display/Badge.tsx';
 import Table, { Pagination } from '@/elements/data-display/Table.tsx';
 import Spinner from '@/elements/feedback/Spinner.tsx';
@@ -51,7 +52,6 @@ export default function BackupGroupItem({
     modifyParams: false,
   });
 
-  const overRetention = group.retentionCount !== null && group.usableBackups > group.retentionCount;
   const allLocked = group.usableBackups > 0 && group.usableUnlockedBackups === 0;
 
   return (
@@ -72,33 +72,10 @@ export default function BackupGroupItem({
             <span className='font-medium min-w-0 flex-1 text-left'>
               <ScrollingText>{group.name}</ScrollingText>
             </span>
-            {group.retentionCount !== null ? (
-              <Tooltip
-                label={t('pages.server.backupGroups.badge.keepCount', {
-                  count: group.retentionCount,
-                })}
-              >
-                <Badge variant='light' color={overRetention ? 'yellow' : 'gray'}>
-                  {group.usableBackups}/{group.retentionCount}
-                </Badge>
-              </Tooltip>
-            ) : (
-              <Badge variant='light' color='gray'>
-                {tItem('backup', group.totalBackups)}
-              </Badge>
-            )}
-            {group.retentionDays !== null && (
-              <Badge variant='light' color='blue'>
-                {t('pages.server.backupGroups.badge.keepDays', {
-                  days: tItem('day', group.retentionDays),
-                })}
-              </Badge>
-            )}
-            {group.retentionCount === null && group.retentionDays === null && (
-              <Badge variant='light' color='gray'>
-                {t('pages.server.backupGroups.badge.noRetention', {})}
-              </Badge>
-            )}
+            <Badge variant='light' color='gray'>
+              {tItem('backup', group.totalBackups)}
+            </Badge>
+            <BackupRetentionBadge retention={group.retention} />
             {allLocked && (
               <Badge variant='light' color='red'>
                 {t('pages.server.backupGroups.badge.allLocked', {})}

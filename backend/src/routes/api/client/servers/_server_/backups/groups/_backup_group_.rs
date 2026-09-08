@@ -182,8 +182,7 @@ mod patch {
                 serde_json::json!({
                     "uuid": backup_group.uuid,
                     "name": backup_group.name,
-                    "retention_count": backup_group.retention_count,
-                    "retention_days": backup_group.retention_days,
+                    "retention": backup_group.retention,
                 }),
             )
             .await;
