@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import BackupRetentionBadge from '@/elements/data-display/BackupRetentionBadge.tsx';
 import Badge from '@/elements/data-display/Badge.tsx';
 import { TableData, TableRow } from '@/elements/data-display/Table.tsx';
 import TableLink from '@/elements/data-display/TableLink.tsx';
@@ -24,6 +25,7 @@ export default function SystemBackupPolicyRow({
 
       <TableData>
         {systemBackupPolicy.name}
+        <BackupRetentionBadge retention={systemBackupPolicy.retention} className='ml-2' />
         {!systemBackupPolicy.enabled && (
           <Badge color='gray' className='ml-2'>
             {t('common.badge.disabled', {})}

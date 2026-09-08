@@ -138,6 +138,7 @@ export default function DatabaseResultCell({
       opened
       position='bottom-start'
       shadow='md'
+      width={384}
       trapFocus={false}
       closeOnEscape={false}
       returnFocus={false}
@@ -145,7 +146,7 @@ export default function DatabaseResultCell({
       onDismiss={commit}
     >
       <Popover.Target>{cell}</Popover.Target>
-      <Popover.Dropdown p='xs' className='w-96 max-w-[90vw]'>
+      <Popover.Dropdown p='xs' className='max-w-[90vw]'>
         <Group gap={4} wrap='nowrap' align='flex-start'>
           <TextArea
             autoFocus

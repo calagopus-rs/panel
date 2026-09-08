@@ -124,6 +124,7 @@ mod post {
 
                     "enabled": system_backup_policy.enabled,
                     "cron": system_backup_policy.cron.to_string(),
+                    "retention": system_backup_policy.retention,
                 }),
             )
             .await;

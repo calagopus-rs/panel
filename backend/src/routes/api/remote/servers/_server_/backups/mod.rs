@@ -14,7 +14,7 @@ mod post {
             CreatableModel,
             server::GetServer,
             server_activity::ServerActivity,
-            server_backup::{BackupDisk, ServerBackup, ServerBackupKind},
+            server_backup::{BackupDisk, ServerBackup, ServerBackupKind, retention::EvictionMode},
             server_backup_group::ServerBackupGroup,
             server_database_instance::ServerDatabaseInstance,
         },
@@ -245,20 +245,29 @@ mod post {
             ServerBackupKind::Server
         };
 
-        if let Some(group) = &backup_group {
-            ServerBackup::rotate_group_for_create(&state, group, kind).await?;
-        }
-
         let backups = ServerBackup::count_by_server_uuid(&state.database, server.uuid).await?;
-        if backups >= server.backup_limit as i64
-            && let Err(err) =
-                ServerBackup::evict_one_by_server_uuid_kind(&state, &server, kind).await
-        {
-            tracing::error!(server = %server.uuid, "failed to delete old backup: {:?}", err);
+        if backups >= server.backup_limit as i64 {
+            let evicted = match ServerBackup::evict_for_create(
+                &state,
+                server.uuid,
+                kind,
+                EvictionMode::Any,
+            )
+            .await
+            {
+                Ok(evicted) => evicted as i64,
+                Err(err) => {
+                    tracing::error!(server = %server.uuid, "failed to evict old backups: {err:#?}");
 
-            return ApiResponse::error("maximum number of backups reached")
-                .with_status(StatusCode::EXPECTATION_FAILED)
-                .ok();
+                    0
+                }
+            };
+
+            if backups - evicted >= server.backup_limit as i64 {
+                return ApiResponse::error("maximum number of backups reached")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
+            }
         }
 
         let ratelimit = state
@@ -692,10 +701,6 @@ mod patch {
                 .ok();
         }
 
-        if let Some(group) = &target_group {
-            ServerBackup::rotate_group_for_create(&state, group, backup.kind).await?;
-        }
-
         let uuid = backup.uuid;
 
         backup
@@ -708,6 +713,10 @@ mod patch {
                 },
             )
             .await?;
+
+        if let Err(err) = ServerBackup::prune_retention_for_backup(&state, backup.uuid).await {
+            tracing::error!(backup = %backup.uuid, "failed to prune backups after move: {err:#?}");
+        }
 
         if let Err(err) = ServerActivity::create(
             &state,

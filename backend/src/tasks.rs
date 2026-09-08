@@ -508,15 +508,26 @@ pub async fn define_background_tasks(
             croner::Cron::from_str("0 0 * * * *").unwrap(),
             async |state| {
                 let pruned =
-                    shared::models::server_backup::ServerBackup::prune_expired_group_backups(
-                        &state,
-                    )
-                    .await?;
+                    shared::models::server_backup::ServerBackup::prune_group_backups(&state)
+                        .await?;
                 if pruned > 0 {
-                    tracing::info!(
-                        "pruned {} backups past their group retention window",
-                        pruned
-                    );
+                    tracing::info!("pruned {} backups outside their group retention", pruned);
+                }
+
+                Ok(())
+            },
+        )
+        .await;
+    background_task_builder
+        .add_cron_task(
+            "prune_ungrouped_backups",
+            croner::Cron::from_str("0 15 * * * *").unwrap(),
+            async |state| {
+                let pruned =
+                    shared::models::server_backup::ServerBackup::prune_ungrouped_backups(&state)
+                        .await?;
+                if pruned > 0 {
+                    tracing::info!("pruned {} failed ungrouped backups", pruned);
                 }
 
                 Ok(())
@@ -677,17 +688,6 @@ pub async fn define_background_tasks(
                                     continue;
                                 }
                             };
-
-                        if let Err(err) =
-                            ServerBackup::rotate_system_for_create(&state, &policy, server.uuid)
-                                .await
-                        {
-                            tracing::error!(
-                                server = %server.uuid,
-                                policy = %policy.uuid,
-                                "failed to rotate system backups: {err:#?}"
-                            );
-                        }
 
                         let options = shared::models::server_backup::CreateServerBackupOptions {
                             server: &server,

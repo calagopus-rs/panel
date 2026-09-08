@@ -295,6 +295,12 @@ mod post {
             );
         }
 
+        if data.successful
+            && let Err(err) = ServerBackup::prune_retention_for_backup(&state, backup.uuid).await
+        {
+            tracing::error!(backup = %backup.uuid, "failed to prune backups after completion: {err:#?}");
+        }
+
         ServerBackup::get_event_emitter().emit(
             state.0.clone(),
             ServerBackupEvent::CreationCompleted {

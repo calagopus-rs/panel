@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { nullableNumber, nullableString } from '@/lib/serialization/transformers.ts';
+import { backupRetentionSchema } from '@/lib/schemas/backupRetention.ts';
+import { nullableString } from '@/lib/serialization/transformers.ts';
 import { isValidCronExpression } from '../server/schedules.ts';
 import { adminBackupConfigurationSchema } from './backupConfigurations.ts';
 import { adminLocationSchema } from './locations.ts';
@@ -13,8 +14,7 @@ export const adminSystemBackupPolicySchema = z.looseObject({
   description: z.preprocess(nullableString, z.string().max(1024).nullable()),
   enabled: z.boolean(),
   cron: z.string().min(1),
-  retentionCount: z.preprocess(nullableNumber, z.number().min(1).nullable()),
-  retentionDays: z.preprocess(nullableNumber, z.number().min(1).nullable()),
+  retention: backupRetentionSchema,
   parallelism: z.number().min(1).max(100),
   triggered: z.coerce.date().nullable(),
   totalNodes: z.number(),

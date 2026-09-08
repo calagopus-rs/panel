@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { backupRetentionSchema } from '@/lib/schemas/backupRetention.ts';
 import { databaseAgentType } from '@/lib/schemas/generic.ts';
 
 export const serverBackupKind = z.enum(['server', 'database_instance']);
@@ -63,8 +64,7 @@ export const serverBackupGroupSchema = z.object({
   uuid: z.uuid(),
   name: z.string(),
   order: z.number(),
-  retentionCount: z.number().nullable(),
-  retentionDays: z.number().nullable(),
+  retention: backupRetentionSchema,
   totalBackups: z.number(),
   usableBackups: z.number(),
   usableUnlockedBackups: z.number(),
@@ -73,8 +73,7 @@ export const serverBackupGroupSchema = z.object({
 
 export const serverBackupGroupCreateSchema = z.object({
   name: z.string().min(1).max(255),
-  retentionCount: z.number().int().min(1).nullable(),
-  retentionDays: z.number().int().min(1).nullable(),
+  retention: backupRetentionSchema,
 });
 
 export const serverBackupGroupUpdateSchema = serverBackupGroupCreateSchema;

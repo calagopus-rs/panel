@@ -171,7 +171,10 @@ mod delete {
         backup
             .delete(
                 &state,
-                shared::models::server_backup::DeleteServerBackupOptions { force: data.force },
+                shared::models::server_backup::DeleteServerBackupOptions {
+                    force: data.force,
+                    ..Default::default()
+                },
             )
             .await?;
 
