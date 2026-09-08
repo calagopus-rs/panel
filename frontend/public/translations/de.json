@@ -4783,6 +4783,12 @@
             "restricted": "Berechtigung für Dateiinhalte erforderlich"
           },
           "tree": {
+            "closeOtherTabs": "Andere schließen",
+            "closeTabsToRight": "Rechts davon schließen",
+            "closeSavedTabs": "Gespeicherte schließen",
+            "closeAllTabs": "Alle schließen",
+            "revealInTree": "Im Dateibaum anzeigen",
+            "revealNotFound": "{path} konnte im Dateibaum nicht gefunden werden.",
             "selectPane": "Editorbereich auswählen",
             "editorPane": "Editorbereich {number}"
           },
@@ -4893,6 +4899,8 @@
             "editorLineOverflow": "Zeilenumbruch für lange Zeilen im Editor",
             "editorFontSize": "Editor-Schriftgröße",
             "editorEngine": "Editor-Engine",
+            "editorPreviewTabs": "Dateivorschau in Baum-Tabs",
+            "editorPreviewTabsDescription": "Tabs ohne Änderungen wiederverwenden. Bearbeiten oder doppelklicken, um einen Tab offen zu halten. Ausschalten, um jede Datei offen zu halten.",
             "vscodeUriScheme": "VS Code URI-Schema",
             "imageViewerSmoothing": "Bildglättung (Anti-Aliasing)"
           },

@@ -47,7 +47,13 @@ import FileTreeEditorTabs from '@/pages/server/files/tree/FileTreeEditorTabs.tsx
 import FileTreeRevisionComparison, {
   type FileRevisionComparison,
 } from '@/pages/server/files/tree/FileTreeRevisionComparison.tsx';
-import { FileTreeEditorSelection, getFileTreeEditorDraftPath } from '@/pages/server/files/tree/fileTreeEditor.ts';
+import {
+  FileTreeEditorSelection,
+  FileTreeEditorTabDragData,
+  FileTreeTabCloseAction,
+  FileTreeTabPosition,
+  getFileTreeEditorDraftPath,
+} from '@/pages/server/files/tree/fileTreeEditor.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
@@ -61,13 +67,17 @@ interface FileTreeEditorPaneProps {
   active: boolean;
   tabs: FileTreeEditorSelection[];
   activeTabId: string | null;
+  previewTabId?: string;
   dirtyTabIds: ReadonlySet<string>;
   selection: FileTreeEditorSelection | null;
   draftContent?: string;
   restoreContent?: string;
   onRestoreContent: (tabId: string) => void;
   onSelectTab: (tabId: string) => void;
-  onCloseTab: (tabId: string) => void;
+  onCloseTab: (tabId: string, action?: FileTreeTabCloseAction) => void;
+  onMoveTab: (drag: FileTreeEditorTabDragData, position: FileTreeTabPosition) => void;
+  onRevealTab: (tabId: string) => void;
+  onKeepTabOpen: (tabId: string) => void;
   onClose: () => void;
   onMissing: (tabId: string) => void;
   onDirtyChange: (tabId: string, dirty: boolean) => void;
@@ -82,6 +92,7 @@ export default function FileTreeEditorPane({
   active,
   tabs,
   activeTabId,
+  previewTabId,
   dirtyTabIds,
   selection,
   draftContent,
@@ -89,6 +100,9 @@ export default function FileTreeEditorPane({
   onRestoreContent,
   onSelectTab,
   onCloseTab,
+  onMoveTab,
+  onRevealTab,
+  onKeepTabOpen,
   onClose,
   onMissing,
   onDirtyChange,
@@ -435,9 +449,13 @@ export default function FileTreeEditorPane({
       paneId={paneId}
       tabs={tabs}
       activeTabId={activeTabId}
+      previewTabId={previewTabId}
       dirtyTabIds={dirtyTabIds}
       onSelect={onSelectTab}
       onClose={onCloseTab}
+      onMove={onMoveTab}
+      onReveal={onRevealTab}
+      onKeepOpen={onKeepTabOpen}
     />
   );
 

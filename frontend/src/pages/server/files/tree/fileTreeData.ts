@@ -1,4 +1,4 @@
-import { dirname, join } from 'pathe';
+import { dirname, join, resolve } from 'pathe';
 import { z } from 'zod';
 import { isViewableArchive } from '@/lib/files/files.ts';
 import { serverDirectoryEntrySchema, serverFilesContentMatchesSchema } from '@/lib/schemas/server/files.ts';
@@ -83,11 +83,18 @@ export interface FileTreeProps {
   initialDirectory: string;
   collapsed: boolean;
   onToggleCollapsed: () => void;
+  revealRequest?: { path: string };
 }
 
 export const ROOT_DIRECTORY = '/';
 export const TREE_ROW_HEIGHT = 32;
 export const identifyTreeItem = (item: TreeSelectionItem) => item.path;
+
+export const getFileTreeDirectoryChain = (directory: string): string[] => {
+  const paths = [resolve(ROOT_DIRECTORY, directory)];
+  while (paths[0] !== ROOT_DIRECTORY) paths.unshift(dirname(paths[0]));
+  return paths;
+};
 
 export const EMPTY_DIRECTORY_STATE: DirectoryState = {
   entries: [],

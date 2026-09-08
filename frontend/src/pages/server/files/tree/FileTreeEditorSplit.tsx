@@ -167,6 +167,13 @@ export default function FileTreeEditorSplit({
 
     event.preventDefault();
     event.stopPropagation();
+    if (
+      event.dataTransfer.types.includes(FILE_TREE_EDITOR_TAB_DRAG_TYPE) &&
+      (event.target as Element).closest('[data-file-manager-editor-tabs]')
+    ) {
+      setDropPaneId(null);
+      return;
+    }
     event.dataTransfer.dropEffect = 'copy';
     setDropPaneId(paneId);
   };

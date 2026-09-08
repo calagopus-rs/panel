@@ -73,6 +73,13 @@ export interface FileTreeEditorTabDragData {
   paneId: string;
 }
 
+export type FileTreeTabCloseAction = 'others' | 'right' | 'saved' | 'all';
+
+export interface FileTreeTabPosition {
+  tabId: string;
+  after: boolean;
+}
+
 export const setFileTreeEditorTabDragData = (dataTransfer: DataTransfer, data: FileTreeEditorTabDragData) => {
   dataTransfer.setData(FILE_TREE_EDITOR_TAB_DRAG_TYPE, JSON.stringify(data));
   dataTransfer.effectAllowed = 'copyMove';
