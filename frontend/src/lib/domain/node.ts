@@ -13,6 +13,14 @@ export const isNodeAIO = (node: z.infer<typeof adminNodeSchema>) => {
   return node.uuid === NODE_AIO_UUID;
 };
 
+export const getNodeTunnelDefaultHost = (node: z.infer<typeof adminNodeSchema>, appUrl: string) => {
+  try {
+    return new URL(isNodeAIO(node) ? appUrl : node.url).hostname;
+  } catch {
+    return window.location.hostname;
+  }
+};
+
 export const getNodeConnectPort = (node: z.infer<typeof adminNodeSchema>) => getUrlConnectPort(node.url);
 export const getNodeDefaultApiPort = (node: z.infer<typeof adminNodeSchema>) =>
   getUrlPortOr(node.url, WINGS_DEFAULT_PORT);

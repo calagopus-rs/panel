@@ -2695,6 +2695,7 @@
                 },
                 "alert": {
                   "couldNotReach": "Node konnte nicht erreicht werden: {error}",
+                  "integratedNode": "Dieser Node läuft innerhalb des Panels. Seine Identität, die Panel-URL und die API-Bind-Einstellungen werden bei jedem Start des Panels neu geschrieben, Änderungen daran bleiben also nicht erhalten. Alles andere, was du hier änderst, schon.",
                   "tokenWarning": "Die folgende Konfiguration enthält den Node-Token. Zeige sie nur an, wenn nötig.",
                   "portMismatch": "Die Node-URL zeigt auf Port {connectPort}, aber diese Konfiguration lässt Wings auf Port {apiPort} lauschen. Außer ein Reverse-Proxy leitet Port {connectPort} an Wings weiter, kann das Panel den Node nicht erreichen.",
                   "verifyBackend": "Backend zu Wings",

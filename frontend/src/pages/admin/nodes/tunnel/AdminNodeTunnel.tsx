@@ -30,17 +30,19 @@ import Stack from '@/elements/layout/Stack.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import ResourceView from '@/elements/ResourceView.tsx';
 import Text from '@/elements/typography/Text.tsx';
-import { NODE_TUNNEL_DEFAULT_PORT } from '@/lib/domain/node.ts';
+import { getNodeTunnelDefaultHost, NODE_TUNNEL_DEFAULT_PORT } from '@/lib/domain/node.ts';
 import { queryKeys } from '@/lib/queryKeys.ts';
 import { adminNodeSchema } from '@/lib/schemas/admin/nodes.ts';
 import { useResource } from '@/plugins/resource/useResource.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
 import AdminNodeTunnelMetrics from './AdminNodeTunnelMetrics.tsx';
 
 export default function AdminNodeTunnel({ node }: { node: z.infer<typeof adminNodeSchema> }) {
   const { t } = useTranslations();
   const { addToast } = useToast();
+  const appUrl = useGlobalStore((state) => state.settings.app.url);
 
   const tunnel = useResource({
     queryKey: queryKeys.admin.nodes.tunnel(node.uuid),
@@ -56,7 +58,7 @@ export default function AdminNodeTunnel({ node }: { node: z.infer<typeof adminNo
   useEffect(() => {
     if (!tunnel.data) return;
 
-    setHost(tunnel.data.tunnel?.host ?? new URL(node.url).hostname);
+    setHost(tunnel.data.tunnel?.host ?? getNodeTunnelDefaultHost(node, appUrl));
     setPort(tunnel.data.tunnel?.port ?? NODE_TUNNEL_DEFAULT_PORT);
   }, [tunnel.data]);
 

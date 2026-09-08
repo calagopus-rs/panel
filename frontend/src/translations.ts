@@ -2648,6 +2648,8 @@ const baseTranslations = defineTranslations({
                 },
                 alert: {
                   couldNotReach: 'Could not reach the node: {error}',
+                  integratedNode:
+                    'This node runs inside the panel. Its identity, panel URL and API bind settings are rewritten every time the panel starts, so changes to those are not kept. Everything else you change here is.',
                   tokenWarning: 'The configuration below contains the node token. Reveal it only when needed.',
                   portMismatch:
                     'The node URL points at port {connectPort}, but this configuration makes wings listen on port {apiPort}. Unless a reverse proxy forwards port {connectPort} to wings, the panel will not be able to reach the node.',
