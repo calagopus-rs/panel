@@ -1,9 +1,12 @@
 import { type OnMount } from '@monaco-editor/react';
-import { type EditorChangeEvent } from '@pierre/diffs/edit';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Awareness, applyAwarenessUpdate, encodeAwarenessUpdate } from 'y-protocols/awareness';
 import * as Y from 'yjs';
-import { type PierreEditorHandle } from '@/elements/editors/PierreEditor.tsx';
+import {
+  type PierreEditorHandle,
+  type PierreFileChangeEvent,
+  type PierreLocalSelection,
+} from '@/elements/editors/PierreEditor.tsx';
 import {
   bindPierreEditor,
   createMonacoBinding,
@@ -79,7 +82,8 @@ export default function useFileCollab({
   const subscribedRef = useRef(false);
   const authGappedRef = useRef(false);
   const pendingSaveRef = useRef<string[] | null>(null);
-  const pierreChangeHandlerRef = useRef<((event: EditorChangeEvent<undefined>) => void) | null>(null);
+  const pierreChangeHandlerRef = useRef<((event: PierreFileChangeEvent) => void) | null>(null);
+  const pierreSelectionHandlerRef = useRef<((selection: PierreLocalSelection | null) => void) | null>(null);
   const restoreContentRef = useRef(restoreContent);
   const onRestoreContentRef = useRef(onRestoreContent);
 
@@ -245,8 +249,38 @@ export default function useFileCollab({
           toBase64(encodeAwarenessUpdate(awareness, [doc.clientID])),
         ]);
       } else {
-        // Pierre has no styled remote cursors, so no awareness/decorations are set up here.
-        bindingRef.current = bindPierreEditor(editor as PierreEditorHandle, text, doc, pierreChangeHandlerRef);
+        const awareness = new Awareness(doc);
+        awareness.setLocalStateField('user', {
+          name: user?.username ?? 'unknown',
+          color: cursorColor(doc.clientID),
+        });
+
+        awareness.on(
+          'update',
+          ({ added, updated, removed }: { added: number[]; updated: number[]; removed: number[] }, origin: unknown) => {
+            if (origin === 'remote') return;
+            const changed = added.concat(updated, removed);
+            socket.send(SocketRequest.FILE_COLLAB_AWARENESS, [
+              path,
+              toBase64(encodeAwarenessUpdate(awareness, changed)),
+            ]);
+          },
+        );
+
+        bindingRef.current = bindPierreEditor(
+          editor as PierreEditorHandle,
+          text,
+          doc,
+          pierreChangeHandlerRef,
+          pierreSelectionHandlerRef,
+          awareness,
+        );
+        awarenessRef.current = awareness;
+
+        socket.send(SocketRequest.FILE_COLLAB_AWARENESS, [
+          path,
+          toBase64(encodeAwarenessUpdate(awareness, [doc.clientID])),
+        ]);
       }
 
       docRef.current = doc;
@@ -407,8 +441,12 @@ export default function useFileCollab({
     return true;
   }, [socketInstance, filePath]);
 
-  const handlePierreChangeEvent = useCallback((event: EditorChangeEvent<undefined>) => {
+  const handlePierreChangeEvent = useCallback((event: PierreFileChangeEvent) => {
     pierreChangeHandlerRef.current?.(event);
+  }, []);
+
+  const handlePierreSelectionChange = useCallback((selection: PierreLocalSelection | null) => {
+    pierreSelectionHandlerRef.current?.(selection);
   }, []);
 
   return {
@@ -420,5 +458,6 @@ export default function useFileCollab({
     attachEditor: setMonacoEditor,
     attachPierreEditor: setPierreEditor,
     handlePierreChangeEvent,
+    handlePierreSelectionChange,
   };
 }

@@ -563,6 +563,7 @@ export default function FileTreeEditorPane({
               fontSize={editorFontSize}
               onChange={updateContent}
               onChangeEvent={collab.handlePierreChangeEvent}
+              onSelectionChange={collab.handlePierreSelectionChange}
               onMount={(editor) => {
                 pierreEditorRef.current = editor;
                 collab.attachPierreEditor(editor);
