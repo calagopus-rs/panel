@@ -4910,7 +4910,7 @@
             "editorFontSize": "Editor-Schriftgröße",
             "editorEngine": "Editor-Engine",
             "editorPreviewTabs": "Dateivorschau in Baum-Tabs",
-            "editorPreviewTabsDescription": "Tabs ohne Änderungen wiederverwenden. Bearbeiten oder doppelklicken, um einen Tab offen zu halten. Ausschalten, um jede Datei offen zu halten.",
+            "editorPreviewTabsDescription": "Bearbeiten oder doppelklicken, um einen Tab offen zu halten.",
             "vscodeUriScheme": "VS Code URI-Schema",
             "imageViewerSmoothing": "Bildglättung (Anti-Aliasing)"
           },

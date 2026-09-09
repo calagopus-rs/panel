@@ -4975,8 +4975,7 @@ const baseTranslations = defineTranslations({
             editorFontSize: 'Editor Font Size',
             editorEngine: 'Editor Engine',
             editorPreviewTabs: 'Preview files in tree tabs',
-            editorPreviewTabsDescription:
-              'Reuse unedited tabs. Edit or double-click a tab to keep it open. Turn off to keep every file open.',
+            editorPreviewTabsDescription: 'Edit or double-click a tab to keep it open.',
             vscodeUriScheme: 'VS Code URI Scheme',
             imageViewerSmoothing: 'Smoothen Image (Anti-Aliasing)',
           },
