@@ -202,7 +202,12 @@ export default function PermissionSelector({
               onClick={() =>
                 handleRawPasteFromClipboard((text) => {
                   setSelectedPermissions([
-                    ...text.split('\n').filter((perm) => allPermissionKeys.includes(perm)),
+                    ...new Set(
+                      text
+                        .split(/\r?\n/)
+                        .map((perm) => perm.trim())
+                        .filter((perm) => allPermissionKeys.includes(perm)),
+                    ),
                     ...hiddenSelectedPermissions,
                   ]);
                 }, addToast)

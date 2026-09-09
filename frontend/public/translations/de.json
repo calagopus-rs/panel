@@ -244,6 +244,10 @@
           "copyAll": "Alle kopieren",
           "pasteReplace": "Einfügen (ersetzen)"
         },
+        "serverFileInput": {
+          "notFound": "Es existiert noch keine Datei mit diesem Namen.",
+          "isDirectory": "Das ist ein Verzeichnis, keine Datei."
+        },
         "ignoredFilesInput": {
           "onePatternPerLine": "Ein Muster pro Zeile.",
           "countMatches": "Treffer zählen",
@@ -6532,8 +6536,14 @@
             "allAllocations": "allen Allocations",
             "sourceFile": "Datei {file}",
             "summary": "{protocols} von {sources} an {ports}",
+            "moreSources": "+{count} weitere",
+            "position": "#{position}",
+            "badge": {
+              "shadowed": "Trifft nie zu"
+            },
             "aria": {
-              "reorder": "Firewall-Regel {position} verschieben"
+              "reorder": "Firewall-Regel {position} verschieben",
+              "actions": "Aktionen für Firewall-Regel {position}"
             }
           },
           "alert": {
@@ -6542,6 +6552,8 @@
             "unallocatedPorts": "Diese Regeln verweisen auf Ports, die diesem Server nicht zugewiesen sind: **{ports}**. Die Node ignoriert sie, bis passende Zuweisungen existieren.",
             "limitations": "Regeln gelten für Datenverkehr, der diesen Server von außerhalb erreicht, sowohl über seine veröffentlichten Ports als auch direkt über seine Container-Adresse. Verbindungen, die von der Node selbst aufgebaut werden, werden nicht gefiltert.",
             "shadowed": "Regel {position} kann nie zutreffen, eine frühere Regel deckt bereits alles ab.",
+            "shadowedMany": "Regeln {positions} können nie zutreffen, frühere Regeln decken bereits alles ab.",
+            "unknownEnforcement": "Die Node ist nicht erreichbar, daher ist unbekannt, ob sie Firewall-Regeln derzeit durchsetzt.",
             "unsaved": "Du hast ungespeicherte Änderungen. Nichts wird angewendet, bevor du speicherst."
           },
           "form": {
@@ -6552,8 +6564,13 @@
             "sources": "Quellen",
             "sourcesDescription": "IP-Adressen oder Netzwerke wie 10.0.0.0/8. Bei einem Netzwerk müssen die Host-Bits null sein. Leer lassen, um jede Quelle zu treffen.",
             "ports": "Ports",
-            "portsDescription": "Allocation-Ports, für die diese Regel gilt, Bereiche wie 25565-25570 werden aufgelöst. Leer lassen, um alle Allocations des Servers zu treffen.",
+            "portsDescription": "Allocation-Ports, für die diese Regel gilt, als einzelne Ports oder Bereiche wie 25565-25570. Leer lassen, um alle Allocations des Servers zu treffen.",
+            "preview": "Vorschau",
+            "sourcesCount": "{count} von {max} verwendet",
             "invalidSource": "{source} ist keine gültige IP-Adresse und kein gültiges Netzwerk.",
+            "tooManySources": "Eine Regel kann höchstens {max} Quellen haben.",
+            "invalidPort": "{port} ist kein gültiger Port und kein gültiger Portbereich.",
+            "tooManyPorts": "Eine Regel kann höchstens {max} Ports abdecken.",
             "sourceFile": "Quelldatei",
             "sourceFileDescription": "Pfad einer Datei im Serververzeichnis mit einer IP-Adresse oder einem Netzwerk pro Zeile, Zeilen die mit # beginnen werden ignoriert. Ihre Einträge werden zu den Quellen oben hinzugefügt, Änderungen an der Datei übernimmt der Node von selbst."
           },

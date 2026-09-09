@@ -115,6 +115,10 @@ const baseTranslations = defineTranslations({
           copyAll: 'Copy All',
           pasteReplace: 'Paste (Replace)',
         },
+        serverFileInput: {
+          notFound: 'No file with this name exists yet.',
+          isDirectory: 'This is a directory, not a file.',
+        },
         ignoredFilesInput: {
           onePatternPerLine: 'One pattern per line.',
           countMatches: 'Count Matches',
@@ -6634,8 +6638,14 @@ const baseTranslations = defineTranslations({
             allAllocations: 'all allocations',
             sourceFile: 'file {file}',
             summary: '{protocols} from {sources} to {ports}',
+            moreSources: '+{count} more',
+            position: '#{position}',
+            badge: {
+              shadowed: 'Never matches',
+            },
             aria: {
               reorder: 'Reorder firewall rule {position}',
+              actions: 'Firewall rule {position} actions',
             },
           },
           alert: {
@@ -6648,6 +6658,9 @@ const baseTranslations = defineTranslations({
             limitations:
               'Rules cover traffic reaching this server from elsewhere, both through its published ports and directly on its container address. Connections opened by the node itself are not filtered.',
             shadowed: 'Rule {position} can never match, an earlier rule already covers everything it does.',
+            shadowedMany: 'Rules {positions} can never match, earlier rules already cover everything they do.',
+            unknownEnforcement:
+              'The node could not be reached, so it is unknown whether it currently enforces firewall rules.',
             unsaved: 'You have unsaved changes. Nothing is applied until you save.',
           },
           form: {
@@ -6663,8 +6676,13 @@ const baseTranslations = defineTranslations({
               'Path of a file in the server directory with one IP address or network per line, lines starting with # are ignored. Its entries are added to the sources above, and the node picks up edits to the file on its own.',
             ports: 'Ports',
             portsDescription:
-              'Allocation ports this rule applies to, ranges like 25565-25570 are expanded. Leave empty to match every allocation of the server.',
+              'Allocation ports this rule applies to, as single ports or ranges like 25565-25570. Leave empty to match every allocation of the server.',
+            preview: 'Preview',
+            sourcesCount: '{count} of {max} used',
             invalidSource: '{source} is not a valid IP address or network.',
+            tooManySources: 'A rule can have at most {max} sources.',
+            invalidPort: '{port} is not a valid port or port range.',
+            tooManyPorts: 'A rule can cover at most {max} ports.',
           },
           toast: {
             saved: 'Firewall rules saved.',

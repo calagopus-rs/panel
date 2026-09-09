@@ -41,6 +41,7 @@ interface TagsInputProps {
   onChange: (tags: string[]) => void;
   placeholder?: string;
   allowDuplicates?: boolean;
+  invalidTags?: string[];
   flex?: StyleProp<React.CSSProperties['flex']>;
 }
 
@@ -60,6 +61,7 @@ function TagsInput({
   onChange,
   placeholder = 'Add tag...',
   allowDuplicates = false,
+  invalidTags,
   flex,
 }: TagsInputProps) {
   const { t } = useTranslations();
@@ -217,7 +219,7 @@ function TagsInput({
           <ActionIcon size='sm' variant='subtle' color='gray' {...dragHandleProps} hidden={!allowReordering}>
             <FontAwesomeIcon icon={faGripVertical} size='xs' />
           </ActionIcon>
-          <Text size='xs' className='flex-1 min-w-0'>
+          <Text size='xs' className='flex-1 min-w-0' c={invalidTags?.includes(item.value) ? 'red' : undefined}>
             <ScrollingText>{item.value}</ScrollingText>
           </Text>
           <ActionIcon size='sm' variant='subtle' color='blue' onClick={() => handleStartEdit(index)}>

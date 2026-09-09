@@ -1,4 +1,12 @@
-import { faBan, faCheck, faClone, faGripVertical, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBan,
+  faCheck,
+  faClone,
+  faEllipsis,
+  faGripVertical,
+  faPencil,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ComponentProps } from 'react';
 import { z } from 'zod';
@@ -8,15 +16,12 @@ import Card from '@/elements/data-display/Card.tsx';
 import ThemeIcon from '@/elements/data-display/ThemeIcon.tsx';
 import Group from '@/elements/layout/Group.tsx';
 import Stack from '@/elements/layout/Stack.tsx';
-import ContextMenu, { ContextMenuToggle } from '@/elements/overlays/ContextMenu.tsx';
+import ContextMenu from '@/elements/overlays/ContextMenu.tsx';
 import Text from '@/elements/typography/Text.tsx';
-import {
-  networkProtocolLabelMapping,
-  serverFirewallRuleActionColorMapping,
-  serverFirewallRuleActionLabelMapping,
-} from '@/lib/enums.ts';
+import { serverFirewallRuleActionColorMapping, serverFirewallRuleActionLabelMapping } from '@/lib/enums.ts';
 import { serverFirewallRuleSchema } from '@/lib/schemas/server/firewall.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import { ruleSummary } from './ruleSummary.ts';
 
 type Rule = z.infer<typeof serverFirewallRuleSchema>;
 
@@ -24,6 +29,7 @@ interface Props {
   rule: Rule;
   position: number;
   editable: boolean;
+  shadowed?: boolean;
   dragHandleProps?: ComponentProps<'button'>;
   onEdit?: () => void;
   onDuplicate?: () => void;
@@ -34,6 +40,7 @@ export default function FirewallRuleCard({
   rule,
   position,
   editable,
+  shadowed = false,
   dragHandleProps,
   onEdit,
   onDuplicate,
@@ -74,6 +81,7 @@ export default function FirewallRuleCard({
     >
       {({ items, openMenu }) => (
         <Card
+          className={shadowed ? 'opacity-60' : undefined}
           onContextMenu={(e) => {
             e.preventDefault();
             openMenu(e.clientX, e.clientY);
@@ -100,35 +108,35 @@ export default function FirewallRuleCard({
 
               <Stack gap={4} className='flex-1 min-w-0'>
                 <Group gap='xs' wrap='nowrap'>
+                  <Text size='sm' fw={600} c='dimmed' className='tabular-nums'>
+                    {t('pages.server.firewall.rule.position', { position })}
+                  </Text>
                   <Badge color={serverFirewallRuleActionColorMapping[rule.action]}>
                     {serverFirewallRuleActionLabelMapping[rule.action]()}
                   </Badge>
+                  {shadowed && <Badge color='yellow'>{t('pages.server.firewall.rule.badge.shadowed', {})}</Badge>}
                 </Group>
                 <Text size='sm' c='dimmed'>
-                  {t('pages.server.firewall.rule.summary', {
-                    protocols:
-                      rule.protocols.length > 0
-                        ? rule.protocols
-                            .toSorted()
-                            .map((protocol) => networkProtocolLabelMapping[protocol])
-                            .join(', ')
-                        : t('pages.server.firewall.rule.anyProtocol', {}),
-                    sources:
-                      rule.sources.length > 0 || rule.sourceFile
-                        ? [
-                            ...rule.sources,
-                            ...(rule.sourceFile
-                              ? [t('pages.server.firewall.rule.sourceFile', { file: rule.sourceFile })]
-                              : []),
-                          ].join(', ')
-                        : t('pages.server.firewall.rule.anySource', {}),
-                    ports: rule.ports ? rule.ports.join(', ') : t('pages.server.firewall.rule.allAllocations', {}),
-                  })}
+                  {ruleSummary(rule)}
                 </Text>
               </Stack>
             </Group>
 
-            {editable && <ContextMenuToggle items={items} openMenu={openMenu} />}
+            {items.some((item) => item.type === 'action' && !item.hidden && item.canAccess !== false) && (
+              <ActionIcon
+                size='sm'
+                variant='subtle'
+                color='gray'
+                className='shrink-0'
+                aria-label={t('pages.server.firewall.rule.aria.actions', { position })}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openMenu(e.clientX, e.clientY);
+                }}
+              >
+                <FontAwesomeIcon icon={faEllipsis} />
+              </ActionIcon>
+            )}
           </Group>
         </Card>
       )}

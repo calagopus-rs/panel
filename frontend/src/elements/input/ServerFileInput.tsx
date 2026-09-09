@@ -1,15 +1,18 @@
-import { faFile, faFolder } from '@fortawesome/free-solid-svg-icons';
+import { faFile, faFolder, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AutocompleteProps } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import debounce from 'debounce';
+import { useEffect, useMemo, useState } from 'react';
 import { makeComponentHookable } from 'shared';
-import loadDirectory from '@/api/server/files/loadDirectory.ts';
+import loadDirectory, { DirectoryResponse } from '@/api/server/files/loadDirectory.ts';
 import Spinner from '@/elements/feedback/Spinner.tsx';
 import Autocomplete from '@/elements/input/Autocomplete.tsx';
 import Group from '@/elements/layout/Group.tsx';
+import Tooltip from '@/elements/overlays/Tooltip.tsx';
 import { queryKeys } from '@/lib/queryKeys.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 const MAX_SUGGESTIONS = 50;
 
@@ -29,16 +32,37 @@ function splitPath(value: string): { directory: string; prefix: string } {
     : { directory: trimmed.slice(0, slash), prefix: trimmed.slice(slash + 1) };
 }
 
-function ServerFileInput({ serverUuid, value, onChange, mode = 'file', ...rest }: Props) {
+function checkEntry(
+  entries: DirectoryResponse['entries'] | undefined,
+  name: string,
+  mode: 'file' | 'directory',
+): 'notFound' | 'isDirectory' | null {
+  if (!entries || name === '' || entries.total > entries.data.length) return null;
+
+  const entry = entries.data.find((candidate) => candidate.name === name);
+  if (!entry) return 'notFound';
+
+  return mode === 'file' && entry.directory ? 'isDirectory' : null;
+}
+
+function ServerFileInput({ serverUuid, value, onChange, mode = 'file', description, ...rest }: Props) {
+  const { t } = useTranslations();
   const canRead = useServerCan('files.read');
   const [opened, setOpened] = useState(false);
+  const [settledValue, setSettledValue] = useState(value);
+
+  const updateSettledValue = useMemo(() => debounce((next: string) => setSettledValue(next), 600), []);
+
+  useEffect(() => {
+    updateSettledValue(value);
+  }, [value]);
 
   const { directory, prefix } = splitPath(value);
 
   const { data, isFetching } = useQuery({
     queryKey: queryKeys.server(serverUuid).files.pathSuggestions(directory),
     queryFn: () => loadDirectory(serverUuid, `/${directory}`, 1, 'name_asc'),
-    enabled: canRead && opened,
+    enabled: canRead && (opened || settledValue.trim() !== ''),
     staleTime: 30_000,
     retry: false,
   });
@@ -58,9 +82,24 @@ function ServerFileInput({ serverUuid, value, onChange, mode = 'file', ...rest }
       });
   }, [data, directory, prefix, mode]);
 
+  const settled = splitPath(settledValue);
+  const warning =
+    settled.directory === directory && settled.prefix === prefix
+      ? checkEntry(data?.entries, settled.prefix, mode)
+      : null;
+
   return (
     <Autocomplete
       {...rest}
+      description={
+        warning ? (
+          <>
+            {description} {t(`common.elements.serverFileInput.${warning}`, {})}
+          </>
+        ) : (
+          description
+        )
+      }
       value={value}
       onChange={onChange}
       data={options}
@@ -74,7 +113,15 @@ function ServerFileInput({ serverUuid, value, onChange, mode = 'file', ...rest }
           setTimeout(() => setOpened(true), 0);
         }
       }}
-      rightSection={isFetching ? <Spinner size={14} /> : undefined}
+      rightSection={
+        isFetching ? (
+          <Spinner size={14} />
+        ) : warning ? (
+          <Tooltip label={t(`common.elements.serverFileInput.${warning}`, {})}>
+            <FontAwesomeIcon icon={faTriangleExclamation} className='text-(--mantine-color-yellow-filled)' />
+          </Tooltip>
+        ) : undefined
+      }
       renderOption={({ option }) => {
         const entry = options.find((candidate) => candidate.value === option.value);
 

@@ -3,12 +3,13 @@ import { isNetwork } from '@/lib/network/ip.ts';
 import { networkProtocol } from '@/lib/schemas/generic.ts';
 
 export const serverFirewallRuleAction = z.enum(['allow', 'deny']);
+export const serverFirewallRuleMaxPorts = 1024;
 
 export const serverFirewallRuleSchema = z.object({
   action: serverFirewallRuleAction,
   protocols: z.array(networkProtocol),
   sources: z.array(z.string().refine(isNetwork, { message: 'Invalid IP address or network' })),
-  ports: z.array(z.number().int().min(1).max(65535)).min(1).max(1024).nullable(),
+  ports: z.array(z.number().int().min(1).max(65535)).min(1).max(serverFirewallRuleMaxPorts).nullable(),
   sourceFile: z.string().trim().min(1).max(512).nullable(),
 });
 

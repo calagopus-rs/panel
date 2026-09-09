@@ -20,6 +20,7 @@ import ResourceView from '@/elements/ResourceView.tsx';
 import Text from '@/elements/typography/Text.tsx';
 import Title from '@/elements/typography/Title.tsx';
 import { restrictToVerticalAxis } from '@/lib/dragAndDrop.ts';
+import { formatPortRanges } from '@/lib/network/ip.ts';
 import { queryKeys } from '@/lib/queryKeys.ts';
 import { serverFirewallRuleSchema } from '@/lib/schemas/server/firewall.ts';
 import { useResource } from '@/plugins/resource/useResource.ts';
@@ -202,6 +203,12 @@ export default function ServerFirewall() {
               </Alert>
             )}
 
+            {data.supported === null && (
+              <Alert color='gray' icon={<FontAwesomeIcon icon={faExclamationTriangle} />}>
+                {t('pages.server.firewall.alert.unknownEnforcement', {})}
+              </Alert>
+            )}
+
             {(dirty || defaultAllow || shadowed.length > 0 || unallocatedPorts.length > 0) && (
               <Alert color='yellow' icon={<FontAwesomeIcon icon={faExclamationTriangle} />}>
                 <Stack gap='xs'>
@@ -222,13 +229,16 @@ export default function ServerFirewall() {
                       </ServerCan>
                     </Group>
                   )}
-                  {shadowed.map((position) => (
-                    <span key={position}>{t('pages.server.firewall.alert.shadowed', { position })}</span>
-                  ))}
+                  {shadowed.length === 1 && (
+                    <span>{t('pages.server.firewall.alert.shadowed', { position: shadowed[0] })}</span>
+                  )}
+                  {shadowed.length > 1 && (
+                    <span>{t('pages.server.firewall.alert.shadowedMany', { positions: shadowed.join(', ') })}</span>
+                  )}
                   {unallocatedPorts.length > 0 && (
                     <span>
                       {t('pages.server.firewall.alert.unallocatedPorts', {
-                        ports: unallocatedPorts.join(', '),
+                        ports: formatPortRanges(unallocatedPorts).join(', '),
                       }).md()}
                     </span>
                   )}
@@ -291,6 +301,7 @@ export default function ServerFirewall() {
                             rule={item.rule}
                             position={index + 1}
                             editable={canUpdate}
+                            shadowed={shadowed.includes(index + 1)}
                             dragHandleProps={dragHandleProps as unknown as ComponentProps<'button'>}
                             onEdit={() => setEditing(item)}
                             onDuplicate={() => duplicateRule(item.id)}
