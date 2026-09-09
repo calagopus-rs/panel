@@ -5,8 +5,6 @@ allowBuilds:
   "@tailwindcss/oxide": true
   esbuild: true
 minimumReleaseAge: 4320 # 3 days
-minimumReleaseAgeExclude:
-  - '@pierre/diffs'
 blockExoticSubdeps: true
 overrides:
   dompurify: ^3.4.13
