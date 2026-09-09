@@ -121,12 +121,12 @@
       "other": "{count} Headers"
     },
     "backup": {
-      "zero": "{count} Backups",
-      "one": "{count} Backup",
-      "two": "{count} Backups",
-      "few": "{count} Backups",
-      "many": "{count} Backups",
-      "other": "{count} Backups"
+      "zero": "{count} バックアップ",
+      "one": "{count} バックアップ",
+      "two": "{count} バックアップ",
+      "few": "{count} バックアップ",
+      "many": "{count} バックアップ",
+      "other": "{count} バックアップ"
     },
     "row": {
       "zero": "{count} Rows",
@@ -156,28 +156,28 @@
   "translations": {
     "common": {
       "button": {
-        "create": "Create",
-        "add": "Add",
+        "create": "作成",
+        "add": "追加",
         "addDefaultPort": "Add :{port}",
-        "save": "Save",
+        "save": "保存",
         "saveAndStay": "Save & Stay",
-        "edit": "Edit",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
-        "remove": "Remove",
-        "enable": "Enable",
-        "disable": "Disable",
-        "disableTwoFactor": "Disable Two-Factor",
-        "verify": "Verify",
-        "update": "Update",
-        "close": "Close",
-        "cancel": "Cancel",
-        "continue": "Continue",
-        "skip": "Skip",
+        "edit": "編集",
+        "duplicate": "複製",
+        "delete": "削除",
+        "remove": "削除",
+        "enable": "有効化",
+        "disable": "無効化",
+        "disableTwoFactor": "二要素認証を無効化",
+        "verify": "認証",
+        "update": "更新",
+        "close": "閉じる",
+        "cancel": "キャンセル",
+        "continue": "続ける",
+        "skip": "スキップ",
         "okay": "Okay",
-        "back": "Back",
+        "back": "戻る",
         "next": "Next",
-        "install": "Install",
+        "install": "インストール",
         "selectAll": "Select All",
         "deselectAll": "Deselect All",
         "restore": "Restore",
@@ -187,12 +187,12 @@
         "export": "Export",
         "exportAs": "Export as {format}",
         "recreate": "Recreate",
-        "move": "Move",
-        "transfer": "Transfer",
+        "move": "移動",
+        "transfer": "転送",
         "reattach": "Reattach",
         "detach": "Detach",
         "send": "Send",
-        "reset": "Reset",
+        "reset": "リセット",
         "view": "View",
         "import": "Import",
         "details": "Details",
@@ -207,16 +207,16 @@
         "deleteFailedBackups": "Delete {count} Failed"
       },
       "alert": {
-        "error": "Error",
-        "warning": "Warning",
-        "success": "Success",
+        "error": "エラー",
+        "warning": "警告",
+        "success": "成功",
         "clockOffset": "Your system clock is out of sync with the server by more than 5 seconds. This may cause issues with passkey authentication and two-factor authentication. Please sync your clock if issues arise. Current offset: {offset} second(s)."
       },
       "divider": {
         "or": "OR"
       },
       "input": {
-        "search": "Search..."
+        "search": "検索…"
       },
       "elements": {
         "jsonInput": {
@@ -322,18 +322,18 @@
       },
       "form": {
         "force": "Do you want to execute this deletion forcefully?",
-        "name": "Name",
-        "newName": "New Name",
-        "description": "Description",
-        "author": "Author",
+        "name": "名前",
+        "newName": "新しい名前",
+        "description": "説明",
+        "author": "作成者",
         "type": "Type",
-        "password": "Password",
+        "password": "パスワード",
         "host": "Host",
-        "username": "Username",
+        "username": "ユーザー名",
         "usernameOrEmail": "Username/Email",
-        "server": "Server",
+        "server": "サーバー",
         "url": "URL",
-        "email": "Email",
+        "email": "メールアドレス",
         "path": "Path",
         "port": "Port",
         "provider": "Provider",
@@ -350,7 +350,7 @@
         "publicUrl": "Public URL",
         "firstName": "First Name",
         "lastName": "Last Name",
-        "language": "Language",
+        "language": "言語",
         "identifier": "Identifier",
         "enabled": "Enabled",
         "disabled": "Disabled",
@@ -485,7 +485,7 @@
       },
       "label": {
         "noSubdirectories": "No subdirectories",
-        "page": "Page {page}",
+        "page": "ページ {page}",
         "emptyDirectory": "This directory is empty",
         "ignored": "Ignored",
         "showingFirstEntries": "Showing the first {count} entries"
@@ -569,7 +569,7 @@
           "pebibytes": "PiB"
         }
       },
-      "unlimited": "Unlimited",
+      "unlimited": "無制限",
       "readOnly": "Read Only",
       "na": "N/A",
       "never": "Never",
@@ -673,7 +673,7 @@
         },
         "modal": {
           "logout": {
-            "title": "Logout",
+            "title": "ログアウト",
             "content": "Are you sure you want to log out?"
           }
         }
@@ -4835,9 +4835,17 @@
             "noEditorAvailable": "No editor is available for this file type.",
             "editorTabsLabel": "Open files",
             "closeEditorTab": "Close {name}",
+            "closeOtherTabs": "Close Others",
+            "closeTabsToRight": "Close to the Right",
+            "closeSavedTabs": "Close Saved",
+            "closeAllTabs": "Close All",
+            "revealInTree": "Reveal in Tree",
+            "revealNotFound": "Could not find {path} in the file tree.",
             "unsavedTab": "{name} has unsaved changes",
             "dropToSplit": "Drop to open in a new editor pane",
-            "resizeEditorPanes": "Resize editor panes"
+            "resizeEditorPanes": "Resize editor panes",
+            "selectPane": "Select editor pane",
+            "editorPane": "Editor pane {number}"
           },
           "titleEditorViewing": "Viewing {file}",
           "titleEditorPlaying": "Playing {file}",
@@ -4876,11 +4884,19 @@
             "fileFromUpload": "File from Upload",
             "directoryFromUpload": "Directory from Upload",
             "viewDiff": "View Diff",
+            "openInEditor": "Open in Editor",
+            "editorActions": "Editor Actions",
             "loadDisk": "Load Disk Version",
             "keepEditor": "Keep Editor Version"
           },
           "quickAction": {
             "newFile": "New File",
+            "keepFileOpen": "Keep File Open",
+            "copyFilePath": "Copy Active File Path",
+            "searchTree": "Search Tree",
+            "refreshTree": "Refresh Tree",
+            "switchToList": "Switch to List View",
+            "switchToTree": "Switch to Tree View",
             "newDirectory": "New Directory",
             "pullFile": "Pull File from URL",
             "uploadFiles": "Upload Files",
@@ -4912,13 +4928,17 @@
           },
           "searchBanner": {
             "resultsTitle": "Search Results ({files} found)",
+            "emptyTitle": "No Files Matched",
             "root": "Root:",
             "query": "Query:",
+            "included": "Included:",
             "excluded": "Excluded:",
             "content": "Content:",
+            "caseSensitive": "Case sensitive",
+            "maxSearchSize": "Files above {size} are skipped",
+            "oversizedIncluded": "Files above {size} are listed without being searched",
             "size": "Size:",
-            "min": "Min:",
-            "max": "Max:"
+            "edit": "Edit Search"
           },
           "operations": {
             "compressing": "Compressing {files} from {path}",
@@ -4944,6 +4964,8 @@
             "editorLineOverflow": "Wrap Line Overflow",
             "editorFontSize": "Editor Font Size",
             "editorEngine": "Editor Engine",
+            "editorPreviewTabs": "Preview files in tree tabs",
+            "editorPreviewTabsDescription": "Edit or double-click a tab to keep it open.",
             "vscodeUriScheme": "VS Code URI Scheme",
             "imageViewerSmoothing": "Smoothen Image (Anti-Aliasing)"
           },
@@ -4971,6 +4993,7 @@
             "fileRenamed": "File has been renamed.",
             "fileCouldNotBeRenamed": "File could not be renamed.",
             "closeDestinationBeforeRename": "Close the editor tab for the destination file before renaming.",
+            "closeDestinationBeforeCreate": "Close the editor tab for the destination file before creating this file.",
             "closeTabsBeforeBulkRename": "Close affected editor tabs before renaming overlapping paths.",
             "filesRenamed": "{files} renamed.",
             "renameUndone": "Rename undone.",

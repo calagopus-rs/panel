@@ -186,31 +186,31 @@
         "downloadAs": "Download som {format}",
         "export": "Eksportér",
         "exportAs": "Eksportér som {format}",
-        "recreate": "Genopret",
+        "recreate": "Genskab",
         "move": "Flyt",
         "transfer": "Overfør",
-        "reattach": "Tilknyt igen",
-        "detach": "Frakobl",
+        "reattach": "Monter igen",
+        "detach": "Frigør",
         "send": "Send",
         "reset": "Nulstil",
         "view": "Vis",
-        "import": "Importér",
+        "import": "Importere",
         "details": "Detaljer",
-        "loadLogs": "Indlæs logs",
-        "sendTestEmail": "Send test-e-mail",
-        "setPrimary": "Sæt som primær",
-        "unsetPrimary": "Fjern som primær",
-        "leavePage": "Forlad siden",
-        "viewDocumentation": "Se dokumentation",
+        "loadLogs": "Indlæs Logs",
+        "sendTestEmail": "Send test e-mail",
+        "setPrimary": "Sæt Primær",
+        "unsetPrimary": "Fravælg Primær",
+        "leavePage": "Forlad Side",
+        "viewDocumentation": "Se Dokumentation",
         "undo": "Fortryd",
-        "clearUserFilter": "Ryd brugerfilter",
-        "deleteFailedBackups": "Delete {count} Failed"
+        "clearUserFilter": "Ryd Brugerfilter",
+        "deleteFailedBackups": "Slet {count} Mislykkedes"
       },
       "alert": {
         "error": "Fejl",
         "warning": "Advarsel",
         "success": "Succes",
-        "clockOffset": "Dit systemur er mere end 5 sekunder ude af sync med serveren. Det kan give problemer med passkey-login og tofaktorgodkendelse. Synkroniser dit ur, hvis der opstår problemer. Nuværende forskydning: {offset} sekund(er)."
+        "clockOffset": "Dit systems ur afviger mere end 5 sekunder fra serverens ur. Dette kan medføre problemer med godkendelse via adgangsnøgle og tofaktorautentificering. Synkroniser venligst dit ur, hvis der opstår problemer. Aktuel afvigelse: {offset} sekund(er)."
       },
       "divider": {
         "or": "ELLER"
@@ -222,12 +222,12 @@
         "jsonInput": {
           "enum": {
             "type": {
-              "string": "String",
+              "string": "Streng",
               "number": "Number",
               "boolean": "Boolean",
               "object": "Object",
               "array": "Array",
-              "null": "Null"
+              "null": "Nul"
             }
           },
           "textMode": "Tekst",
@@ -235,20 +235,20 @@
           "invalidJson": "Ugyldig JSON"
         },
         "tagsInput": {
-          "copyAll": "Kopiér alle",
-          "pasteReplace": "Indsæt (erstat)"
+          "copyAll": "Kopier Alt",
+          "pasteReplace": "Indsæt (Erstat)"
         },
         "serverFileInput": {
           "notFound": "Der findes endnu ingen fil med dette navn.",
           "isDirectory": "Dette er en mappe, ikke en fil."
         },
         "ignoredFilesInput": {
-          "onePatternPerLine": "Ét mønster pr. linje.",
-          "countMatches": "Tæl matches",
-          "matches": "{count} matchede",
-          "noMatches": "Ingen matches",
+          "onePatternPerLine": "Et mønster pr. linje.",
+          "countMatches": "Antal Matcher",
+          "matches": "{count} matches",
+          "noMatches": "Ingen match",
           "exception": "Undtagelse",
-          "tooManyPatterns": "Matches tælles ikke automatisk ved mere end {max} mønstre."
+          "tooManyPatterns": "Matchning tælles ikke automatisk for mere end {max} mønstre."
         },
         "cronInput": {
           "segments": {
@@ -262,39 +262,39 @@
           "nextRun": "Næste kørsel er {timestamp}."
         },
         "backupRetention": {
-          "title": "Retention",
-          "disabled": "No retention rules",
-          "description": "Keep a successful backup when any rule selects it: the latest count, all backups within the recent number of days, or the newest backup in each daily, weekly, monthly or yearly period containing backups. Periods use UTC; weeks start on Monday. Missed periods do not consume the count. Leave a rule empty or set it to 0 to disable it. With all rules disabled, successful backups are kept.",
-          "sourcesDescription": "Retention is evaluated separately for server files and each database. Locked backups are protected. Retention does not schedule backups.",
-          "capacityDescription": "At the server backup limit, backups your rules no longer keep are removed to make room. Scheduled backups additionally evict the oldest unlocked backup; manual backups are refused instead.",
-          "failedDescription": "Unlocked failed backups are cleaned up after 24 hours, grouped or not.",
-          "count": "Keep latest",
-          "days": "Keep all within days",
-          "daily": "Keep daily",
-          "weekly": "Keep weekly",
-          "monthly": "Keep monthly",
-          "yearly": "Keep yearly",
+          "title": "Opbevaring",
+          "disabled": "Ingen opbevaringsregler",
+          "description": "Behold en vellykket sikkerhedskopi, hvis en regel vælger den: den seneste (baseret på antal), alle sikkerhedskopier fra de seneste dage, eller den nyeste sikkerhedskopi i hver periode (daglig, ugentlig, månedlig eller årlig), der indeholder sikkerhedskopier. Perioder baseres på UTC; uger starter om mandagen. Perioder, hvor der ikke er foretaget sikkerhedskopiering, tæller ikke med i antallet. Lad en regel stå tom, eller sæt den til 0 for at deaktivere den. Hvis alle regler er deaktiveret, beholdes vellykkede sikkerhedskopier.",
+          "sourcesDescription": "Opbevaring evalueres separat for serverfiler og hver database. Låste sikkerhedskopier er beskyttet. Opbevaring planlægger ikke sikkerhedskopier.",
+          "capacityDescription": "Når grænsen for server-backups er nået, fjernes de backups, der ikke længere omfattes af dine regler, for at skabe plads. Ved planlagte backups slettes desuden den ældste ulåste backup, mens manuelle backups afvises.",
+          "failedDescription": "Oplåsning mislykket. Sikkerhedskopier renses op efter 24 timer, grupperet eller ej.",
+          "count": "Behold den nyeste",
+          "days": "Behold alle inden for dage",
+          "daily": "Behold dagligt",
+          "weekly": "Behold ugentligt",
+          "monthly": "Behold månedligt",
+          "yearly": "Behold årligt",
           "ruleSummary": "{rule}: {count}"
         }
       },
       "modal": {
         "duplicate": {
-          "title": "Duplikér {resource}"
+          "title": "Dupliker {resource}"
         },
         "delete": {
           "content": "Er du sikker på, at du vil slette **{name}**?"
         },
         "deleteFailedBackups": {
-          "title": "Confirm Failed Backup Deletion",
-          "content": "Are you sure you want to delete `{count}` failed backups? Locked backups and backups whose configuration is in maintenance are kept. Deletion runs in the background and may take a while to finish.",
+          "title": "Bekræft sletning af backup",
+          "content": "Er du sikker på, at du vil slette `{count}` mislykkede sikkerhedskopier? Låste sikkerhedskopier og sikkerhedskopier, hvis konfiguration er under vedligeholdelse, beholdes. Sletningen kører i baggrunden og kan tage et stykke tid at fuldføre.",
           "alert": {
-            "forceWarning": "Force deletion removes these backups even if their configuration is missing or the remote storage cannot be reached. The backup files themselves may not be fully cleaned up, leaving orphaned data behind."
+            "forceWarning": "Tvungen sletning fjerner disse sikkerhedskopier, selvom deres konfiguration mangler, eller fjernlageret ikke kan nås. Selve sikkerhedskopiere slettes muligvis ikke fuldstændigt, hvilket kan efterlade forældreløse data."
           }
         }
       },
       "toast": {
         "duplicated": "{resource} duplikeret.",
-        "failedBackupDeletionStarted": "Deleting {count} failed backups in the background."
+        "failedBackupDeletionStarted": "Sletter {count} mislykkede sikkerhedskopier i baggrunden."
       },
       "settingScope": {
         "account": "Synkronisér med konto",
@@ -1705,7 +1705,7 @@
           "subtitle": "{current} af maksimalt {max} API-nøgler oprettet.",
           "button": {
             "apiDocumentation": "API-dokumentation",
-            "copyUuid": "Copy UUID"
+            "copyUuid": "Kopiér UUID"
           },
           "tooltip": {
             "limitReached": "Du er begrænset til {max} API-nøgler."
@@ -2223,12 +2223,12 @@
                   "windowSecondsDescription": "Vinduets varighed i sekunder."
                 },
                 "exemptions": {
-                  "title": "Exemptions",
+                  "title": "Undtagelser",
                   "form": {
-                    "exemptIps": "Exempt IPs",
-                    "exemptIpsDescription": "IP addresses or CIDR ranges that skip the client and remote ratelimits. Login and per-server limits still apply.",
-                    "exemptApiKeys": "Exempt API Keys",
-                    "exemptApiKeysDescription": "UUIDs of API keys that skip the client ratelimit. Users can copy the UUID from the context menu of their API keys. Deleted keys are removed automatically."
+                    "exemptIps": "Undtagne IP-adresser",
+                    "exemptIpsDescription": "IP-adresser eller CIDR-områder, der omgår klient- og fjern-hastighedsbegrænsninger. Grænser for login og pr. server gælder stadig.",
+                    "exemptApiKeys": "Undtagne API-nøgler",
+                    "exemptApiKeysDescription": "UUID'er på API-nøgler, der omgår klient-hastighedsbegrænsningen. Brugere kan kopiere UUID'et fra kontekstmenuen på deres API-nøgler. Slettede nøgler fjernes automatisk."
                   }
                 },
                 "toast": {
@@ -4835,9 +4835,17 @@
             "noEditorAvailable": "Der er ingen editor til denne filtype.",
             "editorTabsLabel": "Åbne filer",
             "closeEditorTab": "Luk {name}",
+            "closeOtherTabs": "Close Others",
+            "closeTabsToRight": "Close to the Right",
+            "closeSavedTabs": "Close Saved",
+            "closeAllTabs": "Close All",
+            "revealInTree": "Reveal in Tree",
+            "revealNotFound": "Could not find {path} in the file tree.",
             "unsavedTab": "{name} har ugemte ændringer",
             "dropToSplit": "Slip for at åbne i et nyt editor-panel",
-            "resizeEditorPanes": "Tilpas størrelsen på editor-paneler"
+            "resizeEditorPanes": "Tilpas størrelsen på editor-paneler",
+            "selectPane": "Select editor pane",
+            "editorPane": "Editor pane {number}"
           },
           "titleEditorViewing": "Viser {file}",
           "titleEditorPlaying": "Afspiller {file}",
@@ -4876,11 +4884,19 @@
             "fileFromUpload": "Fil fra upload",
             "directoryFromUpload": "Mappe fra upload",
             "viewDiff": "Vis diff",
+            "openInEditor": "Open in Editor",
+            "editorActions": "Editor Actions",
             "loadDisk": "Indlæs version fra disk",
             "keepEditor": "Behold editorens version"
           },
           "quickAction": {
             "newFile": "Ny fil",
+            "keepFileOpen": "Keep File Open",
+            "copyFilePath": "Copy Active File Path",
+            "searchTree": "Search Tree",
+            "refreshTree": "Refresh Tree",
+            "switchToList": "Switch to List View",
+            "switchToTree": "Switch to Tree View",
             "newDirectory": "Ny mappe",
             "pullFile": "Hent fil fra URL",
             "uploadFiles": "Upload filer",
@@ -4912,13 +4928,17 @@
           },
           "searchBanner": {
             "resultsTitle": "Søgeresultater ({files} fundet)",
+            "emptyTitle": "No Files Matched",
             "root": "Rod:",
             "query": "Søgning:",
+            "included": "Included:",
             "excluded": "Ekskluderet:",
             "content": "Indhold:",
+            "caseSensitive": "Case sensitive",
+            "maxSearchSize": "Files above {size} are skipped",
+            "oversizedIncluded": "Files above {size} are listed without being searched",
             "size": "Størrelse:",
-            "min": "Min.:",
-            "max": "Maks.:"
+            "edit": "Edit Search"
           },
           "operations": {
             "compressing": "Komprimerer {files} fra {path}",
@@ -4944,6 +4964,8 @@
             "editorLineOverflow": "Ombryd lange linjer",
             "editorFontSize": "Skriftstørrelse i editoren",
             "editorEngine": "Editor-engine",
+            "editorPreviewTabs": "Preview files in tree tabs",
+            "editorPreviewTabsDescription": "Edit or double-click a tab to keep it open.",
             "vscodeUriScheme": "VS Code URI-scheme",
             "imageViewerSmoothing": "Udglat billede (anti-aliasing)"
           },
@@ -4971,6 +4993,7 @@
             "fileRenamed": "Filen er omdøbt.",
             "fileCouldNotBeRenamed": "Filen kunne ikke omdøbes.",
             "closeDestinationBeforeRename": "Luk editor-fanen for destinationsfilen, før du omdøber.",
+            "closeDestinationBeforeCreate": "Close the editor tab for the destination file before creating this file.",
             "closeTabsBeforeBulkRename": "Luk de berørte editor-faner, før du omdøber overlappende stier.",
             "filesRenamed": "{files} omdøbt.",
             "renameUndone": "Omdøbning fortrudt.",
