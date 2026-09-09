@@ -1,10 +1,13 @@
 import { type OnMount } from '@monaco-editor/react';
-import { type EditorChangeEvent } from '@pierre/diffs/edit';
 import { RefObject, useId } from 'react';
 import { FileEditorActionContext } from 'shared/src/registries/pages/server/files';
 import { useShallow } from 'zustand/react/shallow';
 import MonacoEditor from '@/elements/editors/MonacoEditor.tsx';
-import PierreEditor, { type PierreEditorHandle } from '@/elements/editors/PierreEditor.tsx';
+import PierreEditor, {
+  type PierreEditorHandle,
+  type PierreFileChangeEvent,
+  type PierreLocalSelection,
+} from '@/elements/editors/PierreEditor.tsx';
 import { fileModelUri } from '@/lib/editor/fileModelUri.ts';
 import { registerHoconLanguage, registerTomlLanguage } from '@/lib/editor/monaco.ts';
 import { useFileManager } from '@/providers/FileManagerProvider.tsx';
@@ -27,7 +30,8 @@ interface FileEditorContentProps {
   readOnly: boolean;
   context?: FileEditorActionContext;
   handleContentChange: (value: string) => void;
-  handlePierreChangeEvent: (event: EditorChangeEvent<undefined>) => void;
+  handlePierreChangeEvent: (event: PierreFileChangeEvent) => void;
+  handlePierreSelectionChange: (selection: PierreLocalSelection | null) => void;
   attachPierreEditor: (editor: PierreEditorHandle) => void;
   attachEditor: (editor: Parameters<OnMount>[0]) => void;
   editorRef: RefObject<Parameters<OnMount>[0] | null>;
@@ -50,6 +54,7 @@ export default function FileEditorContent({
   context,
   handleContentChange,
   handlePierreChangeEvent,
+  handlePierreSelectionChange,
   attachPierreEditor,
   attachEditor,
   editorRef,
@@ -103,6 +108,7 @@ export default function FileEditorContent({
           fontSize={editorFontSize}
           onChange={handleContentChange}
           onChangeEvent={handlePierreChangeEvent}
+          onSelectionChange={handlePierreSelectionChange}
           onMount={(editor) => {
             pierreEditorRef.current = editor;
             attachPierreEditor(editor);
