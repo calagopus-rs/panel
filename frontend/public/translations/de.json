@@ -4878,13 +4878,17 @@
           },
           "searchBanner": {
             "resultsTitle": "Suchergebnisse ({files} gefunden)",
+            "emptyTitle": "Keine Dateien gefunden",
             "root": "Wurzelverzeichnis:",
             "query": "Suchbegriff:",
+            "included": "Eingeschlossen:",
             "excluded": "Ausgeschlossen:",
             "content": "Inhalt:",
+            "caseSensitive": "Groß-/Kleinschreibung beachten",
+            "maxSearchSize": "Dateien über {size} werden übersprungen",
+            "oversizedIncluded": "Dateien über {size} werden aufgelistet, aber nicht durchsucht",
             "size": "Größe:",
-            "min": "Min:",
-            "max": "Max:"
+            "edit": "Suche bearbeiten"
           },
           "operations": {
             "compressing": "Komprimiere {files} von {path}",

@@ -4912,13 +4912,17 @@
           },
           "searchBanner": {
             "resultsTitle": "Search Results ({files} found)",
+            "emptyTitle": "No Files Matched",
             "root": "Root:",
             "query": "Query:",
+            "included": "Included:",
             "excluded": "Excluded:",
             "content": "Content:",
+            "caseSensitive": "Case sensitive",
+            "maxSearchSize": "Files above {size} are skipped",
+            "oversizedIncluded": "Files above {size} are listed without being searched",
             "size": "Size:",
-            "min": "Min:",
-            "max": "Max:"
+            "edit": "Edit Search"
           },
           "operations": {
             "compressing": "Compressing {files} from {path}",
