@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import deleteFailedBackupConfigurationBackups from '@/api/admin/backup-configurations/backups/deleteFailedBackupConfigurationBackups.ts';
 import getBackupConfigurationBackups from '@/api/admin/backup-configurations/backups/getBackupConfigurationBackups.ts';
 import AdminSubContentContainer from '@/elements/containers/AdminSubContentContainer.tsx';
 import Table from '@/elements/data-display/Table.tsx';
@@ -6,6 +7,7 @@ import { queryKeys } from '@/lib/queryKeys.ts';
 import { adminBackupConfigurationSchema } from '@/lib/schemas/admin/backupConfigurations.ts';
 import { useSearchablePaginatedTable } from '@/plugins/resource/useSearchablePaginatedTable.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import DeleteFailedBackupsButton from '../../nodes/backups/DeleteFailedBackupsButton.tsx';
 import NodeServerBackupRow from '../../nodes/backups/NodeServerBackupRow.tsx';
 
 export default function AdminBackupConfigurationBackups({
@@ -24,7 +26,9 @@ export default function AdminBackupConfigurationBackups({
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.admin.backups.byBackupConfiguration(backupConfiguration.uuid),
     fetcher: (page, search) => getBackupConfigurationBackups(backupConfiguration.uuid, page, search),
-    refetchInterval: (data) => (data?.data.some((backup) => backup.deletionStatus === 'deleting') ? 5000 : false),
+    paginationKey: 'backups',
+    refetchInterval: (data) =>
+      data?.backups.data.some((backup) => backup.deletionStatus === 'deleting') ? 5000 : false,
   });
 
   return (
@@ -33,6 +37,12 @@ export default function AdminBackupConfigurationBackups({
       titleOrder={2}
       search={search}
       setSearch={setSearch}
+      contentRight={
+        <DeleteFailedBackupsButton
+          failed={backupConfigurationBackups?.failed ?? 0}
+          onDelete={(force) => deleteFailedBackupConfigurationBackups(backupConfiguration.uuid, { force })}
+        />
+      }
       registry={window.extensionContext.extensionRegistry.pages.admin.backupConfigurations.view.backups.subContainer}
       registryProps={{ backupConfiguration }}
     >
@@ -49,10 +59,10 @@ export default function AdminBackupConfigurationBackups({
         ]}
         loading={loading}
         error={error}
-        pagination={backupConfigurationBackups}
+        pagination={backupConfigurationBackups?.backups}
         onPageSelect={setPage}
       >
-        {backupConfigurationBackups?.data.map((backup) => (
+        {backupConfigurationBackups?.backups.data.map((backup) => (
           <NodeServerBackupRow
             key={backup.uuid}
             backup={backup}

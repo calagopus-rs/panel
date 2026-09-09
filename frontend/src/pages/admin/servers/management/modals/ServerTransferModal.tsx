@@ -74,7 +74,7 @@ export default function ServerTransferModal({ server, ...props }: ModalProps & {
   });
   const backups = useSearchableResource<z.infer<typeof adminServerBackupSchema>>({
     queryKey: queryKeys.admin.backups.byServer(server.uuid),
-    fetcher: (search) => getServerBackups(server.uuid, 1, search),
+    fetcher: (search) => getServerBackups(server.uuid, 1, search).then(({ backups }) => backups),
     canRequest: props.opened,
   });
 

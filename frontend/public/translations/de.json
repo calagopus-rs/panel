@@ -202,7 +202,8 @@
         "unsetPrimary": "Als primär entfernen",
         "leavePage": "Seite verlassen",
         "viewDocumentation": "Dokumentation ansehen",
-        "undo": "Rückgängig"
+        "undo": "Rückgängig",
+        "deleteFailedBackups": "{count} fehlgeschlagene löschen"
       },
       "alert": {
         "error": "Fehler",
@@ -281,10 +282,18 @@
         },
         "delete": {
           "content": "Bist du sicher, dass du **{name}** löschen möchtest?"
+        },
+        "deleteFailedBackups": {
+          "title": "Löschen fehlgeschlagener Backups bestätigen",
+          "content": "Bist du sicher, dass du `{count}` fehlgeschlagene Backups löschen möchtest? Gesperrte Backups und Backups, deren Konfiguration sich im Wartungsmodus befindet, bleiben erhalten. Die Löschung läuft im Hintergrund und kann eine Weile dauern.",
+          "alert": {
+            "forceWarning": "Das erzwungene Löschen entfernt diese Backups, auch wenn ihre Konfiguration fehlt oder der Remote-Speicher nicht erreichbar ist. Die Backup-Dateien selbst werden möglicherweise nicht vollständig entfernt, sodass verwaiste Daten zurückbleiben."
+          }
         }
       },
       "toast": {
-        "duplicated": "{resource} dupliziert."
+        "duplicated": "{resource} dupliziert.",
+        "failedBackupDeletionStarted": "{count} fehlgeschlagene Backups werden im Hintergrund gelöscht."
       },
       "settingScope": {
         "account": "Mit Konto synchronisieren",

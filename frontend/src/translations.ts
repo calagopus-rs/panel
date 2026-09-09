@@ -80,6 +80,7 @@ const baseTranslations = defineTranslations({
         viewDocumentation: 'View Documentation',
         undo: 'Undo',
         clearUserFilter: 'Clear User Filter',
+        deleteFailedBackups: 'Delete {count} Failed',
       },
       alert: {
         error: 'Error',
@@ -163,9 +164,19 @@ const baseTranslations = defineTranslations({
         delete: {
           content: 'Are you sure you want to delete **{name}**?',
         },
+        deleteFailedBackups: {
+          title: 'Confirm Failed Backup Deletion',
+          content:
+            'Are you sure you want to delete `{count}` failed backups? Locked backups and backups whose configuration is in maintenance are kept. Deletion runs in the background and may take a while to finish.',
+          alert: {
+            forceWarning:
+              'Force deletion removes these backups even if their configuration is missing or the remote storage cannot be reached. The backup files themselves may not be fully cleaned up, leaving orphaned data behind.',
+          },
+        },
       },
       toast: {
         duplicated: '{resource} duplicated.',
+        failedBackupDeletionStarted: 'Deleting {count} failed backups in the background.',
       },
       settingScope: {
         account: 'Sync With Account',
