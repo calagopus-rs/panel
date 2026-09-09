@@ -24,19 +24,24 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let ratelimit = match state.settings.get_as(|s| s.ratelimits.remote).await {
-        Ok(ratelimit) => ratelimit,
+    let (ratelimit, ip_exempt) = match state
+        .settings
+        .get_as(|s| (s.ratelimits.remote, s.ratelimits.is_ip_exempt(ip.0)))
+        .await
+    {
+        Ok(data) => data,
         Err(err) => return Ok(ApiResponse::from(err).into_response()),
     };
-    if let Err(err) = state
-        .cache
-        .ratelimit(
-            "remote",
-            ratelimit.hits,
-            ratelimit.window_seconds,
-            ip.to_string(),
-        )
-        .await
+    if !ip_exempt
+        && let Err(err) = state
+            .cache
+            .ratelimit(
+                "remote",
+                ratelimit.hits,
+                ratelimit.window_seconds,
+                ip.to_string(),
+            )
+            .await
     {
         return Ok(err.into_response());
     }

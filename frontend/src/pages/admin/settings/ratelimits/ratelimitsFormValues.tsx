@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { adminSettingsRatelimitsSchema } from '@/lib/schemas/admin/settings.ts';
 
 type RatelimitsFormValues = z.infer<typeof adminSettingsRatelimitsSchema>;
-type RatelimitsFormKey = keyof RatelimitsFormValues;
+type RatelimitsFormKey = Exclude<keyof RatelimitsFormValues, 'exemptIps' | 'exemptApiKeys'>;
 
 export interface RatelimitEndpoint {
   label: string;
@@ -27,9 +27,14 @@ export const ratelimitEndpoints: RatelimitEndpoint[] = [
   { label: 'remote/sftp/auth', key: 'remoteSftpAuth' },
 ];
 
-export const ratelimitsEmptyFormValues: RatelimitsFormValues = Object.fromEntries(
-  ratelimitEndpoints.map(({ key }) => [key, { hits: 0, windowSeconds: 0 }]),
-) as RatelimitsFormValues;
+export const ratelimitsEmptyFormValues: RatelimitsFormValues = {
+  ...(Object.fromEntries(ratelimitEndpoints.map(({ key }) => [key, { hits: 0, windowSeconds: 0 }])) as Pick<
+    RatelimitsFormValues,
+    RatelimitsFormKey
+  >),
+  exemptIps: [],
+  exemptApiKeys: [],
+};
 
 export const ratelimitsToFormValues = (ratelimits: RatelimitsFormValues): Partial<RatelimitsFormValues> => ({
   ...ratelimits,

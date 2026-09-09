@@ -37,7 +37,10 @@ mod put {
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
-        models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
+        models::{
+            admin_activity::GetAdminActivityLogger, user::GetPermissionManager,
+            user_api_key::UserApiKey,
+        },
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -232,6 +235,11 @@ mod put {
         remote: Option<shared::settings::ratelimits::RatelimitConfiguration>,
         #[garde(dive)]
         remote_sftp_auth: Option<shared::settings::ratelimits::RatelimitConfiguration>,
+        #[garde(length(max = 256))]
+        #[schema(value_type = Option<Vec<String>>)]
+        exempt_ips: Option<Vec<sqlx::types::ipnetwork::IpNetwork>>,
+        #[garde(length(max = 256))]
+        exempt_api_keys: Option<Vec<uuid::Uuid>>,
     }
 
     #[derive(ToSchema, Validate, Deserialize)]
@@ -549,6 +557,25 @@ mod put {
             }
             if let Some(remote_sftp_auth) = ratelimits.remote_sftp_auth {
                 settings.ratelimits.remote_sftp_auth = remote_sftp_auth;
+            }
+            if let Some(exempt_ips) = ratelimits.exempt_ips {
+                settings.ratelimits.exempt_ips = exempt_ips;
+            }
+            if let Some(mut exempt_api_keys) = ratelimits.exempt_api_keys {
+                exempt_api_keys.sort_unstable();
+                exempt_api_keys.dedup();
+
+                let existing = UserApiKey::by_uuids(&state.database, &exempt_api_keys).await?;
+                if let Some(unknown) = exempt_api_keys
+                    .iter()
+                    .find(|uuid| !existing.iter().any(|api_key| api_key.uuid == **uuid))
+                {
+                    return ApiResponse::error(format!("api key {unknown} does not exist"))
+                        .with_status(StatusCode::BAD_REQUEST)
+                        .ok();
+                }
+
+                settings.ratelimits.exempt_api_keys = exempt_api_keys;
             }
         }
 

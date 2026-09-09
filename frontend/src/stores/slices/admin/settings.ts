@@ -150,6 +150,8 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
       hits: 0,
       windowSeconds: 0,
     },
+    exemptIps: [],
+    exemptApiKeys: [],
   },
 
   updateInformation: null,

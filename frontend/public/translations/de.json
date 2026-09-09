@@ -1703,7 +1703,8 @@
           "title": "API-Schlüssel",
           "subtitle": "{current} von maximal {max} API-Schlüsseln erstellt.",
           "button": {
-            "apiDocumentation": "API Dokumentation"
+            "apiDocumentation": "API Dokumentation",
+            "copyUuid": "UUID kopieren"
           },
           "tooltip": {
             "limitReached": "Du bist auf {max} API-Schlüssel limitiert."
@@ -2219,6 +2220,15 @@
                   "hitsDescription": "Maximale Anzahl an Anfragen pro Fenster.",
                   "windowSeconds": "Fenster",
                   "windowSecondsDescription": "Fensterdauer in Sekunden."
+                },
+                "exemptions": {
+                  "title": "Ausnahmen",
+                  "form": {
+                    "exemptIps": "Ausgenommene IPs",
+                    "exemptIpsDescription": "IP-Adressen oder CIDR-Bereiche, die die client- und remote-Ratenbegrenzungen überspringen. Login- und serverbezogene Begrenzungen gelten weiterhin.",
+                    "exemptApiKeys": "Ausgenommene API-Schlüssel",
+                    "exemptApiKeysDescription": "UUIDs von API-Schlüsseln, die die client-Ratenbegrenzung überspringen. Benutzer können die UUID über das Kontextmenü ihrer API-Schlüssel kopieren. Gelöschte Schlüssel werden automatisch entfernt."
+                  }
                 },
                 "toast": {
                   "updated": "Ratenbegrenzungs-Einstellungen aktualisiert."

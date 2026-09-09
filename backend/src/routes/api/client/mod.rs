@@ -122,6 +122,24 @@ fn check_account_gates(
     None
 }
 
+fn bearer_api_token(headers: &axum::http::HeaderMap) -> Option<&str> {
+    let api_token = headers.get("Authorization")?;
+
+    if api_token.len() != UserApiKey::HEADER_LEN {
+        return None;
+    }
+
+    Some(api_token.to_str().ok()?.trim_start_matches("Bearer "))
+}
+
+fn api_key_allows_ip(api_key: &UserApiKey, ip: std::net::IpAddr) -> bool {
+    api_key.allowed_ips.is_empty()
+        || api_key
+            .allowed_ips
+            .iter()
+            .any(|allowed_ip| allowed_ip.contains(ip))
+}
+
 async fn finalize(
     state: &GetState,
     ip: shared::GetIp,
@@ -199,19 +217,75 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let ratelimit = match state.settings.get_as(|s| s.ratelimits.client).await {
-        Ok(ratelimit) => ratelimit,
+    let (ratelimit, ip_exempt, has_exempt_api_keys) = match state
+        .settings
+        .get_as(|s| {
+            (
+                s.ratelimits.client,
+                s.ratelimits.is_ip_exempt(ip.0),
+                !s.ratelimits.exempt_api_keys.is_empty(),
+            )
+        })
+        .await
+    {
+        Ok(data) => data,
         Err(err) => return Ok(ApiResponse::from(err).into_response()),
     };
-    if let Err(err) = state
-        .cache
-        .ratelimit(
-            "client",
-            ratelimit.hits,
-            ratelimit.window_seconds,
-            ip.to_string(),
-        )
-        .await
+
+    let mut exempt = ip_exempt;
+    let mut resolved_api_key = None;
+    if !exempt
+        && has_exempt_api_keys
+        && let Some(api_token) = bearer_api_token(req.headers())
+        && !state
+            .cache
+            .ratelimit_reached("client:api-key-miss", ratelimit.hits, ip.to_string())
+            .await
+    {
+        let resolved = match User::by_api_key_cached(&state.database, api_token).await {
+            Ok(resolved) => resolved,
+            Err(err) => return Ok(ApiResponse::from(err).into_response()),
+        };
+
+        match &resolved {
+            Some((_, api_key)) => {
+                if api_key.enabled && api_key_allows_ip(api_key, ip.0) {
+                    exempt = match state
+                        .settings
+                        .get_as(|s| s.ratelimits.is_api_key_exempt(api_key.uuid))
+                        .await
+                    {
+                        Ok(exempt) => exempt,
+                        Err(err) => return Ok(ApiResponse::from(err).into_response()),
+                    };
+                }
+            }
+            None => {
+                let _ = state
+                    .cache
+                    .ratelimit(
+                        "client:api-key-miss",
+                        ratelimit.hits,
+                        ratelimit.window_seconds,
+                        ip.to_string(),
+                    )
+                    .await;
+            }
+        }
+
+        resolved_api_key = Some(resolved);
+    }
+
+    if !exempt
+        && let Err(err) = state
+            .cache
+            .ratelimit(
+                "client",
+                ratelimit.hits,
+                ratelimit.window_seconds,
+                ip.to_string(),
+            )
+            .await
     {
         return Ok(err.into_response());
     }
@@ -261,7 +335,7 @@ pub async fn auth(
     } else if let Some(session_id) = cookies.get(&settings.app.session_cookie) {
         drop(settings);
 
-        if session_id.value().len() != 81 {
+        if session_id.value().len() != UserSession::COOKIE_LEN {
             return Ok(ApiResponse::error("invalid authorization cookie")
                 .with_status(StatusCode::UNAUTHORIZED)
                 .into_response());
@@ -313,36 +387,29 @@ pub async fn auth(
         if let Some(response) = finalize(&state, ip, &mut req, auth_user, auth_method).await {
             return Ok(response);
         }
-    } else if let Some(api_token) = req.headers().get("Authorization") {
+    } else if req.headers().contains_key("Authorization") {
         drop(settings);
 
-        // "Bearer ".len() + 48 character token
-        if api_token.len() != 55 {
+        let Some(api_token) = bearer_api_token(req.headers()) else {
             return Ok(ApiResponse::error("invalid authorization header")
                 .with_status(StatusCode::UNAUTHORIZED)
                 .into_response());
-        }
-
-        let api_token = api_token
-            .to_str()
-            .unwrap_or("")
-            .trim_start_matches("Bearer ");
-        let (auth_user, api_key) = match User::by_api_key_cached(&state.database, api_token).await {
-            Ok(Some(data)) => data,
-            Ok(None) => {
-                return Ok(ApiResponse::error("invalid api key")
-                    .with_status(StatusCode::UNAUTHORIZED)
-                    .into_response());
-            }
-            Err(err) => return Ok(ApiResponse::from(err).into_response()),
         };
 
-        if !api_key.allowed_ips.is_empty()
-            && !api_key
-                .allowed_ips
-                .iter()
-                .any(|allowed_ip| allowed_ip.contains(ip.0))
-        {
+        let resolved = match resolved_api_key {
+            Some(resolved) => resolved,
+            None => match User::by_api_key_cached(&state.database, api_token).await {
+                Ok(resolved) => resolved,
+                Err(err) => return Ok(ApiResponse::from(err).into_response()),
+            },
+        };
+        let Some((auth_user, api_key)) = resolved else {
+            return Ok(ApiResponse::error("invalid api key")
+                .with_status(StatusCode::UNAUTHORIZED)
+                .into_response());
+        };
+
+        if !api_key_allows_ip(&api_key, ip.0) {
             return Ok(
                 ApiResponse::error("ip address not allowed for this api key")
                     .with_status(StatusCode::FORBIDDEN)

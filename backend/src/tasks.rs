@@ -258,6 +258,15 @@ pub async fn define_background_tasks(
                     );
                 }
 
+                let cleaned_ratelimit_exempt_api_keys =
+                    state.settings.cleanup_ratelimit_exempt_api_keys().await?;
+                if cleaned_ratelimit_exempt_api_keys > 0 {
+                    tracing::info!(
+                        "cleaned up {} stale api key uuids in ratelimit exemptions",
+                        cleaned_ratelimit_exempt_api_keys
+                    );
+                }
+
                 Ok(())
             },
         )

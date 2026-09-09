@@ -1621,6 +1621,7 @@ const baseTranslations = defineTranslations({
           subtitle: '{current} of {max} maximum api keys created.',
           button: {
             apiDocumentation: 'API Documentation',
+            copyUuid: 'Copy UUID',
           },
           tooltip: {
             limitReached: 'You are limited to {max} api keys.',
@@ -2167,6 +2168,17 @@ const baseTranslations = defineTranslations({
                   hitsDescription: 'Maximum number of requests allowed per window.',
                   windowSeconds: 'Window',
                   windowSecondsDescription: 'Window duration in seconds.',
+                },
+                exemptions: {
+                  title: 'Exemptions',
+                  form: {
+                    exemptIps: 'Exempt IPs',
+                    exemptIpsDescription:
+                      'IP addresses or CIDR ranges that skip the client and remote ratelimits. Login and per-server limits still apply.',
+                    exemptApiKeys: 'Exempt API Keys',
+                    exemptApiKeysDescription:
+                      'UUIDs of API keys that skip the client ratelimit. Users can copy the UUID from the context menu of their API keys. Deleted keys are removed automatically.',
+                  },
                 },
                 toast: {
                   updated: 'Rate limit settings updated.',

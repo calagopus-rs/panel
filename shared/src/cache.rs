@@ -287,6 +287,48 @@ impl Cache {
         Ok(())
     }
 
+    pub async fn ratelimit_reached(
+        &self,
+        limit_identifier: impl AsRef<str>,
+        limit: u64,
+        client: impl AsRef<str>,
+    ) -> bool {
+        let key = compact_str::format_compact!(
+            "ratelimit::{}::{}",
+            limit_identifier.as_ref(),
+            client.as_ref()
+        );
+
+        let remote = match &self.client {
+            Some(redis_client) => match redis_client.get::<Option<u64>>(key.as_str()).await {
+                Ok(limit_used) => Some(limit_used.unwrap_or(0)),
+                Err(err) => {
+                    tracing::warn!(
+                        "failed to read redis ratelimit for {key}, falling back to local ratelimit: {err:#?}"
+                    );
+
+                    None
+                }
+            },
+            None => None,
+        };
+
+        let limit_used = match remote {
+            Some(limit_used) => limit_used,
+            None => {
+                let now = chrono::Utc::now().timestamp() as u64;
+
+                self.local_ratelimits
+                    .get(&key)
+                    .await
+                    .filter(|(_, expire_unix)| *expire_unix > now + 2)
+                    .map_or(0, |(limit_used, _)| limit_used)
+            }
+        };
+
+        limit_used >= limit
+    }
+
     #[tracing::instrument(skip(self))]
     pub async fn lock(
         &self,
@@ -780,6 +822,21 @@ mod tests {
                 Some(DatabaseError::Sqlx(sqlx::Error::RowNotFound))
             )
         })
+    }
+
+    #[tokio::test]
+    async fn ratelimit_reached_reads_without_counting() {
+        let cache = memory_only();
+
+        assert!(!cache.ratelimit_reached("test", 2, "client").await);
+        assert!(!cache.ratelimit_reached("test", 2, "client").await);
+
+        cache.ratelimit("test", 2, 60, "client").await.unwrap();
+        assert!(!cache.ratelimit_reached("test", 2, "client").await);
+
+        cache.ratelimit("test", 2, 60, "client").await.unwrap_err();
+        assert!(cache.ratelimit_reached("test", 2, "client").await);
+        assert!(!cache.ratelimit_reached("test", 2, "other").await);
     }
 
     #[tokio::test]

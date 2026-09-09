@@ -33,6 +33,20 @@ pub struct AppSettingsRatelimits {
 
     pub remote: RatelimitConfiguration,
     pub remote_sftp_auth: RatelimitConfiguration,
+
+    #[schema(value_type = Vec<String>)]
+    pub exempt_ips: Vec<sqlx::types::ipnetwork::IpNetwork>,
+    pub exempt_api_keys: Vec<uuid::Uuid>,
+}
+
+impl AppSettingsRatelimits {
+    pub fn is_ip_exempt(&self, ip: std::net::IpAddr) -> bool {
+        self.exempt_ips.iter().any(|network| network.contains(ip))
+    }
+
+    pub fn is_api_key_exempt(&self, api_key_uuid: uuid::Uuid) -> bool {
+        self.exempt_api_keys.contains(&api_key_uuid)
+    }
 }
 
 #[async_trait::async_trait]
@@ -68,7 +82,9 @@ impl SettingsSerializeExt for AppSettingsRatelimits {
                 &self.client_servers_files_pull_query,
             )?
             .write_serde_setting("remote", &self.remote)?
-            .write_serde_setting("remote_sftp_auth", &self.remote_sftp_auth)?)
+            .write_serde_setting("remote_sftp_auth", &self.remote_sftp_auth)?
+            .write_serde_setting("exempt_ips", &self.exempt_ips)?
+            .write_serde_setting("exempt_api_keys", &self.exempt_api_keys)?)
     }
 }
 
@@ -171,6 +187,12 @@ impl SettingsDeserializeExt for AppSettingsRatelimitsDeserializer {
                     hits: 60,
                     window_seconds: 30,
                 }),
+            exempt_ips: deserializer
+                .read_serde_setting("exempt_ips")
+                .unwrap_or_default(),
+            exempt_api_keys: deserializer
+                .read_serde_setting("exempt_api_keys")
+                .unwrap_or_default(),
         }))
     }
 }
