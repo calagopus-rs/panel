@@ -80,6 +80,7 @@ const baseTranslations = defineTranslations({
         viewDocumentation: 'View Documentation',
         undo: 'Undo',
         clearUserFilter: 'Clear User Filter',
+        deleteFailedBackups: 'Delete {count} Failed',
       },
       alert: {
         error: 'Error',
@@ -163,9 +164,19 @@ const baseTranslations = defineTranslations({
         delete: {
           content: 'Are you sure you want to delete **{name}**?',
         },
+        deleteFailedBackups: {
+          title: 'Confirm Failed Backup Deletion',
+          content:
+            'Are you sure you want to delete `{count}` failed backups? Locked backups and backups whose configuration is in maintenance are kept. Deletion runs in the background and may take a while to finish.',
+          alert: {
+            forceWarning:
+              'Force deletion removes these backups even if their configuration is missing or the remote storage cannot be reached. The backup files themselves may not be fully cleaned up, leaving orphaned data behind.',
+          },
+        },
       },
       toast: {
         duplicated: '{resource} duplicated.',
+        failedBackupDeletionStarted: 'Deleting {count} failed backups in the background.',
       },
       settingScope: {
         account: 'Sync With Account',
@@ -1610,6 +1621,7 @@ const baseTranslations = defineTranslations({
           subtitle: '{current} of {max} maximum api keys created.',
           button: {
             apiDocumentation: 'API Documentation',
+            copyUuid: 'Copy UUID',
           },
           tooltip: {
             limitReached: 'You are limited to {max} api keys.',
@@ -2156,6 +2168,17 @@ const baseTranslations = defineTranslations({
                   hitsDescription: 'Maximum number of requests allowed per window.',
                   windowSeconds: 'Window',
                   windowSecondsDescription: 'Window duration in seconds.',
+                },
+                exemptions: {
+                  title: 'Exemptions',
+                  form: {
+                    exemptIps: 'Exempt IPs',
+                    exemptIpsDescription:
+                      'IP addresses or CIDR ranges that skip the client and remote ratelimits. Login and per-server limits still apply.',
+                    exemptApiKeys: 'Exempt API Keys',
+                    exemptApiKeysDescription:
+                      'UUIDs of API keys that skip the client ratelimit. Users can copy the UUID from the context menu of their API keys. Deleted keys are removed automatically.',
+                  },
                 },
                 toast: {
                   updated: 'Rate limit settings updated.',
@@ -4942,13 +4965,17 @@ const baseTranslations = defineTranslations({
           },
           searchBanner: {
             resultsTitle: 'Search Results ({files} found)',
+            emptyTitle: 'No Files Matched',
             root: 'Root:',
             query: 'Query:',
+            included: 'Included:',
             excluded: 'Excluded:',
             content: 'Content:',
+            caseSensitive: 'Case sensitive',
+            maxSearchSize: 'Files above {size} are skipped',
+            oversizedIncluded: 'Files above {size} are listed without being searched',
             size: 'Size:',
-            min: 'Min:',
-            max: 'Max:',
+            edit: 'Edit Search',
           },
           operations: {
             compressing: 'Compressing {files} from {path}',

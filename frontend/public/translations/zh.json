@@ -128,14 +128,6 @@
       "many": "{count} 個備份",
       "other": "{count} 個備份"
     },
-    "day": {
-      "zero": "{count} 天",
-      "one": "{count} 天",
-      "two": "{count} 天",
-      "few": "{count} 天",
-      "many": "{count} 天",
-      "other": "{count} 天"
-    },
     "row": {
       "zero": "{count} 列",
       "one": "{count} 列",
@@ -211,7 +203,8 @@
         "leavePage": "離開頁面",
         "viewDocumentation": "檢視文件",
         "undo": "還原",
-        "clearUserFilter": "Clear User Filter"
+        "clearUserFilter": "Clear User Filter",
+        "deleteFailedBackups": "Delete {count} Failed"
       },
       "alert": {
         "error": "錯誤",
@@ -267,6 +260,21 @@
             "weekday": "Weekday"
           },
           "nextRun": "Next run is {timestamp}."
+        },
+        "backupRetention": {
+          "title": "Retention",
+          "disabled": "No retention rules",
+          "description": "Keep a successful backup when any rule selects it: the latest count, all backups within the recent number of days, or the newest backup in each daily, weekly, monthly or yearly period containing backups. Periods use UTC; weeks start on Monday. Missed periods do not consume the count. Leave a rule empty or set it to 0 to disable it. With all rules disabled, successful backups are kept.",
+          "sourcesDescription": "Retention is evaluated separately for server files and each database. Locked backups are protected. Retention does not schedule backups.",
+          "capacityDescription": "At the server backup limit, backups your rules no longer keep are removed to make room. Scheduled backups additionally evict the oldest unlocked backup; manual backups are refused instead.",
+          "failedDescription": "Unlocked failed backups are cleaned up after 24 hours, grouped or not.",
+          "count": "Keep latest",
+          "days": "Keep all within days",
+          "daily": "Keep daily",
+          "weekly": "Keep weekly",
+          "monthly": "Keep monthly",
+          "yearly": "Keep yearly",
+          "ruleSummary": "{rule}: {count}"
         }
       },
       "modal": {
@@ -275,10 +283,18 @@
         },
         "delete": {
           "content": "Are you sure you want to delete **{name}**?"
+        },
+        "deleteFailedBackups": {
+          "title": "Confirm Failed Backup Deletion",
+          "content": "Are you sure you want to delete `{count}` failed backups? Locked backups and backups whose configuration is in maintenance are kept. Deletion runs in the background and may take a while to finish.",
+          "alert": {
+            "forceWarning": "Force deletion removes these backups even if their configuration is missing or the remote storage cannot be reached. The backup files themselves may not be fully cleaned up, leaving orphaned data behind."
+          }
         }
       },
       "toast": {
-        "duplicated": "{resource} 已複製。"
+        "duplicated": "{resource} 已複製。",
+        "failedBackupDeletionStarted": "Deleting {count} failed backups in the background."
       },
       "settingScope": {
         "account": "Sync With Account",
@@ -1688,7 +1704,8 @@
           "title": "API 金鑰",
           "subtitle": "已建立 {current} / {max} 個 API 金鑰。",
           "button": {
-            "apiDocumentation": "API 文件"
+            "apiDocumentation": "API 文件",
+            "copyUuid": "Copy UUID"
           },
           "tooltip": {
             "limitReached": "你最多只能使用 {max} 個 API 金鑰。"
@@ -2205,6 +2222,15 @@
                   "windowSeconds": "時間視窗",
                   "windowSecondsDescription": "時間視窗持續時間（秒）。"
                 },
+                "exemptions": {
+                  "title": "Exemptions",
+                  "form": {
+                    "exemptIps": "Exempt IPs",
+                    "exemptIpsDescription": "IP addresses or CIDR ranges that skip the client and remote ratelimits. Login and per-server limits still apply.",
+                    "exemptApiKeys": "Exempt API Keys",
+                    "exemptApiKeysDescription": "UUIDs of API keys that skip the client ratelimit. Users can copy the UUID from the context menu of their API keys. Deleted keys are removed automatically."
+                  }
+                },
                 "toast": {
                   "updated": "速率限制設定已更新。"
                 }
@@ -2689,6 +2715,7 @@
                 },
                 "alert": {
                   "couldNotReach": "無法連線到節點：{error}",
+                  "integratedNode": "This node runs inside the panel. Its identity, panel URL and API bind settings are rewritten every time the panel starts, so changes to those are not kept. Everything else you change here is.",
                   "tokenWarning": "下方的設定內容包含節點權杖，請僅在需要時才顯示。",
                   "portMismatch": "節點網址指向通訊埠 {connectPort}，但此設定讓 Wings 監聽通訊埠 {apiPort}。除非反向代理將通訊埠 {connectPort} 轉送至 Wings，否則面板將無法連線至此節點。",
                   "verifyBackend": "後端至 Wings",
@@ -3209,6 +3236,7 @@
                   "externalIdPlaceholder": "選填外部識別碼",
                   "descriptionPlaceholder": "伺服器描述",
                   "owner": "擁有者",
+                  "ownerCreateHint": "Can't find them? Create a new user",
                   "egg": "Egg",
                   "backupConfigurationPlaceholder": "繼承自節點/位置",
                   "cpuLimit": "CPU 限制（%）",
@@ -4437,10 +4465,6 @@
             "backupConfigurationPlaceholder": "繼承自伺服器",
             "cron": "排程",
             "cronDescription": "Cron 運算式(含秒),用於決定備份執行時間,以 UTC 時區計算。",
-            "retentionCount": "保留數量",
-            "retentionCountDescription": "每台伺服器保留的成功備份數量上限。留空則不設限。",
-            "retentionDays": "保留天數",
-            "retentionDaysDescription": "刪除超過此天數的備份。留空則不設限。",
             "parallelism": "平行處理數",
             "parallelismDescription": "此政策在單一節點上同時執行的備份數量上限。",
             "enabledDescription": "已停用的政策會保留現有備份,但不會再建立新的備份。"
@@ -4781,6 +4805,17 @@
           "view": {
             "list": "List",
             "tree": "Tree"
+          },
+          "searchPreview": {
+            "expand": "Expand content preview for {file}",
+            "collapse": "Collapse content preview for {file}",
+            "lines": "Lines {start}-{end}",
+            "loading": "Loading preview...",
+            "empty": "Empty file",
+            "unavailable": "Preview unavailable",
+            "noContext": "Match found, preview unavailable",
+            "moreMatches": "More matches not shown",
+            "restricted": "Content permission required"
           },
           "tree": {
             "empty": "This folder is empty",
@@ -6489,17 +6524,10 @@
             "createInGroup": "在此群組中建立備份"
           },
           "badge": {
-            "keepCount": "保留 {count} 份",
-            "keepDays": "保留 {days}",
-            "noRetention": "不自動刪除",
             "allLocked": "全部已鎖定"
           },
           "form": {
-            "retentionCount": "保留份數",
-            "retentionCountDescription": "此群組中保留的可用備份數量上限，留空表示不限制。",
-            "retentionDays": "保留天數",
-            "retentionDaysDescription": "刪除此群組中超過此天數的備份，留空表示不限制。",
-            "noRetentionDescription": "未設定保留規則時，此群組僅作為標籤使用，不會自動刪除任何備份。"
+            "noRetentionDescription": "With no retention set, this group is just a label and never deletes successful backups automatically."
           },
           "modal": {
             "createGroup": {

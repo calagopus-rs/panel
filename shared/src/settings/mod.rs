@@ -1229,6 +1229,39 @@ impl Settings {
         Ok(())
     }
 
+    pub async fn cleanup_ratelimit_exempt_api_keys(&self) -> Result<usize, anyhow::Error> {
+        let exempt_api_keys = self
+            .get_as(|s| s.ratelimits.exempt_api_keys.clone())
+            .await?;
+        if exempt_api_keys.is_empty() {
+            return Ok(0);
+        }
+
+        let existing: Vec<uuid::Uuid> =
+            crate::models::user_api_key::UserApiKey::by_uuids(&self.database, &exempt_api_keys)
+                .await?
+                .into_iter()
+                .map(|api_key| api_key.uuid)
+                .collect();
+        if existing.len() == exempt_api_keys.len() {
+            return Ok(0);
+        }
+
+        let mut settings = self.get_mut().await?;
+        let before = settings.ratelimits.exempt_api_keys.len();
+        settings
+            .ratelimits
+            .exempt_api_keys
+            .retain(|uuid| existing.contains(uuid));
+        let removed = before - settings.ratelimits.exempt_api_keys.len();
+
+        if removed > 0 {
+            settings.save().await?;
+        }
+
+        Ok(removed)
+    }
+
     pub async fn invalidate_cache(&self) {
         let Ok(_lock) = self.write_serializing.acquire().await else {
             return;

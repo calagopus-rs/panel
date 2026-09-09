@@ -219,6 +219,11 @@ impl ResolvableModel for UserApiKey {
 }
 
 impl UserApiKey {
+    /// The total len of the header,
+    ///
+    /// "Bearer " (7) + key (48)
+    pub const HEADER_LEN: usize = 7 + 48;
+
     pub async fn by_user_uuid_uuid(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,
@@ -299,6 +304,27 @@ impl UserApiKey {
                 .map(|row| Self::map(None, &row))
                 .try_collect_vec()?,
         })
+    }
+
+    pub async fn by_uuids(
+        database: &crate::database::Database,
+        uuids: &[uuid::Uuid],
+    ) -> Result<Vec<Self>, crate::database::DatabaseError> {
+        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
+            r#"
+            SELECT {}
+            FROM user_api_keys
+            WHERE user_api_keys.uuid = ANY($1)
+            "#,
+            Self::columns_sql(None)
+        )))
+        .bind(uuids)
+        .fetch_all(database.read())
+        .await?;
+
+        rows.into_iter()
+            .map(|row| Self::map(None, &row))
+            .try_collect_vec()
     }
 
     pub async fn delete_expired(database: &crate::database::Database) -> Result<u64, sqlx::Error> {

@@ -128,14 +128,6 @@
       "many": "{count} Backups",
       "other": "{count} Backups"
     },
-    "day": {
-      "zero": "{count} Days",
-      "one": "{count} Day",
-      "two": "{count} Days",
-      "few": "{count} Days",
-      "many": "{count} Days",
-      "other": "{count} Days"
-    },
     "row": {
       "zero": "{count} Rows",
       "one": "{count} Row",
@@ -211,7 +203,8 @@
         "leavePage": "Sayfadan Ayrıl",
         "viewDocumentation": "View Documentation",
         "undo": "Undo",
-        "clearUserFilter": "Clear User Filter"
+        "clearUserFilter": "Clear User Filter",
+        "deleteFailedBackups": "Delete {count} Failed"
       },
       "alert": {
         "error": "Hata",
@@ -267,6 +260,21 @@
             "weekday": "Weekday"
           },
           "nextRun": "Next run is {timestamp}."
+        },
+        "backupRetention": {
+          "title": "Retention",
+          "disabled": "No retention rules",
+          "description": "Keep a successful backup when any rule selects it: the latest count, all backups within the recent number of days, or the newest backup in each daily, weekly, monthly or yearly period containing backups. Periods use UTC; weeks start on Monday. Missed periods do not consume the count. Leave a rule empty or set it to 0 to disable it. With all rules disabled, successful backups are kept.",
+          "sourcesDescription": "Retention is evaluated separately for server files and each database. Locked backups are protected. Retention does not schedule backups.",
+          "capacityDescription": "At the server backup limit, backups your rules no longer keep are removed to make room. Scheduled backups additionally evict the oldest unlocked backup; manual backups are refused instead.",
+          "failedDescription": "Unlocked failed backups are cleaned up after 24 hours, grouped or not.",
+          "count": "Keep latest",
+          "days": "Keep all within days",
+          "daily": "Keep daily",
+          "weekly": "Keep weekly",
+          "monthly": "Keep monthly",
+          "yearly": "Keep yearly",
+          "ruleSummary": "{rule}: {count}"
         }
       },
       "modal": {
@@ -275,10 +283,18 @@
         },
         "delete": {
           "content": "Are you sure you want to delete **{name}**?"
+        },
+        "deleteFailedBackups": {
+          "title": "Confirm Failed Backup Deletion",
+          "content": "Are you sure you want to delete `{count}` failed backups? Locked backups and backups whose configuration is in maintenance are kept. Deletion runs in the background and may take a while to finish.",
+          "alert": {
+            "forceWarning": "Force deletion removes these backups even if their configuration is missing or the remote storage cannot be reached. The backup files themselves may not be fully cleaned up, leaving orphaned data behind."
+          }
         }
       },
       "toast": {
-        "duplicated": "{resource} duplicated."
+        "duplicated": "{resource} duplicated.",
+        "failedBackupDeletionStarted": "Deleting {count} failed backups in the background."
       },
       "settingScope": {
         "account": "Sync With Account",
@@ -1688,7 +1704,8 @@
           "title": "API Anahtarları",
           "subtitle": "{current} of {max} maximum api keys created.",
           "button": {
-            "apiDocumentation": "API Dokümantasyonu"
+            "apiDocumentation": "API Dokümantasyonu",
+            "copyUuid": "Copy UUID"
           },
           "tooltip": {
             "limitReached": "You are limited to {max} api keys."
@@ -2205,6 +2222,15 @@
                   "windowSeconds": "Window",
                   "windowSecondsDescription": "Window duration in seconds."
                 },
+                "exemptions": {
+                  "title": "Exemptions",
+                  "form": {
+                    "exemptIps": "Exempt IPs",
+                    "exemptIpsDescription": "IP addresses or CIDR ranges that skip the client and remote ratelimits. Login and per-server limits still apply.",
+                    "exemptApiKeys": "Exempt API Keys",
+                    "exemptApiKeysDescription": "UUIDs of API keys that skip the client ratelimit. Users can copy the UUID from the context menu of their API keys. Deleted keys are removed automatically."
+                  }
+                },
                 "toast": {
                   "updated": "Rate limit settings updated."
                 }
@@ -2689,6 +2715,7 @@
                 },
                 "alert": {
                   "couldNotReach": "Could not reach the node: {error}",
+                  "integratedNode": "This node runs inside the panel. Its identity, panel URL and API bind settings are rewritten every time the panel starts, so changes to those are not kept. Everything else you change here is.",
                   "tokenWarning": "The configuration below contains the node token. Reveal it only when needed.",
                   "portMismatch": "The node URL points at port {connectPort}, but this configuration makes wings listen on port {apiPort}. Unless a reverse proxy forwards port {connectPort} to wings, the panel will not be able to reach the node.",
                   "verifyBackend": "Backend to Wings",
@@ -3209,6 +3236,7 @@
                   "externalIdPlaceholder": "Optional external identifier",
                   "descriptionPlaceholder": "Server description",
                   "owner": "Owner",
+                  "ownerCreateHint": "Can't find them? Create a new user",
                   "egg": "Egg",
                   "backupConfigurationPlaceholder": "Inherit from Node/Location",
                   "cpuLimit": "CPU Limit (%)",
@@ -4437,10 +4465,6 @@
             "backupConfigurationPlaceholder": "Inherit from Server",
             "cron": "Schedule",
             "cronDescription": "Cron expression (with seconds) that determines when backups are taken, in UTC.",
-            "retentionCount": "Keep count",
-            "retentionCountDescription": "Maximum number of successful backups to keep per server. Leave empty for no limit.",
-            "retentionDays": "Keep days",
-            "retentionDaysDescription": "Delete backups older than this many days. Leave empty for no limit.",
             "parallelism": "Parallelism",
             "parallelismDescription": "Maximum number of backups this policy runs at the same time on a single node.",
             "enabledDescription": "Disabled policies keep their backups but do not take new ones."
@@ -4781,6 +4805,17 @@
           "view": {
             "list": "List",
             "tree": "Tree"
+          },
+          "searchPreview": {
+            "expand": "Expand content preview for {file}",
+            "collapse": "Collapse content preview for {file}",
+            "lines": "Lines {start}-{end}",
+            "loading": "Loading preview...",
+            "empty": "Empty file",
+            "unavailable": "Preview unavailable",
+            "noContext": "Match found, preview unavailable",
+            "moreMatches": "More matches not shown",
+            "restricted": "Content permission required"
           },
           "tree": {
             "empty": "This folder is empty",
@@ -6489,17 +6524,10 @@
             "createInGroup": "Create backup in this group"
           },
           "badge": {
-            "keepCount": "Keep {count}",
-            "keepDays": "Keep {days}",
-            "noRetention": "No auto-deletion",
             "allLocked": "All locked"
           },
           "form": {
-            "retentionCount": "Keep count",
-            "retentionCountDescription": "Maximum number of usable backups to keep in this group. Leave empty for no limit.",
-            "retentionDays": "Keep days",
-            "retentionDaysDescription": "Delete backups in this group older than this many days. Leave empty for no limit.",
-            "noRetentionDescription": "With no retention set, this group is just a label and never deletes backups automatically."
+            "noRetentionDescription": "With no retention set, this group is just a label and never deletes successful backups automatically."
           },
           "modal": {
             "createGroup": {

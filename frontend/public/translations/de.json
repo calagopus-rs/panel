@@ -202,7 +202,9 @@
         "unsetPrimary": "Als primär entfernen",
         "leavePage": "Seite verlassen",
         "viewDocumentation": "Dokumentation ansehen",
-        "undo": "Rückgängig"
+        "undo": "Rückgängig",
+        "clearUserFilter": "Benutzerfilter löschen",
+        "deleteFailedBackups": "{count} fehlgeschlagene löschen"
       },
       "alert": {
         "error": "Fehler",
@@ -281,10 +283,18 @@
         },
         "delete": {
           "content": "Bist du sicher, dass du **{name}** löschen möchtest?"
+        },
+        "deleteFailedBackups": {
+          "title": "Löschen fehlgeschlagener Backups bestätigen",
+          "content": "Bist du sicher, dass du `{count}` fehlgeschlagene Backups löschen möchtest? Gesperrte Backups und Backups, deren Konfiguration sich im Wartungsmodus befindet, bleiben erhalten. Die Löschung läuft im Hintergrund und kann eine Weile dauern.",
+          "alert": {
+            "forceWarning": "Das erzwungene Löschen entfernt diese Backups, auch wenn ihre Konfiguration fehlt oder der Remote-Speicher nicht erreichbar ist. Die Backup-Dateien selbst werden möglicherweise nicht vollständig entfernt, sodass verwaiste Daten zurückbleiben."
+          }
         }
       },
       "toast": {
-        "duplicated": "{resource} dupliziert."
+        "duplicated": "{resource} dupliziert.",
+        "failedBackupDeletionStarted": "{count} fehlgeschlagene Backups werden im Hintergrund gelöscht."
       },
       "settingScope": {
         "account": "Mit Konto synchronisieren",
@@ -1694,7 +1704,8 @@
           "title": "API-Schlüssel",
           "subtitle": "{current} von maximal {max} API-Schlüsseln erstellt.",
           "button": {
-            "apiDocumentation": "API Dokumentation"
+            "apiDocumentation": "API Dokumentation",
+            "copyUuid": "UUID kopieren"
           },
           "tooltip": {
             "limitReached": "Du bist auf {max} API-Schlüssel limitiert."
@@ -2210,6 +2221,15 @@
                   "hitsDescription": "Maximale Anzahl an Anfragen pro Fenster.",
                   "windowSeconds": "Fenster",
                   "windowSecondsDescription": "Fensterdauer in Sekunden."
+                },
+                "exemptions": {
+                  "title": "Ausnahmen",
+                  "form": {
+                    "exemptIps": "Ausgenommene IPs",
+                    "exemptIpsDescription": "IP-Adressen oder CIDR-Bereiche, die die client- und remote-Ratenbegrenzungen überspringen. Login- und serverbezogene Begrenzungen gelten weiterhin.",
+                    "exemptApiKeys": "Ausgenommene API-Schlüssel",
+                    "exemptApiKeysDescription": "UUIDs von API-Schlüsseln, die die client-Ratenbegrenzung überspringen. Benutzer können die UUID über das Kontextmenü ihrer API-Schlüssel kopieren. Gelöschte Schlüssel werden automatisch entfernt."
+                  }
                 },
                 "toast": {
                   "updated": "Ratenbegrenzungs-Einstellungen aktualisiert."
@@ -3216,6 +3236,7 @@
                   "externalIdPlaceholder": "Optionaler externer Bezeichner",
                   "descriptionPlaceholder": "Serverbeschreibung",
                   "owner": "Besitzer",
+                  "ownerCreateHint": "Nicht gefunden? Erstelle einen neuen Benutzer",
                   "egg": "Egg",
                   "backupConfigurationPlaceholder": "Von Node/Standort erben",
                   "cpuLimit": "CPU-Limit (%)",
@@ -3791,15 +3812,11 @@
                   }
                 },
                 "toast": {
-                  "installed": "Egg installiert.",
-                  "installedBulk": "{eggs} installiert."
+                  "installed": "{eggs} installiert."
                 },
                 "modal": {
                   "install": {
-                    "title": "Egg Repository Egg installieren"
-                  },
-                  "installBulk": {
-                    "title": "Egg Repository Eggs installieren",
+                    "title": "{eggs} installieren",
                     "button": "{eggs} installieren"
                   }
                 },
@@ -4712,11 +4729,17 @@
             "commandHistory": "Befehlsverlauf",
             "decreaseFontSize": "Schriftgröße verringern",
             "increaseFontSize": "Schriftgröße erhöhen",
-            "copySelection": "Auswahl kopieren"
+            "copySelection": "Auswahl kopieren",
+            "popout": "In separatem Fenster öffnen"
           },
           "quickAction": {
             "search": "Konsole durchsuchen",
-            "scrollToBottom": "Nach unten scrollen"
+            "scrollToBottom": "Nach unten scrollen",
+            "popout": "Konsole in separatem Fenster öffnen"
+          },
+          "popout": {
+            "windowTitle": "Konsole",
+            "returnHint": "Diese Konsole läuft in einem eigenen Fenster. Du kannst es jederzeit schließen."
           },
           "drawer": {
             "commandHistory": {
@@ -4775,6 +4798,14 @@
         },
         "files": {
           "title": "Dateien",
+          "editorNotFound": {
+            "title": "Nicht gefunden",
+            "content": "Editor nicht gefunden."
+          },
+          "view": {
+            "list": "Liste",
+            "tree": "Baum"
+          },
           "searchPreview": {
             "expand": "Inhaltsvorschau für {file} ausklappen",
             "collapse": "Inhaltsvorschau für {file} einklappen",
@@ -4794,7 +4825,27 @@
             "revealInTree": "Im Dateibaum anzeigen",
             "revealNotFound": "{path} konnte im Dateibaum nicht gefunden werden.",
             "selectPane": "Editorbereich auswählen",
-            "editorPane": "Editorbereich {number}"
+            "editorPane": "Editorbereich {number}",
+            "empty": "Dieser Ordner ist leer",
+            "loadMore": "Mehr laden",
+            "retry": "Erneut versuchen",
+            "reload": "Dateien neu laden",
+            "show": "Dateibaum anzeigen",
+            "hide": "Dateibaum ausblenden",
+            "searchPlaceholder": "Dateien suchen...",
+            "noSearchResults": "Keine passenden Dateien",
+            "upload": "Hochladen",
+            "uploadFromComputer": "Vom Computer hochladen",
+            "uploadFromUrl": "Von URL hochladen",
+            "selectItem": "{name} auswählen",
+            "deselectItem": "{name} abwählen",
+            "selectFileToOpen": "Wähle eine Datei im Baum aus, um sie zu öffnen.",
+            "noEditorAvailable": "Für diesen Dateityp ist kein Editor verfügbar.",
+            "editorTabsLabel": "Geöffnete Dateien",
+            "closeEditorTab": "{name} schließen",
+            "unsavedTab": "{name} hat ungespeicherte Änderungen",
+            "dropToSplit": "Hier ablegen, um in einem neuen Editorbereich zu öffnen",
+            "resizeEditorPanes": "Größe der Editorbereiche ändern"
           },
           "titleEditorViewing": "Betrachte {file}",
           "titleEditorPlaying": "Spiele {file} ab",
@@ -4877,13 +4928,17 @@
           },
           "searchBanner": {
             "resultsTitle": "Suchergebnisse ({files} gefunden)",
+            "emptyTitle": "Keine Dateien gefunden",
             "root": "Wurzelverzeichnis:",
             "query": "Suchbegriff:",
+            "included": "Eingeschlossen:",
             "excluded": "Ausgeschlossen:",
             "content": "Inhalt:",
+            "caseSensitive": "Groß-/Kleinschreibung beachten",
+            "maxSearchSize": "Dateien über {size} werden übersprungen",
+            "oversizedIncluded": "Dateien über {size} werden aufgelistet, aber nicht durchsucht",
             "size": "Größe:",
-            "min": "Min:",
-            "max": "Max:"
+            "edit": "Suche bearbeiten"
           },
           "operations": {
             "compressing": "Komprimiere {files} von {path}",
@@ -4937,6 +4992,8 @@
             "filePullingStarted": "Datei-Pull hat begonnen.",
             "fileRenamed": "Datei wurde umbenannt.",
             "fileCouldNotBeRenamed": "Datei konnte nicht umbenannt werden.",
+            "closeDestinationBeforeRename": "Schließe den Editor-Tab der Zieldatei, bevor du sie umbenennst.",
+            "closeTabsBeforeBulkRename": "Schließe die betroffenen Editor-Tabs, bevor du überlappende Pfade umbenennst.",
             "filesRenamed": "{files} umbenannt.",
             "renameUndone": "Umbenennung rückgängig gemacht.",
             "renameCouldNotBeUndone": "Umbenennung konnte nicht rückgängig gemacht werden.",
@@ -4952,6 +5009,7 @@
           },
           "tooltip": {
             "settings": "Einstellungen",
+            "advancedSearch": "Erweiterte Suche",
             "fileHistory": "Dateiverlauf",
             "revertToDisk": "Änderungen verwerfen und Datei von der Festplatte laden",
             "collabEditing": "{user} bearbeitet diese Datei",
@@ -4963,7 +5021,8 @@
             "play": "Abspielen",
             "pause": "Pausieren",
             "mute": "Stummschalten",
-            "unmute": "Stummschaltung aufheben"
+            "unmute": "Stummschaltung aufheben",
+            "playbackRate": "Wiedergabegeschwindigkeit"
           },
           "drawer": {
             "revisions": {
@@ -5161,9 +5220,12 @@
               "advancedFilters": "Erweiterte Filter",
               "pathPatterns": "Pfadmuster",
               "include": "Einschließen",
+              "includePlaceholder": "z. B. *.js, src/**",
               "exclude": "Ausschließen",
+              "excludePlaceholder": "z. B. node_modules/**",
               "fileContent": "Dateiinhalte",
               "searchText": "Suchtext",
+              "contentPlaceholder": "Text, der in Dateien gesucht werden soll",
               "maxFileSize": "Maximale Dateigröße",
               "includeOversized": "Übergroße einschließen",
               "includeOversizedDescription": "Schließt Dateien ein, die auf andere Filter passen, aber zu groß zum Durchsuchen sind.",

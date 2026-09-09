@@ -8,9 +8,12 @@ export default async (
   page: number,
   search?: string,
   partiallyDetached?: boolean,
-): Promise<Pagination<z.infer<typeof adminNodeServerBackupSchema>>> => {
+): Promise<{ backups: Pagination<z.infer<typeof adminNodeServerBackupSchema>>; failed: number }> => {
   const { data } = await axiosInstance.get(`/api/admin/servers/${serverUuid}/backups`, {
     params: { page, search, partially_detached: partiallyDetached },
   });
-  return parsePaginationFromApi(adminNodeServerBackupSchema, data.backups);
+  return {
+    backups: parsePaginationFromApi(adminNodeServerBackupSchema, data.backups),
+    failed: data.failed,
+  };
 };

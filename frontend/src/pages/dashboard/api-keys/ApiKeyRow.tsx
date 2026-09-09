@@ -1,4 +1,4 @@
-import { faBan, faCheck, faPencil, faRefresh, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faBan, faCheck, faCopy, faPencil, faRefresh, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { z } from 'zod';
@@ -13,6 +13,7 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import ContextMenu, { ContextMenuToggle } from '@/elements/overlays/ContextMenu.tsx';
 import FormattedTimestamp from '@/elements/time/FormattedTimestamp.tsx';
 import Code from '@/elements/typography/Code.tsx';
+import { handleRawCopyToClipboard } from '@/lib/clipboard/copy.ts';
 import { queryKeys } from '@/lib/queryKeys.ts';
 import { userApiKeySchema } from '@/lib/schemas/user/apiKeys.ts';
 import ApiKeyCreateOrUpdateModal from '@/pages/dashboard/api-keys/modals/ApiKeyCreateOrUpdateModal.tsx';
@@ -100,6 +101,13 @@ export default function ApiKeyRow({ apiKey }: { apiKey: z.infer<typeof userApiKe
 
       <ContextMenu
         items={[
+          {
+            type: 'action',
+            icon: faCopy,
+            label: t('pages.account.apiKeys.button.copyUuid', {}),
+            onClick: () => handleRawCopyToClipboard(apiKey.uuid, addToast),
+            color: 'gray',
+          },
           {
             type: 'action',
             icon: faPencil,

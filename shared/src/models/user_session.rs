@@ -218,6 +218,11 @@ impl ResolvableModel for UserSession {
 }
 
 impl UserSession {
+    /// The total len of the session cookie,
+    ///
+    /// key_id (16) + separator (1) + key (64)
+    pub const COOKIE_LEN: usize = 16 + 1 + 64;
+
     pub async fn by_user_uuid_uuid(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,

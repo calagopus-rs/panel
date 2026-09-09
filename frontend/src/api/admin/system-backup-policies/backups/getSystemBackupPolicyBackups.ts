@@ -7,9 +7,12 @@ export default async (
   policyUuid: string,
   page: number,
   search?: string,
-): Promise<Pagination<z.infer<typeof adminNodeServerBackupSchema>>> => {
+): Promise<{ backups: Pagination<z.infer<typeof adminNodeServerBackupSchema>>; failed: number }> => {
   const { data } = await axiosInstance.get(`/api/admin/system-backup-policies/${policyUuid}/backups`, {
     params: { page, search },
   });
-  return parsePaginationFromApi(adminNodeServerBackupSchema, data.backups);
+  return {
+    backups: parsePaginationFromApi(adminNodeServerBackupSchema, data.backups),
+    failed: data.failed,
+  };
 };

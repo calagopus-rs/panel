@@ -5,9 +5,11 @@ import updateRatelimitSettings from '@/api/admin/settings/updateRatelimitSetting
 import AdminSubContentContainer from '@/elements/containers/AdminSubContentContainer.tsx';
 import Card from '@/elements/data-display/Card.tsx';
 import NumberInput from '@/elements/input/NumberInput.tsx';
+import TagsInput from '@/elements/input/TagsInput.tsx';
 import Group from '@/elements/layout/Group.tsx';
 import Stack from '@/elements/layout/Stack.tsx';
 import Code from '@/elements/typography/Code.tsx';
+import Title from '@/elements/typography/Title.tsx';
 import { adminSettingsRatelimitsSchema } from '@/lib/schemas/admin/settings.ts';
 import { useHydrateForm } from '@/plugins/form/useHydrateForm.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
@@ -68,6 +70,31 @@ export default function RatelimitsContainer() {
             </Card>
           ))}
         </div>
+
+        <Card withBorder radius='md' p='md' mt='md'>
+          <Stack gap='xs'>
+            <Title order={3} c='dimmed' mb='sm'>
+              {t('pages.admin.settings.tabs.ratelimits.page.exemptions.title', {})}
+            </Title>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+              <TagsInput
+                label={t('pages.admin.settings.tabs.ratelimits.page.exemptions.form.exemptIps', {})}
+                description={t('pages.admin.settings.tabs.ratelimits.page.exemptions.form.exemptIpsDescription', {})}
+                placeholder='e.g. 192.168.1.1, 2001:db8::/32'
+                {...form.getInputProps('exemptIps')}
+              />
+              <TagsInput
+                label={t('pages.admin.settings.tabs.ratelimits.page.exemptions.form.exemptApiKeys', {})}
+                description={t(
+                  'pages.admin.settings.tabs.ratelimits.page.exemptions.form.exemptApiKeysDescription',
+                  {},
+                )}
+                placeholder='e.g. 7e4c6d0a-1b2c-4d3e-8f90-a1b2c3d4e5f6'
+                {...form.getInputProps('exemptApiKeys')}
+              />
+            </div>
+          </Stack>
+        </Card>
 
         <Group mt='md'>
           <SettingsSaveButton loading={loading} disabled={!form.isValid()} />

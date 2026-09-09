@@ -2,6 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod _backup_;
+mod delete_failed;
 
 mod get {
     use axum::{extract::Query, http::StatusCode};
@@ -9,8 +10,10 @@ mod get {
     use shared::{
         ApiError, GetState,
         models::{
-            IntoAdminApiObject, Pagination, PaginationParamsWithSearch, node::GetNode,
-            server_backup::ServerBackup, user::GetPermissionManager,
+            IntoAdminApiObject, Pagination, PaginationParamsWithSearch,
+            node::GetNode,
+            server_backup::{FailedServerBackupScope, ServerBackup},
+            user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -26,6 +29,7 @@ mod get {
     struct Response {
         #[schema(inline)]
         backups: Pagination<shared::models::server_backup::AdminApiServerBackup>,
+        failed: i64,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -72,6 +76,12 @@ mod get {
 
         permissions.has_admin_permission("nodes.backups")?;
 
+        let scope = if params.detached {
+            FailedServerBackupScope::DetachedNode(node.uuid)
+        } else {
+            FailedServerBackupScope::Node(node.uuid)
+        };
+
         let backups = if params.detached {
             ServerBackup::by_detached_node_uuid_with_pagination(
                 &state.database,
@@ -100,6 +110,7 @@ mod get {
                     backup.into_admin_api_object(&state, &storage_url_retriever)
                 })
                 .await?,
+            failed: ServerBackup::count_failed(&state.database, scope).await?,
         })
         .ok()
     }
@@ -108,6 +119,7 @@ mod get {
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
+        .nest("/delete-failed", delete_failed::router(state))
         .nest("/{backup}", _backup_::router(state))
         .with_state(state.clone())
 }
