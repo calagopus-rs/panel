@@ -141,7 +141,7 @@ mod post {
         models::{
             CreatableModel, IntoApiObject,
             server::{GetServer, GetServerActivityLogger},
-            server_backup::{BackupDisk, GroupRotationOutcome, ServerBackup, ServerBackupKind},
+            server_backup::{BackupDisk, ServerBackup, ServerBackupKind, retention::EvictionMode},
             server_backup_group::ServerBackupGroup,
             server_database_instance::ServerDatabaseInstance,
             user::GetPermissionManager,
@@ -332,20 +332,29 @@ mod post {
             ServerBackupKind::Server
         };
 
-        if let Some(group) = &backup_group
-            && ServerBackup::rotate_group_for_create(&state, group, kind).await?
-                == GroupRotationOutcome::BlockedAllLocked
-        {
-            return ApiResponse::error("backup group is full and all of its backups are locked")
-                .with_status(StatusCode::EXPECTATION_FAILED)
-                .ok();
-        }
-
         let backups = ServerBackup::count_by_server_uuid(&state.database, server.uuid).await?;
         if backups >= server.backup_limit as i64 {
-            return ApiResponse::error("maximum number of backups reached")
-                .with_status(StatusCode::EXPECTATION_FAILED)
-                .ok();
+            let evicted = match ServerBackup::evict_for_create(
+                &state,
+                server.uuid,
+                kind,
+                EvictionMode::Expendable,
+            )
+            .await
+            {
+                Ok(evicted) => evicted as i64,
+                Err(err) => {
+                    tracing::error!(server = %server.uuid, "failed to evict old backups: {err:#?}");
+
+                    0
+                }
+            };
+
+            if backups - evicted >= server.backup_limit as i64 {
+                return ApiResponse::error("maximum number of backups reached")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
+            }
         }
 
         let ratelimit = state

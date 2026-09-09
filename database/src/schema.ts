@@ -518,8 +518,7 @@ export const systemBackupPoliciesTable = pgTable(
     description: text(),
     enabled: boolean().default(true).notNull(),
     cron: varchar({ length: 255 }).notNull(),
-    retention_count: integer(),
-    retention_days: integer(),
+    retention: jsonb().default({ count: 0, days: 0, daily: 0, weekly: 0, monthly: 0, yearly: 0 }).notNull(),
     parallelism: integer().default(2).notNull(),
     triggered: timestamp(),
     created: timestamp().defaultNow().notNull(),
@@ -1209,8 +1208,7 @@ export const serverBackupGroupsTable = pgTable(
       .notNull(),
     name: varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
     order_: smallint().default(0).notNull(),
-    retention_count: integer(),
-    retention_days: integer(),
+    retention: jsonb().default({ count: 0, days: 0, daily: 0, weekly: 0, monthly: 0, yearly: 0 }).notNull(),
     created: timestamp().defaultNow().notNull(),
   },
   (cols) => [
@@ -1262,10 +1260,7 @@ export const serverBackupsTable = pgTable(
     index('server_backups_database_instance_uuid_idx').on(cols.database_instance_uuid),
     index('server_backups_successful_idx').on(cols.successful),
     index('server_backups_deleting_idx').on(cols.deleting),
-    check(
-      'server_backups_kind_database_type_check',
-      sql`(${cols.kind} = 'SERVER') = (${cols.database_type} IS NULL)`,
-    ),
+    check('server_backups_kind_database_type_check', sql`(${cols.kind} = 'SERVER') = (${cols.database_type} IS NULL)`),
   ],
 );
 

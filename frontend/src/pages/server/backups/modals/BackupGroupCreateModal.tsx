@@ -7,12 +7,13 @@ import { z } from 'zod';
 import createBackupGroup from '@/api/server/backups/groups/createBackupGroup.ts';
 import Button from '@/elements/buttons/Button.tsx';
 import Alert from '@/elements/feedback/Alert.tsx';
-import NumberInput from '@/elements/input/NumberInput.tsx';
+import BackupRetentionInput from '@/elements/input/BackupRetentionInput.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Stack from '@/elements/layout/Stack.tsx';
 import FormModal from '@/elements/modals/FormModal.tsx';
 import { ModalFooter } from '@/elements/modals/Modal.tsx';
 import { queryKeys } from '@/lib/queryKeys.ts';
+import { emptyBackupRetention, isBackupRetentionDisabled } from '@/lib/schemas/backupRetention.ts';
 import { serverBackupGroupCreateSchema } from '@/lib/schemas/server/backups.ts';
 import { useModalForm } from '@/plugins/form/useModalForm.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
@@ -30,8 +31,7 @@ export default function BackupGroupCreateModal({ ...props }: ModalProps) {
   >({
     initialValues: {
       name: '',
-      retentionCount: null,
-      retentionDays: null,
+      retention: { ...emptyBackupRetention },
     },
     validateInputOnBlur: true,
     validate: zod4Resolver(serverBackupGroupCreateSchema),
@@ -45,6 +45,8 @@ export default function BackupGroupCreateModal({ ...props }: ModalProps) {
     },
   });
 
+  const retentionDisabled = isBackupRetentionDisabled(form.values.retention);
+
   return (
     <FormModal
       title={t('pages.server.backupGroups.modal.createGroup.title', {})}
@@ -57,27 +59,16 @@ export default function BackupGroupCreateModal({ ...props }: ModalProps) {
       <Stack>
         <TextInput withAsterisk label={t('common.form.name', {})} {...form.getInputProps('name')} />
 
-        <NumberInput
-          label={t('pages.server.backupGroups.form.retentionCount', {})}
-          description={t('pages.server.backupGroups.form.retentionCountDescription', {})}
-          min={1}
-          allowDecimal={false}
-          value={form.values.retentionCount ?? ''}
-          error={form.errors.retentionCount}
-          onChange={(v) => form.setFieldValue('retentionCount', v === '' || v === undefined ? null : Number(v))}
-        />
+        <BackupRetentionInput form={form} path='retention' label={t('common.elements.backupRetention.title', {})}>
+          <p className='text-sm text-(--mantine-color-dimmed)'>
+            {t('common.elements.backupRetention.capacityDescription', {})}
+          </p>
+          <p className='text-sm text-(--mantine-color-dimmed)'>
+            {t('common.elements.backupRetention.failedDescription', {})}
+          </p>
+        </BackupRetentionInput>
 
-        <NumberInput
-          label={t('pages.server.backupGroups.form.retentionDays', {})}
-          description={t('pages.server.backupGroups.form.retentionDaysDescription', {})}
-          min={1}
-          allowDecimal={false}
-          value={form.values.retentionDays ?? ''}
-          error={form.errors.retentionDays}
-          onChange={(v) => form.setFieldValue('retentionDays', v === '' || v === undefined ? null : Number(v))}
-        />
-
-        {!form.values.retentionCount && !form.values.retentionDays && (
+        {retentionDisabled && (
           <Alert color='blue' icon={<FontAwesomeIcon icon={faCircleInfo} />}>
             {t('pages.server.backupGroups.form.noRetentionDescription', {})}
           </Alert>

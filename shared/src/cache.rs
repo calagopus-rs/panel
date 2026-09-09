@@ -99,6 +99,10 @@ pub struct Cache {
     cache_misses: AtomicU64,
 }
 
+async fn connect_client(label: &str, url: &str) -> Client {
+    crate::retry::startup_connect(label, || Client::connect(url)).await
+}
+
 impl Cache {
     pub async fn new(env: &crate::env::Env) -> Arc<Self> {
         let start = std::time::Instant::now();
@@ -106,7 +110,7 @@ impl Cache {
         let client = match &env.redis_mode {
             RedisMode::Redis { redis_url } => {
                 if let Some(redis_url) = redis_url {
-                    Some(Arc::new(Client::connect(redis_url.clone()).await.unwrap()))
+                    Some(Arc::new(connect_client("redis", redis_url).await))
                 } else {
                     None
                 }
@@ -115,15 +119,14 @@ impl Cache {
                 cluster_name,
                 redis_sentinels,
             } => Some(Arc::new(
-                Client::connect(
-                    format!(
+                connect_client(
+                    "redis sentinel",
+                    &format!(
                         "redis-sentinel://{}/{cluster_name}/0",
                         redis_sentinels.join(",")
-                    )
-                    .as_str(),
+                    ),
                 )
-                .await
-                .unwrap(),
+                .await,
             )),
         };
 

@@ -38,6 +38,10 @@ import FileModals from '@/pages/server/files/list/FileModals.tsx';
 import FileOperationsProgress from '@/pages/server/files/list/FileOperationsProgress.tsx';
 import FileParentDirectoryRow from '@/pages/server/files/list/FileParentDirectoryRow.tsx';
 import FileSearchBanner from '@/pages/server/files/list/FileSearchBanner.tsx';
+import FileSearchPreview, {
+  canPreviewFile,
+  estimateFileSearchPreviewHeight,
+} from '@/pages/server/files/list/FileSearchPreview.tsx';
 import FileSettings from '@/pages/server/files/list/FileSettings.tsx';
 import FileToolbar from '@/pages/server/files/list/FileToolbar.tsx';
 import FileUpload from '@/pages/server/files/list/FileUpload.tsx';
@@ -80,6 +84,7 @@ function FileBrowser() {
   const browsingDirectory = useFileManagerStore((state) => state.browsingDirectory);
   const browsingBackup = useFileManagerStore((state) => state.browsingBackup);
   const searchInfo = useFileManagerStore((state) => state.searchInfo);
+  const collapsedSearchPreviews = useFileManagerStore((state) => state.collapsedSearchPreviews);
   const sortMode = useFileManagerStore((state) => state.sortMode);
   const clickOnce = useFileManagerStore((state) => state.clickOnce);
   const preferPhysicalSize = useFileManagerStore((state) => state.preferPhysicalSize);
@@ -317,12 +322,29 @@ function FileBrowser() {
     };
   }, [browsingDirectory, searchInfo, browsingError, showParentDirectoryRow]);
 
+  const rows = useMemo(() => {
+    const result: { entry: (typeof browsingEntries.data)[number]; path: string; key: string; preview: boolean }[] = [];
+    for (const entry of browsingEntries.data) {
+      const path = join('/', searchInfo?.root ?? browsingDirectory, entry.name);
+      result.push({ entry, path, key: `file:${path}`, preview: false });
+      if (searchInfo && canPreviewFile(entry) && !collapsedSearchPreviews.has(path)) {
+        result.push({ entry, path, key: `preview:${path}`, preview: true });
+      }
+    }
+    return result;
+  }, [browsingEntries.data, browsingDirectory, searchInfo, collapsedSearchPreviews]);
+
   const rowVirtualizer = useWindowVirtualizer<HTMLTableRowElement>({
-    count: browsingEntries.data.length,
-    estimateSize: () => ESTIMATED_ROW_HEIGHT,
+    count: rows.length,
+    estimateSize: (index) => {
+      const row = rows[index];
+      return row?.preview
+        ? estimateFileSearchPreviewHeight(searchInfo?.contentMatches?.[row.path]) + 16
+        : ESTIMATED_ROW_HEIGHT;
+    },
     overscan: VIRTUALIZER_OVERSCAN,
     scrollMargin,
-    getItemKey: (index) => browsingEntries.data[index]?.name ?? index,
+    getItemKey: (index) => rows[index]?.key ?? index,
   });
 
   const virtualRows = useSyncExternalStore(
@@ -372,8 +394,22 @@ function FileBrowser() {
                 )}
 
                 {virtualRows.map((virtualRow) => {
-                  const entry = browsingEntries.data[virtualRow.index];
-                  if (!entry) return null;
+                  const row = rows[virtualRow.index];
+                  if (!row) return null;
+                  const entry = row.entry;
+                  if (row.preview) {
+                    return (
+                      <TableRow key={virtualRow.key} ref={rowVirtualizer.measureElement} data-index={virtualRow.index}>
+                        <TableData colSpan={columns.length} className='max-w-0 px-4 py-2'>
+                          <FileSearchPreview
+                            file={entry}
+                            path={row.path}
+                            matches={searchInfo?.contentMatches?.[row.path]}
+                          />
+                        </TableData>
+                      </TableRow>
+                    );
+                  }
 
                   return (
                     <SelectableFileRow
@@ -449,7 +485,7 @@ function ServerFilesComponent() {
 
   return (
     <div data-file-manager-page className='flex w-full min-w-0 flex-col'>
-      <FileModals />
+      <FileModals treeView={view === 'tree'} />
       <FileUpload showOverlay={view === 'list'} />
       <FileActionBar />
 

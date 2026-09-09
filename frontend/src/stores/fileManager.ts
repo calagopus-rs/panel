@@ -1,9 +1,10 @@
 import { InfiniteData, QueryClient } from '@tanstack/react-query';
+import { join } from 'pathe';
 import { createRef, RefObject, startTransition } from 'react';
 import { z } from 'zod';
 import { create, StoreApi } from 'zustand';
 import { createContext } from 'zustand-utils';
-import { getEmptyPaginationSet } from '@/api/axios.ts';
+import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios.ts';
 import { DirectoryResponse } from '@/api/server/files/loadDirectory.ts';
 import searchFiles from '@/api/server/files/searchFiles.ts';
 import { ObjectSet } from '@/lib/objectSet.ts';
@@ -12,6 +13,7 @@ import { serverBackupSchema } from '@/lib/schemas/server/backups.ts';
 import {
   serverDirectoryEntrySchema,
   serverDirectorySortingModeSchema,
+  serverFilesContentMatchesSchema,
   serverFilesSearchSchema,
 } from '@/lib/schemas/server/files.ts';
 import {
@@ -47,6 +49,7 @@ export interface SearchInfo {
   query?: string;
   root: string;
   filters: z.infer<typeof serverFilesSearchSchema>;
+  contentMatches?: Record<string, z.infer<typeof serverFilesContentMatchesSchema>>;
 }
 
 export type ActingFileMode = 'copy' | 'move';
@@ -68,6 +71,7 @@ export interface FileManagerBrowsingContext {
 
 export interface FileManagerStore {
   externals: FileManagerExternals;
+  setExternals: (externals: FileManagerExternals) => void;
   isLoading: boolean;
   fileInputRef: RefObject<HTMLInputElement | null>;
   folderInputRef: RefObject<HTMLInputElement | null>;
@@ -102,7 +106,16 @@ export interface FileManagerStore {
   modalDirectoryEntries: z.infer<typeof serverDirectoryEntrySchema>[];
   setModalDirectoryEntries: (files: z.infer<typeof serverDirectoryEntrySchema>[]) => void;
   searchInfo: SearchInfo | null;
+  collapsedSearchPreviews: Set<string>;
+  toggleSearchPreview: (path: string) => void;
   setSearchInfo: (info: SearchInfo | null) => void;
+  searchGeneration: number;
+  beginSearch: () => number;
+  setSearchResults: (
+    info: SearchInfo,
+    entries: z.infer<typeof serverDirectoryEntrySchema>[],
+    contentMatches?: z.infer<typeof serverFilesContentMatchesSchema>[],
+  ) => void;
 
   sortMode: z.infer<typeof serverDirectorySortingModeSchema>;
   setSortMode: (sortMode: z.infer<typeof serverDirectorySortingModeSchema>) => void;
@@ -254,6 +267,12 @@ export const createFileManagerStore = (
 
     return {
       externals: initialExternals,
+      setExternals: (externals) =>
+        set((state) => ({
+          externals,
+          collapsedSearchPreviews:
+            state.externals.serverUuid === externals.serverUuid ? state.collapsedSearchPreviews : new Set<string>(),
+        })),
       isLoading: true,
       fileInputRef: createRef<HTMLInputElement>(),
       folderInputRef: createRef<HTMLInputElement>(),
@@ -273,7 +292,11 @@ export const createFileManagerStore = (
           if (state.browsingDirectory === directory) return state;
 
           selectionAnchor = null;
-          return { browsingDirectory: directory, selectedFiles: new ObjectSet('name') };
+          return {
+            browsingDirectory: directory,
+            selectedFiles: new ObjectSet('name'),
+            searchGeneration: state.searchGeneration + 1,
+          };
         }),
       setBrowsingContext: ({ directory, primary, writable, fast }) =>
         set((state) => {
@@ -305,7 +328,35 @@ export const createFileManagerStore = (
       modalDirectoryEntries: [],
       setModalDirectoryEntries: (files) => set({ modalDirectoryEntries: files }),
       searchInfo: null,
-      setSearchInfo: (info) => set({ searchInfo: info }),
+      collapsedSearchPreviews: new Set<string>(),
+      toggleSearchPreview: (path) =>
+        set((state) => {
+          const collapsedSearchPreviews = new Set(state.collapsedSearchPreviews);
+          if (collapsedSearchPreviews.has(path)) collapsedSearchPreviews.delete(path);
+          else collapsedSearchPreviews.add(path);
+          return { collapsedSearchPreviews };
+        }),
+      setSearchInfo: (info) =>
+        set((state) => ({ searchInfo: info, browsingError: null, searchGeneration: state.searchGeneration + 1 })),
+      searchGeneration: 0,
+      beginSearch: () => {
+        const generation = get().searchGeneration + 1;
+        set({ searchGeneration: generation });
+        return generation;
+      },
+      setSearchResults: (info, entries, contentMatches) =>
+        set((state) => ({
+          searchInfo: {
+            ...info,
+            contentMatches:
+              contentMatches === undefined
+                ? undefined
+                : Object.fromEntries(contentMatches.map((matches) => [join('/', info.root, matches.file), matches])),
+          },
+          browsingEntries: { total: entries.length, page: 1, perPage: entries.length, data: entries },
+          browsingError: null,
+          searchGeneration: state.searchGeneration + 1,
+        })),
 
       sortMode: readUserSettingField('sortMode'),
       setSortMode: (sortMode) => {
@@ -374,14 +425,36 @@ export const createFileManagerStore = (
         const { searchInfo, browsingDirectory, sortMode, doSelectFiles, clearActingFiles, externals } = get();
         const { serverUuid, queryClient } = externals;
 
+        queryClient
+          .invalidateQueries({
+            queryKey: [...queryKeys.server(serverUuid).files.all(), 'lines'],
+          })
+          .catch((e) => console.error(e));
+
         if (searchInfo) {
-          searchFiles(serverUuid, { root: searchInfo.root, ...searchInfo.filters }).then((entries) => {
-            startTransition(() => {
-              set({ browsingEntries: { total: entries.length, page: 1, perPage: entries.length, data: entries } });
-              doSelectFiles([]);
-              clearActingFiles();
+          const generation = get().beginSearch();
+          const isCurrent = () => {
+            const state = get();
+            return (
+              state.searchGeneration === generation &&
+              state.searchInfo === searchInfo &&
+              state.externals.serverUuid === serverUuid
+            );
+          };
+
+          searchFiles(serverUuid, { root: searchInfo.root, ...searchInfo.filters })
+            .then((response) => {
+              if (!isCurrent()) return;
+              startTransition(() => {
+                get().setSearchResults(searchInfo, response.entries, response.contentMatches);
+                doSelectFiles([]);
+                clearActingFiles();
+              });
+            })
+            .catch((error) => {
+              if (isCurrent()) set({ browsingError: httpErrorToHuman(error) });
             });
-          });
+
           return;
         }
 

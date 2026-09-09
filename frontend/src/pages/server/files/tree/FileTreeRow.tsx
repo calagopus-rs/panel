@@ -1,7 +1,7 @@
 import { faChevronDown, faChevronRight, faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
-import { memo, useEffect, useMemo, useRef } from 'react';
+import { memo, Ref, useEffect, useMemo, useRef } from 'react';
 import ActionIcon from '@/elements/buttons/ActionIcon.tsx';
 import Checkbox from '@/elements/input/Checkbox.tsx';
 import FormattedTimestamp from '@/elements/time/FormattedTimestamp.tsx';
@@ -9,6 +9,10 @@ import { isOpenableFile } from '@/lib/files/files.ts';
 import { bytesToString } from '@/lib/format/size.ts';
 import FileRowContextMenu from '@/pages/server/files/list/FileRowContextMenu.tsx';
 import FileRowIcon from '@/pages/server/files/list/FileRowIcon.tsx';
+import FileSearchPreview, {
+  canPreviewFile,
+  FileSearchPreviewToggle,
+} from '@/pages/server/files/list/FileSearchPreview.tsx';
 import FileTreeName from '@/pages/server/files/tree/FileTreeName.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useFileManagerApi, useFileManagerStore } from '@/stores/fileManager.ts';
@@ -20,11 +24,14 @@ interface FileTreeRowProps {
   item: TreeSelectionItem;
   row: EntryRow;
   rowHeight: number;
+  selectionRef: Ref<HTMLElement>;
+  previewExpanded: boolean;
   active: boolean;
   selected: boolean;
   dragged: boolean;
   moving: boolean;
   canUpdateFiles: boolean;
+  dragDisabled: boolean;
   parentWritable: boolean;
   parentFast: boolean;
   directoryWritable: boolean;
@@ -52,11 +59,14 @@ function FileTreeRow({
   item,
   row,
   rowHeight,
+  selectionRef,
+  previewExpanded,
   active,
   selected,
   dragged,
   moving,
   canUpdateFiles,
+  dragDisabled,
   parentWritable,
   parentFast,
   directoryWritable,
@@ -72,6 +82,7 @@ function FileTreeRow({
   onDragEnd,
 }: FileTreeRowProps) {
   const { t } = useTranslations();
+  const showPreview = row.searchResult && canPreviewFile(row.entry);
   const store = useFileManagerApi();
   const anyActing = useFileManagerStore((state) => state.actingFiles.size > 0);
   const clickOnce = useFileManagerStore((state) => state.clickOnce);
@@ -95,7 +106,8 @@ function FileTreeRow({
     [parentFast, parentWritable, row.entry, row.parent, store],
   );
   const canDrag =
-    (canUpdateFiles && parentWritable && !moving && !anyActing) || (!row.entry.directory && openMode.openable);
+    !dragDisabled &&
+    ((canUpdateFiles && parentWritable && !moving && !anyActing) || (!row.entry.directory && openMode.openable));
 
   const handleClick = (event: React.MouseEvent) => {
     if (clickOnce) {
@@ -132,6 +144,7 @@ function FileTreeRow({
   return (
     <>
       <div
+        ref={selectionRef as Ref<HTMLDivElement>}
         role='treeitem'
         tabIndex={0}
         aria-level={row.depth + 1}
@@ -214,6 +227,8 @@ function FileTreeRow({
                 className='w-2.5 text-xs text-(--mantine-color-dimmed)'
               />
             </span>
+          ) : showPreview ? (
+            <FileSearchPreviewToggle compact path={row.path} />
           ) : (
             <span className='w-2.5 shrink-0' />
           )}
@@ -267,6 +282,12 @@ function FileTreeRow({
           <FontAwesomeIcon icon={faEllipsis} />
         </ActionIcon>
       </div>
+
+      {showPreview && previewExpanded && (
+        <div className='px-2.5 pt-1 pb-1'>
+          <FileSearchPreview file={row.entry} path={row.path} matches={row.contentMatches} />
+        </div>
+      )}
 
       {menuPosition && (
         <FileRowContextMenu

@@ -18,7 +18,6 @@ import getNode from '@/api/admin/nodes/getNode.ts';
 import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import SubNavigation from '@/elements/navigation/SubNavigation.tsx';
 import ResourceView from '@/elements/ResourceView.tsx';
-import { isNodeAIO } from '@/lib/domain/node.ts';
 import { queryKeys } from '@/lib/queryKeys.ts';
 import { useResource } from '@/plugins/resource/useResource.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
@@ -73,7 +72,6 @@ export default function NodeView() {
                 name: t('pages.admin.nodes.tabs.configuration.title', {}),
                 icon: faPenRuler,
                 path: `/configuration`,
-                hidden: isNodeAIO(node),
                 element: <AdminNodeConfiguration node={node} />,
               },
               {
@@ -141,7 +139,6 @@ export default function NodeView() {
                 name: t('pages.admin.nodes.tabs.tunnel.title', {}),
                 icon: faShareNodes,
                 path: `/tunnel`,
-                hidden: isNodeAIO(node),
                 element: <AdminNodeTunnel node={node} />,
                 permission: 'nodes.tunnel',
               },

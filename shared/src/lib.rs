@@ -40,6 +40,7 @@ pub mod payload;
 pub mod permissions;
 pub mod prelude;
 pub mod response;
+pub mod retry;
 pub mod settings;
 pub mod storage;
 pub mod telemetry;

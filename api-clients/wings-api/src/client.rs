@@ -771,6 +771,44 @@ impl WingsClient {
         .await
     }
 
+    pub async fn get_servers_server_files_lines(
+        &self,
+        server: uuid::Uuid,
+        query: &super::servers_server_files_lines::get::Query,
+    ) -> Result<super::servers_server_files_lines::get::Response, ApiHttpError> {
+        let mut query_parts: Vec<compact_str::CompactString> = Vec::new();
+        if let Some(value) = &query.file {
+            query_parts.push(format!("file={}", urlencoding::encode(value)).into());
+        }
+        if let Some(value) = query.start_line {
+            query_parts.push(format!("start_line={}", value).into());
+        }
+        if let Some(value) = query.end_line {
+            query_parts.push(format!("end_line={}", value).into());
+        }
+        if let Some(value) = query.max_size {
+            query_parts.push(format!("max_size={}", value).into());
+        }
+        if let Some(value) = &query.ignored {
+            for value in value {
+                query_parts.push(format!("ignored={}", urlencoding::encode(value)).into());
+            }
+        }
+        let query = if query_parts.is_empty() {
+            String::new()
+        } else {
+            format!("?{}", query_parts.join("&"))
+        };
+        request_impl(
+            self,
+            Method::GET,
+            format!("/api/servers/{server}/files/lines{query}"),
+            None::<&()>,
+            None,
+        )
+        .await
+    }
+
     pub async fn get_servers_server_files_list(
         &self,
         server: uuid::Uuid,
@@ -1018,11 +1056,24 @@ impl WingsClient {
         server: uuid::Uuid,
         data: &super::servers_server_files_search::post::RequestBody,
     ) -> Result<super::servers_server_files_search::post::Response, ApiHttpError> {
+        self.post_servers_server_files_search_with(server, data, &Default::default())
+            .await
+    }
+
+    pub async fn post_servers_server_files_search_with(
+        &self,
+        server: uuid::Uuid,
+        data: &super::servers_server_files_search::post::RequestBody,
+        extra: &super::servers_server_files_search::post::Extra,
+    ) -> Result<super::servers_server_files_search::post::Response, ApiHttpError> {
         request_impl(
             self,
             Method::POST,
             format!("/api/servers/{server}/files/search"),
-            Some(data),
+            Some(&ServersServerFilesSearchPostBody {
+                inner: data,
+                match_context: &extra.match_context,
+            }),
             None,
         )
         .await
@@ -1644,6 +1695,13 @@ struct ServersServerFilesRenamePutBody<'a> {
     inner: &'a super::servers_server_files_rename::put::RequestBody,
     ignored: &'a Vec<compact_str::CompactString>,
     create_directories: &'a bool,
+}
+
+#[derive(Serialize)]
+struct ServersServerFilesSearchPostBody<'a> {
+    #[serde(flatten)]
+    inner: &'a super::servers_server_files_search::post::RequestBody,
+    match_context: &'a Option<super::servers_server_files_search::post::ExtraMatchContext>,
 }
 
 #[derive(Serialize)]

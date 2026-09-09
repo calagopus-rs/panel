@@ -1,6 +1,7 @@
 import { faCheck, faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
+import { Ref } from 'react';
 import { bytesToString } from '@/lib/format/size.ts';
 import FileRowIcon from '@/pages/server/files/list/FileRowIcon.tsx';
 import FileTreeName from '@/pages/server/files/tree/FileTreeName.tsx';
@@ -11,6 +12,7 @@ type EntryTreeRow = Extract<FileTreeRowData, { type: 'entry' }>;
 interface FileTreeScrollingRowProps {
   row: EntryTreeRow;
   rowHeight: number;
+  selectionRef: Ref<HTMLElement>;
   active: boolean;
   selected: boolean;
   preferPhysicalSize: boolean;
@@ -19,12 +21,14 @@ interface FileTreeScrollingRowProps {
 export default function FileTreeScrollingRow({
   row,
   rowHeight,
+  selectionRef,
   active,
   selected,
   preferPhysicalSize,
 }: FileTreeScrollingRowProps) {
   return (
     <div
+      ref={selectionRef as Ref<HTMLDivElement>}
       role='treeitem'
       aria-level={row.depth + 1}
       aria-expanded={row.expandable ? row.expanded : undefined}

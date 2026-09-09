@@ -1,5 +1,5 @@
 use crate::{
-    models::{InsertQueryBuilder, UpdateQueryBuilder},
+    models::{InsertQueryBuilder, UpdateQueryBuilder, server_backup::retention::BackupRetention},
     prelude::*,
 };
 use garde::Validate;
@@ -18,8 +18,7 @@ pub struct ServerBackupGroup {
 
     pub name: compact_str::CompactString,
     pub order: i16,
-    pub retention_count: Option<i32>,
-    pub retention_days: Option<i32>,
+    pub retention: BackupRetention,
 
     pub created: chrono::NaiveDateTime,
 
@@ -62,12 +61,8 @@ impl BaseModel for ServerBackupGroup {
                 compact_str::format_compact!("{prefix}order"),
             ),
             (
-                "server_backup_groups.retention_count",
-                compact_str::format_compact!("{prefix}retention_count"),
-            ),
-            (
-                "server_backup_groups.retention_days",
-                compact_str::format_compact!("{prefix}retention_days"),
+                "server_backup_groups.retention",
+                compact_str::format_compact!("{prefix}retention"),
             ),
             (
                 "server_backup_groups.created",
@@ -86,10 +81,9 @@ impl BaseModel for ServerBackupGroup {
                 .try_get(compact_str::format_compact!("{prefix}server_uuid").as_str())?,
             name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
             order: row.try_get(compact_str::format_compact!("{prefix}order").as_str())?,
-            retention_count: row
-                .try_get(compact_str::format_compact!("{prefix}retention_count").as_str())?,
-            retention_days: row
-                .try_get(compact_str::format_compact!("{prefix}retention_days").as_str())?,
+            retention: serde_json::from_value(
+                row.try_get(compact_str::format_compact!("{prefix}retention").as_str())?,
+            )?,
             created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
             extension_data: Self::map_extensions(prefix, row)?,
         })
@@ -244,8 +238,7 @@ impl IntoApiObject for ServerBackupGroup {
                 uuid: self.uuid,
                 name: self.name,
                 order: self.order,
-                retention_count: self.retention_count,
-                retention_days: self.retention_days,
+                retention: self.retention,
                 total_backups,
                 usable_backups,
                 usable_unlocked_backups,
@@ -266,12 +259,9 @@ pub struct CreateServerBackupGroupOptions {
     #[garde(length(chars, min = 1, max = 255))]
     #[schema(min_length = 1, max_length = 255)]
     pub name: compact_str::CompactString,
-    #[garde(range(min = 1))]
-    #[schema(minimum = 1)]
-    pub retention_count: Option<i32>,
-    #[garde(range(min = 1))]
-    #[schema(minimum = 1)]
-    pub retention_days: Option<i32>,
+    #[garde(dive)]
+    #[serde(default)]
+    pub retention: BackupRetention,
 }
 
 #[async_trait::async_trait]
@@ -300,8 +290,7 @@ impl CreatableModel for ServerBackupGroup {
         query_builder
             .set("server_uuid", options.server_uuid)
             .set("name", &options.name)
-            .set("retention_count", options.retention_count)
-            .set("retention_days", options.retention_days);
+            .set("retention", serde_json::to_value(&options.retention)?);
 
         let row = query_builder
             .returning(&Self::columns_sql(None))
@@ -320,14 +309,14 @@ pub struct UpdateServerBackupGroupOptions {
     #[garde(length(chars, min = 1, max = 255))]
     #[schema(min_length = 1, max_length = 255)]
     pub name: Option<compact_str::CompactString>,
-    #[garde(inner(range(min = 1)))]
-    #[schema(minimum = 1)]
-    #[serde(default, with = "::serde_with::rust::double_option")]
-    pub retention_count: Option<Option<i32>>,
-    #[garde(inner(range(min = 1)))]
-    #[schema(minimum = 1)]
-    #[serde(default, with = "::serde_with::rust::double_option")]
-    pub retention_days: Option<Option<i32>>,
+    #[garde(dive)]
+    #[schema(nullable = false)]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::deserialize::deserialize_non_null_option"
+    )]
+    pub retention: Option<BackupRetention>,
 }
 
 #[async_trait::async_trait]
@@ -356,8 +345,14 @@ impl UpdatableModel for ServerBackupGroup {
 
         query_builder
             .set("name", options.name.as_ref())
-            .set("retention_count", options.retention_count)
-            .set("retention_days", options.retention_days)
+            .set(
+                "retention",
+                options
+                    .retention
+                    .as_ref()
+                    .map(serde_json::to_value)
+                    .transpose()?,
+            )
             .where_eq("uuid", self.uuid);
 
         query_builder.execute(&mut **transaction).await?;
@@ -365,11 +360,8 @@ impl UpdatableModel for ServerBackupGroup {
         if let Some(name) = options.name {
             self.name = name;
         }
-        if let Some(retention_count) = options.retention_count {
-            self.retention_count = retention_count;
-        }
-        if let Some(retention_days) = options.retention_days {
-            self.retention_days = retention_days;
+        if let Some(retention) = options.retention {
+            self.retention = retention;
         }
 
         self.run_after_update_handlers(state, transaction).await?;
@@ -441,6 +433,18 @@ impl DeletableModel for ServerBackupGroup {
         options: Self::DeleteOptions,
         transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     ) -> Result<(), anyhow::Error> {
+        sqlx::query(
+            r#"
+            SELECT server_backup_groups.uuid
+            FROM server_backup_groups
+            WHERE server_backup_groups.uuid = $1
+            FOR UPDATE
+            "#,
+        )
+        .bind(self.uuid)
+        .fetch_optional(&mut **transaction)
+        .await?;
+
         self.run_delete_handlers(&options, state, transaction)
             .await?;
 
@@ -480,8 +484,7 @@ pub struct ApiServerBackupGroup {
 
     pub name: compact_str::CompactString,
     pub order: i16,
-    pub retention_count: Option<i32>,
-    pub retention_days: Option<i32>,
+    pub retention: BackupRetention,
 
     pub total_backups: i64,
     pub usable_backups: i64,

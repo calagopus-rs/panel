@@ -215,7 +215,7 @@ mod patch {
         models::{
             UpdatableModel,
             server::{GetServer, GetServerActivityLogger},
-            server_backup::{ServerBackupKind, UpdateServerBackupOptions},
+            server_backup::{ServerBackup, ServerBackupKind, UpdateServerBackupOptions},
             server_backup_group::ServerBackupGroup,
             user::GetPermissionManager,
         },
@@ -276,6 +276,10 @@ mod patch {
         }
 
         backup.update(&state, data).await?;
+
+        if let Err(err) = ServerBackup::prune_retention_for_backup(&state, backup.uuid).await {
+            tracing::error!(backup = %backup.uuid, "failed to prune backups after update: {err:#?}");
+        }
 
         activity_logger
             .log(

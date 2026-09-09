@@ -176,6 +176,7 @@ fn record_stock_entry(config: &Config, version: &str, key: &str) -> anyhow::Resu
             intended_extensions: Vec::new(),
             verified_extensions: Vec::new(),
             verified: true,
+            stock: true,
             started_at: crate::store::record::now(),
             finished_at: Some(crate::store::record::now()),
             exit_code: Some(0),
@@ -186,6 +187,14 @@ fn record_stock_entry(config: &Config, version: &str, key: &str) -> anyhow::Resu
     crate::store::prune_entries(&config.binaries_dir, crate::store::KEEP_CACHE_ENTRIES)?;
 
     Ok(installed)
+}
+
+fn is_stock(config: &Config, binary: &Path) -> bool {
+    binary == config.stock_binary
+        || binary
+            .parent()
+            .and_then(crate::store::record::read_record)
+            .is_some_and(|record| record.stock)
 }
 
 fn fall_back(config: &Config, version: &str, failed: &Path) -> PathBuf {
@@ -248,12 +257,24 @@ struct Supervisor<'a> {
 }
 
 impl Supervisor<'_> {
+    fn supervise(&self, binary: &Path) -> crate::panel::Supervision {
+        let stock = is_stock(self.config, binary);
+        if stock {
+            tracing::info!(
+                "{} is a stock binary, it is retried until the failure limit and never demoted",
+                binary.display()
+            );
+        }
+
+        crate::panel::Supervision::new(self.policy, !stock)
+    }
+
     async fn run(
         &mut self,
         mut binary: PathBuf,
         mut command: impl FnMut(&Path) -> tokio::process::Command,
     ) -> anyhow::Result<()> {
-        let mut supervision = crate::panel::Supervision::new(self.policy);
+        let mut supervision = self.supervise(&binary);
         let shutdown = crate::panel::Shutdown::new(self.config.shutdown_grace);
         let mut interrupt = Box::pin(requested_stop(self.shutdown.clone()));
 
@@ -285,7 +306,7 @@ impl Supervisor<'_> {
                             tracing::info!("the outgoing panel was {stopped:?}");
 
                             binary = next;
-                            supervision = crate::panel::Supervision::new(self.policy);
+                            supervision = self.supervise(&binary);
                         }
                         Wake::Restart => {
                             tracing::info!("restarting the panel on request");
@@ -294,7 +315,7 @@ impl Supervisor<'_> {
                             let stopped = process.stop(shutdown).await;
                             tracing::info!("the outgoing panel was {stopped:?}");
 
-                            supervision = crate::panel::Supervision::new(self.policy);
+                            supervision = self.supervise(&binary);
                         }
                         Wake::Stop => {
                             let stopped = process.stop(shutdown).await;

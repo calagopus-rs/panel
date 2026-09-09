@@ -214,6 +214,28 @@ async fn handle_aio_wings(
             ]),
         );
     }
+    {
+        let tundra_mapping = match mapping.get_mut(serde_norway::Value::String("tundra".into())) {
+            Some(serde_norway::Value::Mapping(tundra_mapping)) => tundra_mapping,
+            _ => {
+                mapping.insert(
+                    serde_norway::Value::String("tundra".into()),
+                    serde_norway::Value::Mapping(serde_norway::Mapping::new()),
+                );
+                match mapping.get_mut(serde_norway::Value::String("tundra".into())) {
+                    Some(serde_norway::Value::Mapping(tundra_mapping)) => tundra_mapping,
+                    _ => unreachable!(),
+                }
+            }
+        };
+
+        if !tundra_mapping.contains_key(serde_norway::Value::String("enabled".into())) {
+            tundra_mapping.insert(
+                serde_norway::Value::String("enabled".into()),
+                serde_norway::Value::Bool(true),
+            );
+        }
+    }
 
     let mut options = tokio::fs::OpenOptions::new();
     options.write(true).create(true).truncate(true);

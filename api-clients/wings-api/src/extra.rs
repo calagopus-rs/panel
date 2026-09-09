@@ -1037,6 +1037,56 @@ mod tests {
         bytes
     }
 
+    #[test]
+    fn search_content_matches_preserve_older_node_omission() {
+        for (payload, expected_present) in [
+            (serde_json::json!({ "results": [] }), false),
+            (
+                serde_json::json!({ "results": [], "content_matches": [] }),
+                true,
+            ),
+        ] {
+            let response: crate::servers_server_files_search::post::Response =
+                rmp_serde::from_slice(&encode(&payload)).unwrap();
+
+            assert!(response.results.is_empty());
+            assert_eq!(response.content_matches.is_some(), expected_present);
+        }
+    }
+
+    #[test]
+    fn file_content_response_preserves_text_and_nullable_line_bounds() {
+        let payload = serde_json::json!({
+            "results": [],
+            "content_matches": [{
+                "file": "test.txt",
+                "truncated": false,
+                "blocks": [{
+                    "start_line": 3,
+                    "end_line": 4,
+                    "content": "é\r\nHello\r\n",
+                    "matches": [{ "start_byte": 4, "end_byte": 9 }],
+                }],
+            }],
+        });
+        let response: crate::servers_server_files_search::post::Response =
+            rmp_serde::from_slice(&encode(&payload)).unwrap();
+        assert_eq!(serde_json::to_value(response).unwrap(), payload);
+
+        for payload in [
+            serde_json::json!({
+                "start_line": null, "end_line": null, "content": "", "eof": true,
+            }),
+            serde_json::json!({
+                "start_line": 3, "end_line": 4, "content": "é\r\nHello\r\n", "eof": false,
+            }),
+        ] {
+            let response: crate::servers_server_files_lines::get::Response =
+                rmp_serde::from_slice(&encode(&payload)).unwrap();
+            assert_eq!(serde_json::to_value(response).unwrap(), payload);
+        }
+    }
+
     /// The generated client sends the compat properties that were taken out of the `RequestBody`
     /// structs through a flattened overlay, which makes the outer map an unknown-length one. Assert
     /// rmp-serde still writes exactly what a plain struct would, since a mismatch would only ever

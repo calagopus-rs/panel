@@ -112,14 +112,12 @@ const FileManagerProvider = ({ children }: { children: ReactNode }) => {
   }, [directoryError]);
 
   useEffect(() => {
-    store.setState({
-      externals: {
-        serverUuid: server.uuid,
-        serverName: server.name,
-        routeId: params.id ?? server.uuid,
-        queryClient,
-        directoryData: data ?? null,
-      },
+    store.getState().setExternals({
+      serverUuid: server.uuid,
+      serverName: server.name,
+      routeId: params.id ?? server.uuid,
+      queryClient,
+      directoryData: data ?? null,
     });
   }, [store, server, params.id, queryClient, data]);
 
