@@ -4840,6 +4840,12 @@
           },
           "quickAction": {
             "newFile": "Neue Datei",
+            "keepFileOpen": "Datei geöffnet lassen",
+            "copyFilePath": "Pfad der aktiven Datei kopieren",
+            "searchTree": "Dateibaum durchsuchen",
+            "refreshTree": "Dateibaum aktualisieren",
+            "switchToList": "Zur Listenansicht wechseln",
+            "switchToTree": "Zur Baumansicht wechseln",
             "newDirectory": "Neues Verzeichnis",
             "pullFile": "Datei von URL laden",
             "uploadFiles": "Dateien hochladen",

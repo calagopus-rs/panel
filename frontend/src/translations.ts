@@ -4905,6 +4905,12 @@ const baseTranslations = defineTranslations({
           },
           quickAction: {
             newFile: 'New File',
+            keepFileOpen: 'Keep File Open',
+            copyFilePath: 'Copy Active File Path',
+            searchTree: 'Search Tree',
+            refreshTree: 'Refresh Tree',
+            switchToList: 'Switch to List View',
+            switchToTree: 'Switch to Tree View',
             newDirectory: 'New Directory',
             pullFile: 'Pull File from URL',
             uploadFiles: 'Upload Files',

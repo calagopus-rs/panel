@@ -19,6 +19,8 @@ import Checkbox from '@/elements/input/Checkbox.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Collapse from '@/elements/layout/Collapse.tsx';
 import ContextMenu from '@/elements/overlays/ContextMenu.tsx';
+import { CORE_QUICK_ACTION_CATEGORIES } from '@/lib/quickActions/coreQuickActions.tsx';
+import { useQuickActions } from '@/plugins/quick-actions/useQuickActions.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 interface FileTreeToolbarProps {
@@ -79,11 +81,44 @@ export default function FileTreeToolbar({
   const registry = window.extensionContext.extensionRegistry.pages.server.files;
 
   useEffect(() => {
-    if (!searchOpen) return;
+    if (!searchOpen || collapsed) return;
 
     const frame = requestAnimationFrame(() => searchInputRef.current?.focus());
     return () => cancelAnimationFrame(frame);
-  }, [searchOpen]);
+  }, [searchOpen, collapsed]);
+
+  useQuickActions([
+    {
+      id: 'files.tree.toggle',
+      category: CORE_QUICK_ACTION_CATEGORIES.page,
+      label: () => t(collapsed ? 'pages.server.files.tree.show' : 'pages.server.files.tree.hide', {}),
+      icon: <FontAwesomeIcon icon={collapsed ? faAnglesRight : faAnglesLeft} />,
+      perform: onToggleCollapsed,
+    },
+    {
+      id: 'files.tree.search',
+      category: CORE_QUICK_ACTION_CATEGORIES.page,
+      label: () => t('pages.server.files.quickAction.searchTree', {}),
+      icon: <FontAwesomeIcon icon={faMagnifyingGlass} />,
+      keywords: ['find', 'filename', 'filter'],
+      permission: 'files.read',
+      perform: () => {
+        if (collapsed) onToggleCollapsed();
+        onOpenSearch();
+        requestAnimationFrame(() => searchInputRef.current?.focus());
+      },
+    },
+    {
+      id: 'files.tree.refresh',
+      category: CORE_QUICK_ACTION_CATEGORIES.page,
+      label: () => t('pages.server.files.quickAction.refreshTree', {}),
+      icon: <FontAwesomeIcon icon={faRotate} />,
+      keywords: ['reload', 'files'],
+      permission: 'files.read',
+      isVisible: () => !treeLoading && !searchLoading,
+      perform: onReload,
+    },
+  ]);
 
   return (
     <div

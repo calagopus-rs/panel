@@ -29,6 +29,7 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import Tooltip from '@/elements/overlays/Tooltip.tsx';
 import Title from '@/elements/typography/Title.tsx';
 import { isOpenableFile } from '@/lib/files/files.ts';
+import { CORE_QUICK_ACTION_CATEGORIES } from '@/lib/quickActions/coreQuickActions.tsx';
 import FileBreadcrumbs from '@/pages/server/files/FileBreadcrumbs.tsx';
 import { useFileBrowserQuickActions } from '@/pages/server/files/hooks/useFileBrowserQuickActions.tsx';
 import FileActionBar from '@/pages/server/files/list/FileActionBar.tsx';
@@ -57,6 +58,7 @@ import {
   matchesActiveShortcut,
   useKeyboardShortcuts,
 } from '@/plugins/quick-actions/useKeyboardShortcuts.ts';
+import { useQuickActions } from '@/plugins/quick-actions/useQuickActions.ts';
 import { useSelectionArea } from '@/plugins/selection/useSelectionArea.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { FileManagerProvider } from '@/providers/FileManagerProvider.tsx';
@@ -492,6 +494,25 @@ function ServerFilesComponent() {
       return !visible;
     });
   };
+
+  useQuickActions([
+    {
+      id: 'files.view.list',
+      category: CORE_QUICK_ACTION_CATEGORIES.page,
+      label: () => t('pages.server.files.quickAction.switchToList', {}),
+      icon: <FontAwesomeIcon icon={faFolderOpen} />,
+      isVisible: () => view !== 'list',
+      perform: () => changeView('list'),
+    },
+    {
+      id: 'files.view.tree',
+      category: CORE_QUICK_ACTION_CATEGORIES.page,
+      label: () => t('pages.server.files.quickAction.switchToTree', {}),
+      icon: <FontAwesomeIcon icon={faCode} />,
+      isVisible: () => view !== 'tree',
+      perform: () => changeView('tree'),
+    },
+  ]);
 
   return (
     <div data-file-manager-page className='flex w-full min-w-0 flex-col'>

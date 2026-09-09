@@ -37,6 +37,7 @@ import FileImageViewerSettings from '@/pages/server/files/editor/FileImageViewer
 import { FileAudioPreview, FileImagePreview } from '@/pages/server/files/editor/FileMediaPreview.tsx';
 import FileSqliteQuery from '@/pages/server/files/editor/FileSqliteQuery.tsx';
 import { findFileEditorAction } from '@/pages/server/files/editor/useFileEditorPresentation.ts';
+import useFileEditorQuickActions from '@/pages/server/files/editor/useFileEditorQuickActions.tsx';
 import useFileCollab from '@/pages/server/files/hooks/useFileCollab.ts';
 import useFileDraft from '@/pages/server/files/hooks/useFileDraft.ts';
 import useFileDraftPersistence from '@/pages/server/files/hooks/useFileDraftPersistence.ts';
@@ -54,6 +55,7 @@ import {
   FileTreeTabPosition,
   getFileTreeEditorDraftPath,
 } from '@/pages/server/files/tree/fileTreeEditor.ts';
+import useFileTreeTabQuickActions from '@/pages/server/files/tree/useFileTreeTabQuickActions.tsx';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
@@ -443,6 +445,36 @@ export default function FileTreeEditorPane({
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [active, canSave, editorEngine]);
+
+  useFileEditorQuickActions({
+    enabled: active,
+    loading,
+    saveEnabled: canSave,
+    action: selection?.action,
+    fileName: selection?.file.name ?? '',
+    writable: selection?.writable ?? false,
+    primary: selection?.primary ?? false,
+    saving,
+    dirty,
+    collaborationActive: collab.active,
+    collaborationDeleted: collab.conflict?.deleted ?? false,
+    onSave: () => void save(),
+    onCreate: () => void save(),
+    onShowRevisions: () => setRevisionsOpen(true),
+    onRevert: () => setRevertConfirm(true),
+  });
+
+  useFileTreeTabQuickActions({
+    enabled: active,
+    tabs,
+    activeTabId,
+    previewTabId,
+    dirtyTabIds,
+    onClose: onCloseTab,
+    onSelect: onSelectTab,
+    onReveal: onRevealTab,
+    onKeepOpen: onKeepTabOpen,
+  });
 
   const editorTabs = (
     <FileTreeEditorTabs

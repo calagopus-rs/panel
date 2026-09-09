@@ -75,6 +75,12 @@ export interface FileTreeEditorTabDragData {
 
 export type FileTreeTabCloseAction = 'others' | 'right' | 'saved' | 'all';
 
+export const getRelativeFileTreeTabId = (tabIds: string[], activeTabId: string | null, offset: number) => {
+  if (tabIds.length < 2) return null;
+  const index = Math.max(0, tabIds.indexOf(activeTabId ?? ''));
+  return tabIds[(index + offset + tabIds.length) % tabIds.length];
+};
+
 export interface FileTreeTabPosition {
   tabId: string;
   after: boolean;
