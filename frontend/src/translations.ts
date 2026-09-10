@@ -408,6 +408,10 @@ const baseTranslations = defineTranslations({
           stopped: 'Stopped',
           restarted: 'Restarted',
           killed: 'Killed',
+          suspended: 'Suspended',
+          unsuspended: 'Unsuspended',
+          clearedState: 'Cleared the state of',
+          deleted: 'Deleted',
         },
         compressionLevel: {
           bestSpeed: 'Best Speed',
@@ -3088,21 +3092,11 @@ const baseTranslations = defineTranslations({
             delete: 'Delete Server',
           },
           bulkActions: {
-            suspend: 'Suspend',
-            unsuspend: 'Unsuspend',
-            clearState: 'Clear State',
-            delete: 'Delete',
             verb: {
               suspend: 'suspend',
               unsuspend: 'unsuspend',
               clearState: 'clear the state of',
               delete: 'delete',
-            },
-            pastTense: {
-              suspend: 'suspended',
-              unsuspend: 'unsuspended',
-              clearState: 'cleared the state of',
-              delete: 'deleted',
             },
             modal: {
               title: 'Confirm Bulk Action',
@@ -3110,10 +3104,8 @@ const baseTranslations = defineTranslations({
               deleteContent:
                 'Are you sure you want to permanently delete **{servers}** and everything on them? This cannot be undone.',
             },
-            success: 'Successfully {action} {servers}.',
-            successWithSkipped: 'Successfully {action} {servers}. {skippedServers} already {action}.',
-            partial: 'Successfully {action} {successfulServers}. {failedServers} failed.',
-            nothingToDo: 'Every selected server is already {action}.',
+            successWithSkipped: 'Successfully {action} {servers}. {skippedServers} skipped.',
+            nothingToDo: 'Every selected server is already in that state.',
           },
           externalIdLookup: {
             button: 'Find by External ID',

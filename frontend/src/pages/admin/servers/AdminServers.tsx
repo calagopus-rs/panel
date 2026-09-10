@@ -3,39 +3,30 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useQueryClient } from '@tanstack/react-query';
 import { Ref, useState } from 'react';
 import { Route, Routes, useNavigate } from 'react-router';
-import clearServerState from '@/api/admin/servers/clearServerState.ts';
-import deleteServer from '@/api/admin/servers/deleteServer.ts';
 import getServers from '@/api/admin/servers/getServers.ts';
-import updateServer from '@/api/admin/servers/updateServer.ts';
-import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/buttons/Button.tsx';
 import { AdminCan } from '@/elements/Can.tsx';
 import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/data-display/Table.tsx';
 import SelectionArea from '@/elements/dnd/SelectionArea.tsx';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import { queryKeys } from '@/lib/queryKeys.ts';
 import { AdminServer } from '@/lib/schemas/admin/servers.ts';
 import { serverTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/resource/useSearchablePaginatedTable.ts';
 import { useAdminTableSelection } from '@/plugins/selection/useAdminTableSelection.ts';
-import { useToast } from '@/providers/ToastProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import AdminPermissionGuard from '@/routers/guards/AdminPermissionGuard.tsx';
 import ExternalIdLookupModal from './modals/ExternalIdLookupModal.tsx';
+import ServerActionBar from './ServerActionBar.tsx';
 import ServerCreate from './ServerCreate.tsx';
 import ServerRow from './ServerRow.tsx';
-import ServersBulkActionBar, { BulkServerAction } from './ServersBulkActionBar.tsx';
 import ServerView from './ServerView.tsx';
 
 function ServersContainer() {
-  const { t, tItem } = useTranslations();
+  const { t } = useTranslations();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { addToast } = useToast();
   const [lookupOpen, setLookupOpen] = useState(false);
-  const [bulkLoading, setBulkLoading] = useState<BulkServerAction | null>(null);
-  const [confirmAction, setConfirmAction] = useState<BulkServerAction | null>(null);
 
   const {
     data: servers,
@@ -64,102 +55,8 @@ function ServersContainer() {
     }
   };
 
-  // if server is already suspended suspending it again makes no sense so skip it lol
-  const actionTargets = (action: BulkServerAction) =>
-    selectedServers
-      .values()
-      .filter((server) =>
-        action === 'suspend' ? !server.isSuspended : action === 'unsuspend' ? server.isSuspended : true,
-      );
-
-  const runBulkAction = async (action: BulkServerAction) => {
-    const targets = actionTargets(action);
-    const skipped = selectedServers.size - targets.length;
-    setBulkLoading(action);
-
-    const request = (uuid: string) => {
-      switch (action) {
-        case 'suspend':
-          return updateServer(uuid, { suspended: true });
-        case 'unsuspend':
-          return updateServer(uuid, { suspended: false });
-        case 'clearState':
-          return clearServerState(uuid);
-        case 'delete':
-          return deleteServer(uuid, { force: false, deleteBackups: false });
-      }
-    };
-
-    const results = await Promise.allSettled(targets.map((server) => request(server.uuid)));
-
-    const successful = results.filter((result) => result.status === 'fulfilled').length;
-    const failed = results.length - successful;
-    const pastTense = t(`pages.admin.servers.bulkActions.pastTense.${action}`, {});
-
-    if (failed === 0) {
-      addToast(
-        skipped > 0
-          ? t('pages.admin.servers.bulkActions.successWithSkipped', {
-              action: pastTense,
-              servers: tItem('server', successful),
-              skippedServers: tItem('server', skipped),
-            })
-          : t('pages.admin.servers.bulkActions.success', {
-              action: pastTense,
-              servers: tItem('server', successful),
-            }),
-        'success',
-      );
-    } else {
-      const firstError = results.find((result) => result.status === 'rejected');
-
-      addToast(
-        successful === 0 && firstError
-          ? httpErrorToHuman(firstError.reason)
-          : t('pages.admin.servers.bulkActions.partial', {
-              action: pastTense,
-              successfulServers: tItem('server', successful),
-              failedServers: tItem('server', failed),
-            }),
-        successful === 0 ? 'error' : 'warning',
-      );
-    }
-
-    setBulkLoading(null);
-    clearSelectedServers();
-    queryClient.invalidateQueries({ queryKey: queryKeys.admin.servers.all() });
-  };
-
-  const columns = ['', ...serverTableColumns()];
-
   return (
     <>
-      <ConfirmationModal
-        opened={confirmAction !== null}
-        onClose={() => setConfirmAction(null)}
-        title={t('pages.admin.servers.bulkActions.modal.title', {})}
-        confirm={t(confirmAction === 'delete' ? 'common.button.delete' : 'common.button.continue', {})}
-        onConfirmed={() => {
-          const action = confirmAction;
-          setConfirmAction(null);
-          if (action) {
-            runBulkAction(action);
-          }
-        }}
-      >
-        {confirmAction
-          ? t(
-              confirmAction === 'delete'
-                ? 'pages.admin.servers.bulkActions.modal.deleteContent'
-                : 'pages.admin.servers.bulkActions.modal.content',
-              {
-                action: t(`pages.admin.servers.bulkActions.verb.${confirmAction}`, {}),
-                servers: tItem('server', actionTargets(confirmAction).length),
-              },
-            ).md()
-          : null}
-      </ConfirmationModal>
-
       <AdminContentContainer
         title={t('pages.admin.servers.title', {})}
         search={search}
@@ -191,7 +88,7 @@ function ServersContainer() {
       >
         <SelectionArea {...selectionAreaProps}>
           <Table
-            columns={columns}
+            columns={['', ...serverTableColumns()]}
             loading={loading}
             pagination={servers}
             onPageSelect={setPage}
@@ -216,21 +113,10 @@ function ServersContainer() {
         </SelectionArea>
       </AdminContentContainer>
 
-      <ServersBulkActionBar
-        selectedCount={selectedServers.size}
-        onAction={(action) => {
-          if (actionTargets(action).length === 0) {
-            addToast(
-              t('pages.admin.servers.bulkActions.nothingToDo', {
-                action: t(`pages.admin.servers.bulkActions.pastTense.${action}`, {}),
-              }),
-              'info',
-            );
-            return;
-          }
-          setConfirmAction(action);
-        }}
-        loading={bulkLoading}
+      <ServerActionBar
+        selectedServers={selectedServers}
+        clearSelectedServers={clearSelectedServers}
+        invalidateServers={() => queryClient.invalidateQueries({ queryKey: queryKeys.admin.servers.all() })}
       />
     </>
   );

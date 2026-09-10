@@ -20,6 +20,26 @@ interface ServerRowProps {
   onClick?: (event: React.MouseEvent) => void;
 }
 
+function ServerStatus({ server, stats }: { server: AdminServer; stats: ReturnType<typeof useServerStats> }) {
+  const { t } = useTranslations();
+
+  if (server.isSuspended) {
+    return (
+      <>
+        <FontAwesomeIcon icon={faBan} className='size-3 mr-2 text-server-status-offline' />
+        {t('common.server.state.suspended', {})}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <span className={classNames('rounded-full size-3 animate-pulse mr-2', statusToColor(stats?.state))} />
+      {!stats ? t('common.enum.serverState.unknown', {}) : t(`common.enum.serverState.${stats.state}`, {})}
+    </>
+  );
+}
+
 const ServerRow = memo(
   forwardRef<HTMLTableRowElement, ServerRowProps>(function ServerRow(
     { server, showSelection = false, isSelected = false, onSelectionChange, onClick },
@@ -52,17 +72,7 @@ const ServerRow = memo(
 
         <TableData>
           <div className='flex flex-row items-center'>
-            {server.isSuspended ? (
-              <>
-                <FontAwesomeIcon icon={faBan} className='size-3 mr-2 text-server-status-offline' />
-                {t('common.server.state.suspended', {})}
-              </>
-            ) : (
-              <>
-                <span className={classNames('rounded-full size-3 animate-pulse mr-2', statusToColor(stats?.state))} />
-                {!stats ? t('common.enum.serverState.unknown', {}) : t(`common.enum.serverState.${stats.state}`, {})}
-              </>
-            )}
+            <ServerStatus server={server} stats={stats} />
           </div>
         </TableData>
 
